@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
 import { BotActivity } from "./bot-activity";
 import { BotPanel } from "./bot-panel";
@@ -10,12 +10,12 @@ export default async function BotDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) redirect("/login");
 
   const { id } = await params;
   const bot = await prisma.bot.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId: appUser.id },
     include: { _count: { select: { sources: true, messages: true } } },
   });
 

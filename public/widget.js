@@ -16,7 +16,7 @@
   }
   var chatUrl = apiBase.replace(/\/$/, "") + "/api/chat";
   var leadUrl = apiBase.replace(/\/$/, "") + "/api/leads";
-  var sessionUrl = apiBase.replace(/\/$/, "") + "/api/auth/session";
+  var sessionUrl = apiBase.replace(/\/$/, "") + "/api/session";
   var loginUrl = apiBase.replace(/\/$/, "") + "/login";
   var registerUrl = apiBase.replace(/\/$/, "") + "/register";
   var assistantReplies = 0;

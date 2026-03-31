@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { auth } from "@/auth";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { canUserCreateBot, FREE_MAX_ASSISTANTS } from "@/lib/plan";
@@ -12,13 +12,13 @@ const createSchema = z.object({
 });
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const bots = await prisma.bot.findMany({
-    where: { userId: session.user.id },
+    where: { userId: appUser.id },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -33,8 +33,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const allowed = await canUserCreateBot(session.user.id);
+  const allowed = await canUserCreateBot(appUser.id);
   if (!allowed) {
     return NextResponse.json(
       {
@@ -70,14 +70,14 @@ export async function POST(req: Request) {
 
   const bot = await prisma.bot.create({
     data: {
-      userId: session.user.id,
+      userId: appUser.id,
       name: parsed.data.name,
       websiteUrl: url,
     },
   });
 
   await logAudit({
-    userId: session.user.id,
+    userId: appUser.id,
     action: "bot.created",
     resourceType: "bot",
     resourceId: bot.id,

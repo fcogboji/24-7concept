@@ -1,8 +1,8 @@
 "use client";
 
+import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
 
 const links = [
   { href: "#moments", label: "See it in action" },
@@ -12,8 +12,9 @@ const links = [
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
-  const { data: session } = useSession();
-  const isLoggedIn = Boolean(session?.user?.id);
+  const { isSignedIn } = useAuth();
+  const { signOut } = useClerk();
+  const isLoggedIn = Boolean(isSignedIn);
 
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
@@ -48,7 +49,7 @@ export function MarketingHeader() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={() => signOut({ redirectUrl: "/" })}
                   className="rounded-full bg-stone-900 px-4 py-2.5 text-white hover:bg-stone-800"
                 >
                   Log out
@@ -153,7 +154,7 @@ export function MarketingHeader() {
                   type="button"
                   onClick={() => {
                     setOpen(false);
-                    void signOut({ callbackUrl: "/" });
+                    void signOut({ redirectUrl: "/" });
                   }}
                   className="mt-3 rounded-full bg-stone-900 px-4 py-3.5 text-center text-lg font-semibold text-white active:bg-stone-800"
                 >

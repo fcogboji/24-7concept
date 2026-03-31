@@ -1,8 +1,17 @@
 import Link from "next/link";
+import { SignUp } from "@clerk/nextjs";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
-import { RegisterForm } from "./register-form";
+import { safeAppRedirectPath } from "@/lib/safe-redirect";
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const params = await searchParams;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const afterSignUp = safeAppRedirectPath(params.callbackUrl, appUrl);
+
   return (
     <div
       className="flex min-h-screen flex-col justify-center bg-stone-50 px-4 py-10 sm:px-6 sm:py-12"
@@ -16,8 +25,13 @@ export default function RegisterPage() {
           24/7concept
         </p>
         <h1 className="mt-2 text-center text-lg text-stone-600">Create your workspace</h1>
-        <div className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-          <RegisterForm />
+        <div className="mt-8 flex justify-center">
+          <SignUp
+            path="/register"
+            routing="path"
+            signInUrl="/login"
+            fallbackRedirectUrl={afterSignUp}
+          />
         </div>
         <p className="mt-6 text-center text-sm text-stone-600">
           Already have an account?{" "}

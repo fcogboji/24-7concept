@@ -1,14 +1,16 @@
 import Link from "next/link";
+import { SignIn } from "@clerk/nextjs";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
-import { LoginForm } from "./login-form";
+import { safeAppRedirectPath } from "@/lib/safe-redirect";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ reset?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; reset?: string }>;
 }) {
   const params = await searchParams;
-  const passwordResetOk = params.reset === "success";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const afterSignIn = safeAppRedirectPath(params.callbackUrl, appUrl);
 
   return (
     <div
@@ -23,13 +25,18 @@ export default async function LoginPage({
           24/7concept
         </p>
         <h1 className="mt-2 text-center text-lg text-stone-600">Log in to your workspace</h1>
-        {passwordResetOk && (
+        {params.reset === "success" && (
           <p className="mt-4 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-center text-sm text-teal-900">
-            Password updated. Sign in with your new password.
+            Password updated. You can sign in below.
           </p>
         )}
-        <div className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-          <LoginForm />
+        <div className="mt-8 flex justify-center">
+          <SignIn
+            path="/login"
+            routing="path"
+            signUpUrl="/register"
+            fallbackRedirectUrl={afterSignIn}
+          />
         </div>
         <p className="mt-6 text-center text-sm text-stone-600">
           No account?{" "}

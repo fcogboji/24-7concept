@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import OpenAI from "openai";
 import { chunkText } from "../src/lib/chunk";
-
-const prisma = new PrismaClient();
+import { prisma } from "../src/lib/prisma";
 
 const DEMO_BOT_ID = "demo_site_assistant";
 
@@ -33,7 +31,7 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       email,
-      passwordHash: "$2a$12$placeholder.hash.not.for.login",
+      passwordHash: null,
       name: "Demo workspace",
       emailVerifiedAt: new Date(),
     },

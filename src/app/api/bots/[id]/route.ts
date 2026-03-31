@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { auth } from "@/auth";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
 import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
 
@@ -12,8 +12,8 @@ const patchSchema = z.object({
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: Request, context: RouteContext) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -25,7 +25,7 @@ export async function PATCH(req: Request, context: RouteContext) {
   }
 
   const bot = await prisma.bot.findFirst({
-    where: { id, userId: session.user.id },
+    where: { id, userId: appUser.id },
   });
   if (!bot) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

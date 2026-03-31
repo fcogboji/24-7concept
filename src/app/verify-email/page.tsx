@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import Link from "next/link";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
-import { VerifyEmailClient } from "./verify-email-client";
 
 export const metadata: Metadata = {
   title: "Verify email — 24/7concept",
@@ -17,15 +16,24 @@ export default function VerifyEmailPage() {
         paddingTop: "max(2.5rem, env(safe-area-inset-top))",
       }}
     >
-      <Suspense
-        fallback={
-          <div className="mx-auto w-full max-w-sm text-center text-sm text-stone-600">Loading…</div>
-        }
-      >
-        <VerifyEmailClient />
-      </Suspense>
-      <div className="mt-12">
-        <LegalFooterLinks className="text-stone-400" />
+      <div className="mx-auto w-full max-w-sm text-center">
+        <p className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
+          24/7concept
+        </p>
+        <h1 className="mt-2 text-lg text-stone-600">Email verification</h1>
+        <p className="mt-6 text-sm text-stone-600">
+          Email verification is handled when you sign up. If you need help, sign in and open your account settings,
+          or contact support.
+        </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-block rounded-full bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800"
+        >
+          Go to sign in
+        </Link>
+        <div className="mt-10">
+          <LegalFooterLinks className="text-stone-400" />
+        </div>
       </div>
     </div>
   );

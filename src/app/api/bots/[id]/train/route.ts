@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
 import { chunkText } from "@/lib/chunk";
 import { createEmbedding } from "@/lib/embeddings";
@@ -9,15 +9,15 @@ import { crawlWebsite } from "@/lib/crawler";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function POST(_req: Request, context: RouteContext) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id: botId } = await context.params;
 
   const bot = await prisma.bot.findFirst({
-    where: { id: botId, userId: session.user.id },
+    where: { id: botId, userId: appUser.id },
   });
 
   if (!bot) {

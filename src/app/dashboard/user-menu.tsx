@@ -1,7 +1,7 @@
 "use client";
 
+import { useClerk } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { signOut } from "next-auth/react";
 
 const AVATAR_STYLES = [
   "bg-teal-200 text-teal-900",
@@ -31,6 +31,7 @@ export function UserMenu({
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const { signOut } = useClerk();
 
   const avatarStyle = useMemo(
     () => AVATAR_STYLES[hashText(identity) % AVATAR_STYLES.length],
@@ -100,7 +101,7 @@ export function UserMenu({
           )}
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ redirectUrl: "/" })}
             className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-100"
           >
             Log out

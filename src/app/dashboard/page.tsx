@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { auth } from "@/auth";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import {
   countUserMessagesThisMonth,
   FREE_MAX_ASSISTANTS,
@@ -16,18 +16,18 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ checkout?: string }>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) redirect("/login");
 
   const params = await searchParams;
   const bots = await prisma.bot.findMany({
-    where: { userId: session.user.id },
+    where: { userId: appUser.id },
     orderBy: { createdAt: "desc" },
     include: { _count: { select: { sources: true } } },
   });
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: appUser.id },
     select: {
       plan: true,
       subscriptionStatus: true,
@@ -38,7 +38,7 @@ export default async function DashboardPage({
   const effectivePro = user
     ? subscriptionGrantsPro(user.plan, user.subscriptionStatus)
     : false;
-  const messagesUsed = await countUserMessagesThisMonth(session.user.id);
+  const messagesUsed = await countUserMessagesThisMonth(appUser.id);
   const showFreeUsage = !effectivePro;
 
   return (

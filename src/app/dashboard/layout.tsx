@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { auth } from "@/auth";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { subscriptionGrantsPro } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -11,21 +11,21 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  if (!session?.user) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) {
     redirect("/login");
   }
 
   const effectivePro = subscriptionGrantsPro(
-    session.user.plan,
-    session.user.subscriptionStatus ?? null
+    appUser.plan,
+    appUser.subscriptionStatus ?? null
   );
   const badgeLabel =
-    session.user.plan === "pro" && !effectivePro ? "Pro (inactive)" : effectivePro ? "Pro" : "Free";
-  const identity = (session.user.name?.trim() || session.user.email || "User").trim();
+    appUser.plan === "pro" && !effectivePro ? "Pro (inactive)" : effectivePro ? "Pro" : "Free";
+  const identity = (appUser.name?.trim() || appUser.email || "User").trim();
   const initial = identity.charAt(0).toUpperCase();
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: appUser.id },
     select: { stripeCustomerId: true },
   });
 
@@ -56,7 +56,7 @@ export default async function DashboardLayout({
             <UserMenu identity={identity} initial={initial} canManageBilling={Boolean(user?.stripeCustomerId)} />
             <span
               className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                session.user.plan === "pro" && !effectivePro
+                appUser.plan === "pro" && !effectivePro
                   ? "bg-amber-100 text-amber-900"
                   : effectivePro
                     ? "bg-teal-100 text-teal-900"

@@ -45,7 +45,7 @@ export default async function AdminUsersPage({
   return (
     <div>
       <h1 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">Users</h1>
-      <p className="mt-1 text-sm text-stone-600">All registered workspaces (NextAuth).</p>
+      <p className="mt-1 text-sm text-stone-600">All registered workspaces (Clerk sign-in).</p>
 
       <form className="mt-6 flex flex-col gap-2 sm:flex-row" method="get" action="/admin/users">
         <input

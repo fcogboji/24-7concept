@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { auth } from "@/auth";
+import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 
 export const runtime = "nodejs";
 
 export async function POST() {
-  const session = await auth();
-  if (!session?.user?.email) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -24,11 +24,11 @@ export async function POST() {
 
   const checkout = await stripe.checkout.sessions.create({
     mode: "subscription",
-    customer_email: session.user.email,
+    customer_email: appUser.email,
     line_items: [{ price, quantity: 1 }],
     success_url: `${appUrl}/dashboard?checkout=success`,
     cancel_url: `${appUrl}/dashboard?checkout=cancel`,
-    metadata: { userId: session.user.id },
+    metadata: { userId: appUser.id },
     allow_promotion_codes: true,
   });
 

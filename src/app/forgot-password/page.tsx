@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
-import { ForgotPasswordForm } from "./forgot-password-form";
 
 export const metadata: Metadata = {
   title: "Forgot password — 24/7concept",
@@ -17,20 +16,22 @@ export default function ForgotPasswordPage() {
         paddingTop: "max(2.5rem, env(safe-area-inset-top))",
       }}
     >
-      <div className="mx-auto w-full max-w-sm">
-        <p className="text-center font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
+      <div className="mx-auto w-full max-w-sm text-center">
+        <p className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
           24/7concept
         </p>
-        <h1 className="mt-2 text-center text-lg text-stone-600">Reset your password</h1>
-        <div className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-          <ForgotPasswordForm />
-        </div>
-        <p className="mt-6 text-center text-sm text-stone-600">
-          <Link href="/login" className="font-medium text-teal-800 underline">
-            Sign in
-          </Link>
+        <h1 className="mt-2 text-lg text-stone-600">Reset your password</h1>
+        <p className="mt-6 text-sm text-stone-600">
+          Password reset is handled on the sign-in screen. Open Log in and use the &quot;Forgot password?&quot; link
+          there.
         </p>
-        <div className="mt-8">
+        <Link
+          href="/login"
+          className="mt-6 inline-block rounded-full bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800"
+        >
+          Go to sign in
+        </Link>
+        <div className="mt-10">
           <LegalFooterLinks className="text-stone-400" />
         </div>
       </div>

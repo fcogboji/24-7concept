@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
-import { ResetPasswordForm } from "./reset-password-form";
 
 export const metadata: Metadata = {
   title: "New password — 24/7concept",
@@ -16,15 +16,21 @@ export default function ResetPasswordPage() {
         paddingTop: "max(2.5rem, env(safe-area-inset-top))",
       }}
     >
-      <div className="mx-auto w-full max-w-sm">
-        <p className="text-center font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
+      <div className="mx-auto w-full max-w-sm text-center">
+        <p className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
           24/7concept
         </p>
-        <h1 className="mt-2 text-center text-lg text-stone-600">Choose a new password</h1>
-        <div className="mt-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-          <ResetPasswordForm />
-        </div>
-        <div className="mt-8">
+        <h1 className="mt-2 text-lg text-stone-600">Choose a new password</h1>
+        <p className="mt-6 text-sm text-stone-600">
+          This link is no longer used. Use sign in → Forgot password to reset via email.
+        </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-block rounded-full bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800"
+        >
+          Go to sign in
+        </Link>
+        <div className="mt-10">
           <LegalFooterLinks className="text-stone-400" />
         </div>
       </div>
