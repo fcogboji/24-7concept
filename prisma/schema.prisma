@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  passwordHash           String
+  name                   String?
+  emailVerifiedAt        DateTime?
+  plan                   String    @default("free")
+  stripeCustomerId       String?
+  stripeSubscriptionId   String?
+  subscriptionStatus     String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  bots                   Bot[]
+  auditLogs              AuditLog[]
+  authTokens             AuthToken[]
+}
+
+model AuthToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  actorClerkId String?
+  actorEmail   String?
+  action       String
+  resourceType String?
+  resourceId   String?
+  meta         Json?
+  ip           String?
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([action, createdAt])
+  @@index([userId])
+}
+
+model Bot {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  websiteUrl  String?
+  isDemo      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sources     Source[]
+  messages    Message[]
+  leads       Lead[]
+
+  @@index([userId])
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  botId     String
+  email     String
+  source    String   @default("widget")
+  createdAt DateTime @default(now())
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, createdAt])
+}
+
+model Source {
+  id        String   @id @default(cuid())
+  botId     String
+  content   String   @db.Text
+  embedding Json
+  createdAt DateTime @default(now())
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  botId     String
+  role      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, createdAt])
+}
