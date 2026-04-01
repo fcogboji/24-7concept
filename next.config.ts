@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
             key: "Cache-Control",
             value: "public, max-age=0, must-revalidate",
           },
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+          // Allow embedding <script src="https://your-app/widget.js"> on other sites (avoids ORB blocking in Chromium).
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },
       {
