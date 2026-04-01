@@ -18,6 +18,13 @@ const fraunces = Fraunces({
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (process.env.NODE_ENV === "production" && !clerkPublishableKey?.trim()) {
+  throw new Error(
+    "Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY. Set it in Vercel → Environment Variables for Production, then redeploy."
+  );
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -63,7 +70,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${fraunces.variable} h-full`}>
       <body className="min-h-full antialiased">
-        <ClerkProvider>
+        <ClerkProvider publishableKey={clerkPublishableKey}>
           <Providers>{children}</Providers>
           <CookieConsent />
         </ClerkProvider>

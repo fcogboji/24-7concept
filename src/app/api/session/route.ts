@@ -3,9 +3,7 @@ import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 
 export const runtime = "nodejs";
 
-/**
- * Session probe for the widget (same shape as legacy NextAuth `/api/auth/session` for `user.id`).
- */
+/** Session probe for the widget (`user.id` = Prisma user id). Rewrites from `/api/auth/session` in `next.config`. */
 export async function GET() {
   const user = await getOrCreateAppUser();
   if (!user) {

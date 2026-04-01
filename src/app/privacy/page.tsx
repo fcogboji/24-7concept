@@ -39,8 +39,8 @@ export default function PrivacyPage() {
             <h2 className="text-base font-semibold text-stone-900">2. Data we collect</h2>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>
-                <strong>Account data:</strong> email and name when you register; authentication data (e.g. hashed
-                passwords); and records of email verification and password-reset requests sent to your address.
+                <strong>Account data:</strong> email and name when you register; sign-in is handled by our
+                authentication provider (Clerk), which may process credentials or OAuth according to your chosen method.
               </li>
               <li>
                 <strong>Service data:</strong> assistant configuration, training content derived from URLs you provide,
@@ -77,8 +77,8 @@ export default function PrivacyPage() {
               introduce analytics or marketing cookies, we will ask for your consent where required.
             </p>
             <p className="mt-2">
-              <strong>Third parties:</strong> Clerk may set cookies when you use admin areas. Stripe may set cookies
-              during checkout. Those providers have their own privacy policies.
+              <strong>Third parties:</strong> Clerk may set cookies when you sign in (including the dashboard). Stripe may
+              set cookies during checkout. Those providers have their own privacy policies.
             </p>
           </section>
 
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
             <h2 className="text-base font-semibold text-stone-900">5. Processors & sub-processors</h2>
             <p className="mt-2">
               We use infrastructure and service providers (e.g. hosting, database, email provider, OpenAI for AI
-              processing, Clerk for admin authentication, Stripe for payments). They process data in line with our
+              processing, Clerk for authentication, Stripe for payments). They process data in line with our
               instructions and contracts.
             </p>
           </section>

@@ -1,8 +1,23 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.
+      { source: "/api/auth/session", destination: "/api/session" },
+    ];
+  },
   async headers() {
     return [
+      {
+        source: "/widget.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
+          },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
