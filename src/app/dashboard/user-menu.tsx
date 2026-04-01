@@ -1,6 +1,7 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const AVATAR_STYLES = [
@@ -89,6 +90,13 @@ export function UserMenu({
       {open && (
         <div className="absolute right-0 z-20 mt-2 w-56 rounded-xl border border-stone-200 bg-white p-2 shadow-lg">
           <p className="px-2 py-1 text-xs text-stone-500">{identity}</p>
+          <Link
+            href="/dashboard/account"
+            className="mt-1 block rounded-lg px-3 py-2 text-left text-sm text-stone-700 hover:bg-stone-100"
+            onClick={() => setOpen(false)}
+          >
+            Account & security
+          </Link>
           {canManageBilling && (
             <button
               type="button"

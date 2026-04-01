@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
+import { getPublicAppUrl } from "@/lib/public-app-url";
 import { prisma } from "@/lib/prisma";
 import { BotActivity } from "./bot-activity";
 import { BotPanel } from "./bot-panel";
@@ -21,7 +22,7 @@ export default async function BotDetailPage({
 
   if (!bot) notFound();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = await getPublicAppUrl();
 
   const [recentMessages, leads] = await Promise.all([
     prisma.message.findMany({
@@ -50,6 +51,7 @@ export default async function BotDetailPage({
           websiteUrl: bot.websiteUrl,
           sources: bot._count.sources,
           messages: bot._count.messages,
+          isDemo: bot.isDemo,
         }}
         appUrl={appUrl}
       />

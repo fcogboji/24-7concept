@@ -40,9 +40,12 @@ export default async function DashboardLayout({
             >
               24/7concept
             </Link>
-            <nav className="text-sm font-medium text-stone-600">
-              <Link href="/dashboard" className="rounded-lg py-2 pr-2 hover:text-stone-900">
+            <nav className="flex flex-wrap items-center gap-4 text-sm font-medium text-stone-600">
+              <Link href="/dashboard" className="rounded-lg py-2 hover:text-stone-900">
                 Assistants
+              </Link>
+              <Link href="/dashboard/account" className="rounded-lg py-2 hover:text-stone-900">
+                Account
               </Link>
             </nav>
           </div>

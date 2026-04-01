@@ -9,6 +9,7 @@ type Bot = {
   websiteUrl: string | null;
   sources: number;
   messages: number;
+  isDemo: boolean;
 };
 
 export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
@@ -17,6 +18,7 @@ export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
   const [training, setTraining] = useState(false);
   const [urlDraft, setUrlDraft] = useState(bot.websiteUrl ?? "");
   const [savingUrl, setSavingUrl] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const snippet = `<script src="${appUrl}/widget.js" async data-bot-id="${bot.id}" data-brand="${escapeAttr(bot.name)}"></script>`;
 
@@ -50,6 +52,31 @@ export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
       router.refresh();
     } finally {
       setSavingUrl(false);
+    }
+  }
+
+  async function deleteAssistant() {
+    if (bot.isDemo) return;
+    if (
+      !window.confirm(
+        `Delete “${bot.name}”? This removes training data, messages, and leads for this assistant. The embed snippet will stop working.`
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setStatus(null);
+    try {
+      const res = await fetch(`/api/bots/${bot.id}`, { method: "DELETE" });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setStatus(data.error ?? "Could not delete assistant");
+        return;
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -145,6 +172,26 @@ export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
             Copy snippet
           </button>
         </section>
+
+        {!bot.isDemo && (
+          <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-red-800">
+              Danger zone
+            </h2>
+            <p className="mt-2 text-sm text-stone-600">
+              Remove this assistant if you no longer need it (for example to free a slot on the free plan). This cannot
+              be undone.
+            </p>
+            <button
+              type="button"
+              onClick={deleteAssistant}
+              disabled={deleting}
+              className="mt-4 rounded-full border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-900 hover:bg-red-100 disabled:opacity-60"
+            >
+              {deleting ? "Deleting…" : "Delete assistant"}
+            </button>
+          </section>
+        )}
 
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">

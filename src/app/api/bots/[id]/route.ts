@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
+import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
 
@@ -54,4 +55,36 @@ export async function PATCH(req: Request, context: RouteContext) {
   });
 
   return NextResponse.json({ bot: updated });
+}
+
+export async function DELETE(_req: Request, context: RouteContext) {
+  const appUser = await getOrCreateAppUser();
+  if (!appUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+  const bot = await prisma.bot.findFirst({
+    where: { id, userId: appUser.id },
+  });
+  if (!bot) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (bot.isDemo) {
+    return NextResponse.json(
+      { error: "This assistant cannot be deleted." },
+      { status: 403 }
+    );
+  }
+
+  await prisma.bot.delete({ where: { id } });
+  await logAudit({
+    userId: appUser.id,
+    action: "bot.deleted",
+    resourceType: "bot",
+    resourceId: id,
+    meta: { name: bot.name },
+  });
+
+  return NextResponse.json({ ok: true });
 }
