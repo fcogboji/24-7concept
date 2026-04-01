@@ -14,8 +14,11 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
   }
 
   const visited = new Set<string>();
-  const queue: string[] = [base.origin + base.pathname];
+  const startHref = base.href.split("#")[0].split("?")[0];
+  const queue: string[] = [startHref];
   const chunks: string[] = [];
+
+  const minCharsPerPage = 20;
 
   while (queue.length && visited.size < pageLimit) {
     const raw = queue.shift()!;
@@ -32,11 +35,18 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
       const controller = new AbortController();
       const t = setTimeout(() => controller.abort(), 15000);
       const res = await fetch(url, {
-        headers: { "User-Agent": UA, Accept: "text/html" },
+        headers: {
+          "User-Agent": UA,
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
         signal: controller.signal,
+        redirect: "follow",
       });
       clearTimeout(t);
-      if (!res.ok || !res.headers.get("content-type")?.includes("text/html")) {
+      const ct = res.headers.get("content-type") ?? "";
+      const looksHtml = /\btext\/html\b/i.test(ct) || /\bapplication\/xhtml/i.test(ct);
+      if (!res.ok || !looksHtml) {
         continue;
       }
       const html = await res.text();
@@ -47,7 +57,7 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
         $("#content, .content, #main").first().text().trim() ||
         $("body").text().trim();
       const text = main.replace(/\s+/g, " ").trim();
-      if (text.length > 120) {
+      if (text.length >= minCharsPerPage) {
         chunks.push(text);
       }
 

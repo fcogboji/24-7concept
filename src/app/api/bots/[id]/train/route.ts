@@ -34,7 +34,7 @@ export async function POST(_req: Request, context: RouteContext) {
 
   try {
     const raw = await crawlWebsite(bot.websiteUrl, 8);
-    if (!raw || raw.length < 50) {
+    if (!raw || raw.length < 40) {
       return NextResponse.json(
         {
           error:
