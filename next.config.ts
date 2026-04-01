@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
     return [
       // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.
       { source: "/api/auth/session", destination: "/api/session" },
+      // Serve the static widget (no App Route) so cross-origin <script src> always gets real JS + ORB-safe headers.
+      { source: "/api/embed", destination: "/widget.js" },
     ];
   },
   async headers() {
@@ -21,6 +23,15 @@ const nextConfig: NextConfig = {
             value: "application/javascript; charset=utf-8",
           },
           // Allow embedding <script src="https://your-app/widget.js"> on other sites (avoids ORB blocking in Chromium).
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+        ],
+      },
+      // Same as /widget.js — used by older embeds; rewrite targets /widget.js but URL stays /api/embed.
+      {
+        source: "/api/embed",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },

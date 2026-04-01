@@ -20,7 +20,7 @@ export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
   const [savingUrl, setSavingUrl] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const snippet = `<script src="${appUrl}/api/embed" async data-bot-id="${bot.id}" data-brand="${escapeAttr(bot.name)}"></script>`;
+  const snippet = `<script src="${appUrl}/widget.js" async data-bot-id="${bot.id}" data-brand="${escapeAttr(bot.name)}"></script>`;
 
   function escapeAttr(s: string) {
     return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
