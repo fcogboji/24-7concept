@@ -24,8 +24,9 @@ const nextConfig: NextConfig = {
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },
+      // Do not apply nosniff to /widget.js or /api/embed — can trigger ORB on cross-origin <script src>.
       {
-        source: "/(.*)",
+        source: "/((?!widget\\.js$)(?!api/embed$).*)",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },

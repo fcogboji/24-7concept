@@ -36,7 +36,11 @@ export async function POST(_req: Request, context: RouteContext) {
     const raw = await crawlWebsite(bot.websiteUrl, 8);
     if (!raw || raw.length < 50) {
       return NextResponse.json(
-        { error: "Could not read enough text from that site. Check the URL or try again." },
+        {
+          error:
+            "Could not read enough text from that site. The page may block crawlers, require JavaScript, or have very little HTML text.",
+          hint: "Try the site’s homepage URL, or a simpler public page with visible text. If it still fails, the host may be blocking automated requests.",
+        },
         { status: 422 }
       );
     }

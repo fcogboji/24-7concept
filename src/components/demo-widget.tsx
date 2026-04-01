@@ -11,7 +11,7 @@ export function DemoWidget() {
     if (existing) return;
 
     const s = document.createElement("script");
-    s.src = `${window.location.origin}/widget.js?v=clerk`;
+    s.src = `${window.location.origin}/api/embed?v=clerk`;
     s.async = true;
     s.setAttribute("data-247concept-widget", "1");
     s.dataset.botId = botId;

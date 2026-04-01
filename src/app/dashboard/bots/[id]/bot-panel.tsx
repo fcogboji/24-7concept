@@ -20,7 +20,7 @@ export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
   const [savingUrl, setSavingUrl] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const snippet = `<script src="${appUrl}/widget.js" async data-bot-id="${bot.id}" data-brand="${escapeAttr(bot.name)}"></script>`;
+  const snippet = `<script src="${appUrl}/api/embed" async data-bot-id="${bot.id}" data-brand="${escapeAttr(bot.name)}"></script>`;
 
   function escapeAttr(s: string) {
     return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -104,9 +104,15 @@ export function BotPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
       }
 
       const res = await fetch(`/api/bots/${bot.id}/train`, { method: "POST" });
-      const data = (await res.json()) as { ok?: boolean; chunks?: number; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        chunks?: number;
+        error?: string;
+        hint?: string;
+      };
       if (!res.ok) {
-        setStatus(data.error ?? "Training failed");
+        const msg = [data.error ?? "Training failed", data.hint].filter(Boolean).join(" ");
+        setStatus(msg);
         return;
       }
       setStatus(`Indexed ${data.chunks ?? 0} text chunks.`);

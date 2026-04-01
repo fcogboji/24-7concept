@@ -1,7 +1,8 @@
 import * as cheerio from "cheerio";
 import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
 
-const UA = "Mozilla/5.0 (compatible; SiteGPT247/1.0; +https://sitegpt247.local)";
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<string> {
   let base: URL;
@@ -40,11 +41,11 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
       }
       const html = await res.text();
       const $ = cheerio.load(html);
-      $("script, style, nav, footer, noscript, iframe, svg").remove();
+      $("script, style, noscript, iframe, svg").remove();
       const main =
-        $("main, article, [role='main']").first().text() ||
-        $("#content, .content").first().text() ||
-        $("body").text();
+        $("main, article, [role='main']").first().text().trim() ||
+        $("#content, .content, #main").first().text().trim() ||
+        $("body").text().trim();
       const text = main.replace(/\s+/g, " ").trim();
       if (text.length > 120) {
         chunks.push(text);
