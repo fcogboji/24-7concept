@@ -9,7 +9,16 @@ type Bot = {
   isDemo: boolean;
 };
 
-export function BotIntegrationPanel({ bot, appUrl }: { bot: Bot; appUrl: string }) {
+export function BotIntegrationPanel({
+  bot,
+  appUrl,
+  compact = false,
+}: {
+  bot: Bot;
+  appUrl: string;
+  /** Hide title row when used next to Widget appearance in the two-column layout */
+  compact?: boolean;
+}) {
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -54,13 +63,15 @@ export function BotIntegrationPanel({ bot, appUrl }: { bot: Bot; appUrl: string 
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-lg font-semibold text-gray-900">Integration</h2>
-          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-            Active
-          </span>
-        </div>
-        <p className="mt-2 text-sm text-gray-600">
+        {!compact && (
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">Integration</h2>
+            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+              Active
+            </span>
+          </div>
+        )}
+        <p className={`text-sm text-gray-600 ${compact ? "mt-0" : "mt-2"}`}>
           Copy and paste this code snippet right before the closing <code className="rounded bg-gray-100 px-1">&lt;/body&gt;</code> tag on your website, or in your theme&apos;s custom HTML section.
         </p>
         <div className="relative mt-4">

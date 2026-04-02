@@ -37,9 +37,8 @@ export default async function BotDetailPage({
   ]);
 
   const tabs = [
-    { href: `/dashboard/bots/${bot.id}/appearance`, label: "Appearance" },
+    { href: `/dashboard/bots/${bot.id}/appearance`, label: "Widget" },
     { href: `/dashboard/bots/${bot.id}/knowledge`, label: "Knowledge base" },
-    { href: `/dashboard/bots/${bot.id}/integration`, label: "Integration" },
   ];
 
   return (
@@ -56,7 +55,7 @@ export default async function BotDetailPage({
         subtitle={`${bot.websiteUrl ?? "No website URL yet"} · ${bot._count.sources} chunks · ${bot._count.messages} messages`}
       />
 
-      <div className="mb-10 grid gap-3 sm:grid-cols-3">
+      <div className="mb-10 grid gap-3 sm:grid-cols-2">
         {tabs.map((t) => (
           <Link
             key={t.href}

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
+import { getPublicAppUrl } from "@/lib/public-app-url";
 import { prisma } from "@/lib/prisma";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
-import { BotAppearancePanel } from "../bot-appearance-panel";
+import { BotWidgetSetupGrid } from "../bot-widget-setup-grid";
 
 export default async function BotAppearancePage({ params }: { params: Promise<{ id: string }> }) {
   const appUser = await getOrCreateAppUser();
@@ -16,6 +17,8 @@ export default async function BotAppearancePage({ params }: { params: Promise<{ 
 
   if (!bot) notFound();
 
+  const appUrl = await getPublicAppUrl();
+
   return (
     <div>
       <nav className="mb-4 text-sm text-gray-500">
@@ -26,10 +29,14 @@ export default async function BotAppearancePage({ params }: { params: Promise<{ 
         <span className="text-gray-900">{bot.name}</span>
       </nav>
       <DashboardPageHeader
-        title="Appearance"
-        subtitle="Customize how your widget looks on your site."
+        title="Widget"
+        subtitle="Customize appearance and embed your assistant on your site."
       />
-      <BotAppearancePanel botName={bot.name} />
+      <BotWidgetSetupGrid
+        botName={bot.name}
+        bot={{ id: bot.id, name: bot.name, isDemo: bot.isDemo }}
+        appUrl={appUrl}
+      />
     </div>
   );
 }

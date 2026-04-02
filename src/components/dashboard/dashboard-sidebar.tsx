@@ -120,9 +120,8 @@ export function DashboardSidebar({
 
   const configNav: NavItem[] = configBase
     ? [
-        { href: `${configBase}/appearance`, label: "Appearance", icon: "appearance" },
+        { href: `${configBase}/appearance`, label: "Widget", icon: "appearance" },
         { href: `${configBase}/knowledge`, label: "Knowledge Base", icon: "book" },
-        { href: `${configBase}/integration`, label: "Integration", icon: "code" },
       ]
     : [];
 
@@ -192,7 +191,7 @@ export function DashboardSidebar({
           </p>
           {configNav.length === 0 ? (
             <p className="px-3 text-xs leading-relaxed text-teal-200/70">
-              Create an assistant to configure appearance, knowledge, and integration.
+              Create an assistant to configure your widget and knowledge base.
             </p>
           ) : (
             <ul className="space-y-0.5">
