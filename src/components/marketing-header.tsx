@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const links = [
-  { href: "#moments", label: "See it in action" },
+  { href: "#moments", label: "Product" },
   { href: "#how", label: "How it works" },
   { href: "#pricing", label: "Pricing" },
 ] as const;
+
+const accent = "bg-[#0d9488] hover:bg-[#0f7669]";
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
@@ -26,43 +28,50 @@ export function MarketingHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
-        <div className="mx-auto flex min-h-14 max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-50 border-b border-gray-200/90 bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex min-h-[3.5rem] max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link
             href="/"
-            className="font-[family-name:var(--font-fraunces)] text-lg font-semibold tracking-tight text-stone-900 sm:text-xl"
+            className="flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-lg font-semibold tracking-tight text-gray-900 sm:text-xl"
             onClick={() => setOpen(false)}
           >
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0d9488] text-xs font-bold text-white">
+              AI
+            </span>
             24/7concept
           </Link>
 
-          <nav className="hidden items-center gap-5 text-sm font-medium text-stone-600 md:flex lg:gap-6">
+          <nav className="hidden items-center gap-8 text-sm font-medium text-gray-600 md:flex">
             {links.map((l) => (
-              <a key={l.href} href={l.href} className="hover:text-stone-900">
+              <a
+                key={l.href}
+                href={l.href}
+                className="transition-colors hover:text-gray-900"
+              >
                 {l.label}
               </a>
             ))}
             {isLoggedIn ? (
               <>
-                <Link href="/dashboard" className="hover:text-stone-900">
+                <Link href="/dashboard" className="transition-colors hover:text-gray-900">
                   Dashboard
                 </Link>
                 <button
                   type="button"
                   onClick={() => signOut({ redirectUrl: "/" })}
-                  className="rounded-full bg-stone-900 px-4 py-2.5 text-white hover:bg-stone-800"
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white ${accent}`}
                 >
                   Log out
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="hover:text-stone-900">
+                <Link href="/login" className="transition-colors hover:text-gray-900">
                   Log in
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-full bg-stone-900 px-4 py-2.5 text-white hover:bg-stone-800"
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${accent}`}
                 >
                   Start free
                 </Link>
@@ -72,7 +81,7 @@ export function MarketingHeader() {
 
           <button
             type="button"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-stone-800 touch-manipulation md:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-800 touch-manipulation md:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -110,13 +119,13 @@ export function MarketingHeader() {
             paddingBottom: "env(safe-area-inset-bottom)",
           }}
         >
-          <div className="flex min-h-14 items-center justify-between border-b border-stone-200 px-4">
-            <span className="font-[family-name:var(--font-fraunces)] text-lg font-semibold text-stone-900">
+          <div className="flex min-h-14 items-center justify-between border-b border-gray-200 px-4">
+            <span className="font-[family-name:var(--font-fraunces)] text-lg font-semibold text-gray-900">
               Menu
             </span>
             <button
               type="button"
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-stone-800 touch-manipulation"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-800 touch-manipulation"
               aria-label="Close menu"
               onClick={() => setOpen(false)}
             >
@@ -135,7 +144,7 @@ export function MarketingHeader() {
               <a
                 key={l.href}
                 href={l.href}
-                className="rounded-xl px-3 py-3.5 text-lg font-medium text-stone-800 active:bg-stone-100"
+                className="rounded-xl px-3 py-3.5 text-lg font-medium text-gray-800 active:bg-gray-100"
                 onClick={() => setOpen(false)}
               >
                 {l.label}
@@ -145,7 +154,7 @@ export function MarketingHeader() {
               <>
                 <Link
                   href="/dashboard"
-                  className="rounded-xl px-3 py-3.5 text-lg font-medium text-stone-800 active:bg-stone-100"
+                  className="rounded-xl px-3 py-3.5 text-lg font-medium text-gray-800 active:bg-gray-100"
                   onClick={() => setOpen(false)}
                 >
                   Dashboard
@@ -156,7 +165,7 @@ export function MarketingHeader() {
                     setOpen(false);
                     void signOut({ redirectUrl: "/" });
                   }}
-                  className="mt-3 rounded-full bg-stone-900 px-4 py-3.5 text-center text-lg font-semibold text-white active:bg-stone-800"
+                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${accent}`}
                 >
                   Log out
                 </button>
@@ -165,14 +174,14 @@ export function MarketingHeader() {
               <>
                 <Link
                   href="/login"
-                  className="rounded-xl px-3 py-3.5 text-lg font-medium text-stone-800 active:bg-stone-100"
+                  className="rounded-xl px-3 py-3.5 text-lg font-medium text-gray-800 active:bg-gray-100"
                   onClick={() => setOpen(false)}
                 >
                   Log in
                 </Link>
                 <Link
                   href="/register"
-                  className="mt-3 rounded-full bg-stone-900 px-4 py-3.5 text-center text-lg font-semibold text-white active:bg-stone-800"
+                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${accent}`}
                   onClick={() => setOpen(false)}
                 >
                   Start free

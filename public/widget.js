@@ -1,4 +1,5 @@
 (function () {
+  console.log("Widget loaded");
   var script = document.currentScript;
   if (!script) return;
 

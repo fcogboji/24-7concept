@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
-import { getPublicAppUrl } from "@/lib/public-app-url";
 import { prisma } from "@/lib/prisma";
 import { BotActivity } from "./bot-activity";
-import { BotPanel } from "./bot-panel";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 
 export default async function BotDetailPage({
   params,
@@ -22,8 +21,6 @@ export default async function BotDetailPage({
 
   if (!bot) notFound();
 
-  const appUrl = await getPublicAppUrl();
-
   const [recentMessages, leads] = await Promise.all([
     prisma.message.findMany({
       where: { botId: bot.id },
@@ -39,22 +36,39 @@ export default async function BotDetailPage({
     }),
   ]);
 
+  const tabs = [
+    { href: `/dashboard/bots/${bot.id}/appearance`, label: "Appearance" },
+    { href: `/dashboard/bots/${bot.id}/knowledge`, label: "Knowledge base" },
+    { href: `/dashboard/bots/${bot.id}/integration`, label: "Integration" },
+  ];
+
   return (
     <div>
-      <Link href="/dashboard" className="text-sm font-medium text-stone-500 hover:text-stone-800">
-        ← Assistants
-      </Link>
-      <BotPanel
-        bot={{
-          id: bot.id,
-          name: bot.name,
-          websiteUrl: bot.websiteUrl,
-          sources: bot._count.sources,
-          messages: bot._count.messages,
-          isDemo: bot.isDemo,
-        }}
-        appUrl={appUrl}
+      <nav className="mb-4 text-sm text-gray-500">
+        <Link href="/dashboard" className="hover:text-gray-800">
+          Dashboard
+        </Link>
+        <span className="mx-2">/</span>
+        <span className="text-gray-900">{bot.name}</span>
+      </nav>
+      <DashboardPageHeader
+        title={bot.name}
+        subtitle={`${bot.websiteUrl ?? "No website URL yet"} · ${bot._count.sources} chunks · ${bot._count.messages} messages`}
       />
+
+      <div className="mb-10 grid gap-3 sm:grid-cols-3">
+        {tabs.map((t) => (
+          <Link
+            key={t.href}
+            href={t.href}
+            className="rounded-xl border border-gray-100 bg-white px-4 py-4 text-sm font-semibold text-gray-900 shadow-sm transition hover:border-[#0d9488]/40 hover:bg-teal-50/50"
+          >
+            {t.label}
+            <span className="mt-1 block text-xs font-normal text-gray-500">Open section →</span>
+          </Link>
+        ))}
+      </div>
+
       <BotActivity messages={recentMessages} leads={leads} />
     </div>
   );

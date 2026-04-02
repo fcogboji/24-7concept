@@ -64,18 +64,18 @@ export function CookieConsent() {
             .
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={() => save("essential")}
-            className="rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+            className="min-h-12 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50 touch-manipulation"
           >
             Essential only
           </button>
           <button
             type="button"
             onClick={() => save("accepted")}
-            className="rounded-full bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800"
+            className="min-h-12 rounded-full bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 touch-manipulation"
           >
             Accept
           </button>

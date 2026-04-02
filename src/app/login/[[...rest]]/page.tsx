@@ -14,13 +14,13 @@ export default async function LoginPage({
 
   return (
     <div
-      className="flex min-h-screen flex-col justify-center bg-stone-50 px-4 py-10 sm:px-6 sm:py-12"
+      className="flex min-h-screen flex-col justify-center overflow-x-hidden bg-gray-50 px-4 py-10 sm:px-6 sm:py-12"
       style={{
-        paddingBottom: "max(2.5rem, env(safe-area-inset-bottom))",
-        paddingTop: "max(2.5rem, env(safe-area-inset-top))",
+        paddingBottom: "max(2.5rem, env(safe-area-inset-bottom, 0px))",
+        paddingTop: "max(2.5rem, env(safe-area-inset-top, 0px))",
       }}
     >
-      <div className="mx-auto w-full max-w-sm">
+      <div className="mx-auto w-full max-w-sm min-w-0">
         <p className="text-center font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
           24/7concept
         </p>
@@ -30,13 +30,15 @@ export default async function LoginPage({
             Password updated. You can sign in below.
           </p>
         )}
-        <div className="mt-8 flex justify-center">
-          <SignIn
-            path="/login"
-            routing="path"
-            signUpUrl="/register"
-            fallbackRedirectUrl={afterSignIn}
-          />
+        <div className="mt-8 flex w-full justify-center overflow-x-auto">
+          <div className="w-full max-w-[100vw] sm:max-w-none">
+            <SignIn
+              path="/login"
+              routing="path"
+              signUpUrl="/register"
+              fallbackRedirectUrl={afterSignIn}
+            />
+          </div>
         </div>
         <p className="mt-6 text-center text-sm text-stone-600">
           No account?{" "}
