@@ -93,6 +93,8 @@ export function DashboardShell({
           className={[
             "fixed inset-y-0 left-0 z-50 flex w-[min(17.5rem,88vw)] max-w-full transform shadow-2xl shadow-black/20 transition-transform duration-200 ease-out lg:static lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none",
             navOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+            // Closed drawer is visually off-screen but can still steal taps (~88vw strip) on mobile; desktop sidebar must stay interactive.
+            navOpen ? "pointer-events-auto" : "pointer-events-none lg:pointer-events-auto",
           ].join(" ")}
         >
           <DashboardSidebar
