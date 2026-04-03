@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
+import { rateLimitStripeBilling } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -8,6 +9,14 @@ export async function POST() {
   const appUser = await getOrCreateAppUser();
   if (!appUser?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const billingLimit = await rateLimitStripeBilling(appUser.id);
+  if (!billingLimit.ok) {
+    return NextResponse.json(
+      { error: "Too many billing requests. Try again later." },
+      { status: 429, headers: { "Retry-After": String(billingLimit.retryAfter) } }
+    );
   }
 
   const secret = process.env.STRIPE_SECRET_KEY;

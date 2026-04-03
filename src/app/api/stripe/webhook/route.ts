@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
@@ -6,6 +7,10 @@ export const runtime = "nodejs";
 
 function grantsProFromStripeStatus(status: Stripe.Subscription.Status): boolean {
   return status === "active" || status === "trialing";
+}
+
+function isUniqueViolation(e: unknown): boolean {
+  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
 }
 
 export async function POST(req: Request) {
@@ -32,6 +37,15 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, sig, whSecret);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  try {
+    await prisma.stripeWebhookEvent.create({ data: { eventId: event.id } });
+  } catch (e) {
+    if (isUniqueViolation(e)) {
+      return NextResponse.json({ received: true });
+    }
+    throw e;
   }
 
   try {
@@ -98,6 +112,7 @@ export async function POST(req: Request) {
     }
   } catch (e) {
     console.error(e);
+    await prisma.stripeWebhookEvent.delete({ where: { eventId: event.id } }).catch(() => {});
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 

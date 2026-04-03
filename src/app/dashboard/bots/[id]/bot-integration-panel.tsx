@@ -23,7 +23,7 @@ export function BotIntegrationPanel({
   const [status, setStatus] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const snippet = `<script src="${appUrl}/widget.js" async data-bot-id="${bot.id}" data-brand="${escapeAttr(bot.name)}"></script>`;
+  const snippet = `<script src="${escapeAttr(appUrl)}/widget.js" defer data-api-base="${escapeAttr(appUrl)}" data-bot-id="${escapeAttr(bot.id)}" data-brand="${escapeAttr(bot.name)}"></script>`;
 
   function escapeAttr(s: string) {
     return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -72,7 +72,13 @@ export function BotIntegrationPanel({
           </div>
         )}
         <p className={`text-sm text-gray-600 ${compact ? "mt-0" : "mt-2"}`}>
-          Copy and paste this code snippet right before the closing <code className="rounded bg-gray-100 px-1">&lt;/body&gt;</code> tag on your website, or in your theme&apos;s custom HTML section.
+          Copy and paste this snippet just before <code className="rounded bg-gray-100 px-1">&lt;/body&gt;</code> (or your theme&apos;s “custom HTML / footer” block). It uses <code className="rounded bg-gray-100 px-1">defer</code> and{" "}
+          <code className="rounded bg-gray-100 px-1">data-api-base</code> so the widget always calls your app URL, even if the script URL changes.
+        </p>
+        <p className="mt-3 text-sm text-amber-900/90">
+          If your site uses a strict Content Security Policy, allow this app&apos;s origin in{" "}
+          <code className="rounded bg-amber-100 px-1">script-src</code> and <code className="rounded bg-amber-100 px-1">connect-src</code>{" "}
+          (same host as in the snippet). Without that, the browser may block the script or API calls.
         </p>
         <div className="relative mt-4">
           <pre className="max-h-[min(40vh,320px)] overflow-auto rounded-xl bg-gray-900 p-4 text-[11px] leading-relaxed text-gray-100 sm:text-xs">

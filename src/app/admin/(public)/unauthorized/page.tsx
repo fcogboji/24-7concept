@@ -8,8 +8,11 @@ export default function AdminUnauthorizedPage() {
         Admin access required
       </h1>
       <p className="max-w-md text-stone-600">
-        Your account is signed in, but it does not have the <code className="rounded bg-stone-200 px-1">admin</code>{" "}
-        role in Clerk public metadata. Ask a platform owner to grant access.
+        Your account is signed in, but it is not recognized as an admin. In Clerk Dashboard, set{" "}
+        <code className="rounded bg-stone-200 px-1">role</code> to <code className="rounded bg-stone-200 px-1">admin</code>{" "}
+        under <strong>Public</strong> or <strong>Private</strong> metadata (JSON:{" "}
+        <code className="whitespace-nowrap rounded bg-stone-200 px-1">{`{"role":"admin"}`}</code>
+        ). Use the same Clerk instance (dev vs production) as this app. After saving, sign out and sign in again.
       </p>
       <div className="flex flex-wrap items-center justify-center gap-4">
         <UserButton />

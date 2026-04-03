@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { canUserCreateBot, FREE_MAX_ASSISTANTS } from "@/lib/plan";
 import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
+import { rateLimitBotCreate } from "@/lib/rate-limit";
 
 const createSchema = z.object({
   name: z.string().min(1).max(120),
@@ -51,6 +52,14 @@ export async function POST(req: Request) {
         error: `Free plan allows up to ${FREE_MAX_ASSISTANTS} assistants. Upgrade to Pro for more.`,
       },
       { status: 402 }
+    );
+  }
+
+  const createLimit = await rateLimitBotCreate(appUser.id);
+  if (!createLimit.ok) {
+    return NextResponse.json(
+      { error: "Too many assistant creations. Try again later." },
+      { status: 429, headers: { "Retry-After": String(createLimit.retryAfter) } }
     );
   }
 

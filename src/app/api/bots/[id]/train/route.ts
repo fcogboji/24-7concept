@@ -5,6 +5,7 @@ import { chunkText } from "@/lib/chunk";
 import { createEmbedding } from "@/lib/embeddings";
 import { logAudit } from "@/lib/audit";
 import { crawlWebsite } from "@/lib/crawler";
+import { rateLimitTrain } from "@/lib/rate-limit";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -22,6 +23,14 @@ export async function POST(_req: Request, context: RouteContext) {
 
   if (!bot) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const trainLimit = await rateLimitTrain(botId);
+  if (!trainLimit.ok) {
+    return NextResponse.json(
+      { error: "Training rate limit reached. Try again later." },
+      { status: 429, headers: { "Retry-After": String(trainLimit.retryAfter) } }
+    );
   }
 
   if (!bot.websiteUrl) {

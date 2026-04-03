@@ -3,6 +3,7 @@ import { logAudit } from "@/lib/audit";
 import { requireAdminApi } from "@/lib/admin-auth";
 import { getClientIp } from "@/lib/request-ip";
 import { prisma } from "@/lib/prisma";
+import { rateLimitAuth } from "@/lib/rate-limit";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -10,6 +11,15 @@ export async function POST(req: Request, context: RouteContext) {
   const admin = await requireAdminApi();
   if (!admin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ip = getClientIp(req);
+  const adminLimit = await rateLimitAuth(`admin:verify:${admin.clerkUserId}:${ip}`, 5, 15 * 60 * 1000);
+  if (!adminLimit.ok) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(adminLimit.retryAfter) } }
+    );
   }
 
   const { id } = await context.params;

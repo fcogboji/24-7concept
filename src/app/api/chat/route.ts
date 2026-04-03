@@ -5,7 +5,6 @@ import { getRelevantChunks } from "@/lib/retrieve";
 import { rateLimitChat } from "@/lib/rate-limit";
 import { canUserSendMessage } from "@/lib/plan";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
-import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 
 const MAX_MESSAGE_LENGTH = 12_000;
 
@@ -30,14 +29,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const appUser = await getOrCreateAppUser();
-    if (!appUser) {
-      return NextResponse.json(
-        { error: "Please log in or sign up to use chat." },
-        { status: 401, headers: cors }
-      );
-    }
-
     const { botId, message } = (await req.json()) as {
       botId?: string;
       message?: string;

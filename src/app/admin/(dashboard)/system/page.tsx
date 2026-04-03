@@ -25,13 +25,17 @@ export default async function AdminSystemPage() {
   const widgetCors = process.env.WIDGET_ALLOWED_ORIGINS?.trim()
     ? "restricted origins"
     : "open (embed-friendly)";
+  const adminAllowlist = process.env.ADMIN_CLERK_USER_IDS?.trim()
+    ? "set (user id fallback)"
+    : "unset (metadata only)";
 
   return (
     <div>
       <h1 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">System</h1>
       <p className="mt-1 text-sm text-stone-600">
-        Operations snapshot — secret values are never shown. Sign-in uses Clerk (customer app and admin; admin role via
-        public metadata).
+        Operations snapshot — secret values are never shown. Admin access uses Clerk metadata (
+        <code className="rounded bg-stone-100 px-1">role: admin</code>) or optional{" "}
+        <code className="rounded bg-stone-100 px-1">ADMIN_CLERK_USER_IDS</code>.
       </p>
 
       <dl className="mt-8 space-y-4 rounded-2xl border border-stone-200 bg-white p-5 text-sm shadow-sm">
@@ -85,9 +89,13 @@ export default async function AdminSystemPage() {
           <dt className="text-stone-500">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</dt>
           <dd className="font-mono text-stone-900">{clerkPub}</dd>
         </div>
-        <div className="flex flex-wrap justify-between gap-2">
+        <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
           <dt className="text-stone-500">CLERK_SECRET_KEY</dt>
           <dd className="font-mono text-stone-900">{clerkSecret}</dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
+          <dt className="text-stone-500">ADMIN_CLERK_USER_IDS</dt>
+          <dd className="max-w-[min(100%,20rem)] text-right font-mono text-xs text-stone-900">{adminAllowlist}</dd>
         </div>
       </dl>
 

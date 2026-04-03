@@ -23,6 +23,16 @@ export function getWidgetCorsHeaders(req: Request): Record<string, string> | nul
     };
   }
 
+  // Reflect request Origin when present so credentialed requests can work; anonymous embeds still work with *.
+  if (origin) {
+    return {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      Vary: "Origin",
+    };
+  }
+
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
