@@ -1,49 +1,148 @@
 import * as cheerio from "cheerio";
-import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
+import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
 
 const UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+/** Helps some CDNs / WAFs accept the request as a normal document load. */
+const BROWSER_FETCH_HEADERS: Record<string, string> = {
+  "User-Agent": UA,
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Cache-Control": "no-cache",
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Sec-Fetch-User": "?1",
+  "Upgrade-Insecure-Requests": "1",
+};
 
 function sameRegistrableHost(a: string, b: string): boolean {
   return a.replace(/^www\./i, "").toLowerCase() === b.replace(/^www\./i, "").toLowerCase();
 }
 
+/** Some hosts return HTML with wrong or missing Content-Type. */
+function responseLooksLikeHtml(contentType: string, body: string): boolean {
+  const ct = contentType.toLowerCase();
+  if (/\btext\/html\b/.test(ct) || /\bapplication\/xhtml/.test(ct)) return true;
+  const head = body.slice(0, 1200).trim().toLowerCase();
+  return (
+    head.startsWith("<!doctype html") ||
+    head.startsWith("<html") ||
+    head.startsWith("<head") ||
+    head.includes("<meta ") ||
+    head.includes("<body")
+  );
+}
+
+export type CrawlWebsiteStats = {
+  pagesVisited: number;
+  pagesWithUsableText: number;
+  totalChars: number;
+  fetchFailures: number;
+};
+
+export type CrawlWebsiteResult = {
+  text: string;
+  stats: CrawlWebsiteStats;
+};
+
+function extractJsonLdText($: cheerio.CheerioAPI): string[] {
+  const out: string[] = [];
+  const keys = new Set([
+    "name",
+    "description",
+    "headline",
+    "text",
+    "articleBody",
+    "abstract",
+  ]);
+
+  $("script[type='application/ld+json']").each((_, el) => {
+    const raw = $(el).html();
+    if (!raw?.trim()) return;
+    try {
+      const j = JSON.parse(raw) as unknown;
+      const visit = (node: unknown, depth: number) => {
+        if (depth > 10 || node == null) return;
+        if (typeof node === "string" && node.length > 20) {
+          out.push(node);
+          return;
+        }
+        if (Array.isArray(node)) {
+          for (const x of node) visit(x, depth + 1);
+          return;
+        }
+        if (typeof node === "object") {
+          const o = node as Record<string, unknown>;
+          for (const k of keys) {
+            const v = o[k];
+            if (typeof v === "string" && v.length > 12) out.push(v);
+          }
+          if ("@graph" in o && Array.isArray(o["@graph"])) {
+            for (const x of o["@graph"]) visit(x, depth + 1);
+          }
+        }
+      };
+      visit(j, 0);
+    } catch {
+      /* ignore invalid JSON */
+    }
+  });
+  return out;
+}
+
 function extractPageText($: cheerio.CheerioAPI): string {
+  const jsonLd = extractJsonLdText($);
+
   $("script, style, noscript, iframe, svg").remove();
+
   let primary =
-    $("main, article, [role='main']").first().text().trim() ||
-    $("#content, .content, #main").first().text().trim() ||
-    $("#root, #app, #__next").first().text().trim() ||
+    $("main, article, [role='main'], [role='article']").first().text().trim() ||
+    $("#content, .content, #main, #main-content, .main-content, .site-content, .entry-content, .post-content")
+      .first()
+      .text()
+      .trim() ||
+    $("#root, #app, #__next, [data-reactroot], #___gatsby").first().text().trim() ||
+    $(".main, .Main, #page").first().text().trim() ||
     $("body").text().trim();
   primary = primary.replace(/\s+/g, " ").trim();
 
-  const title = $("title").first().text().trim();
+  const title =
+    $('meta[property="og:title"]').attr("content")?.trim() ||
+    $("title").first().text().trim();
   const metaDesc =
     $('meta[name="description"]').attr("content")?.trim() ||
     $('meta[property="og:description"]').attr("content")?.trim() ||
+    $('meta[name="twitter:description"]').attr("content")?.trim() ||
     "";
 
   const extras: string[] = [];
   if (title.length > 2) extras.push(title);
-  if (metaDesc.length > 10) extras.push(metaDesc);
+  if (metaDesc.length > 8) extras.push(metaDesc);
+  extras.push(...jsonLd);
 
-  if (primary.length >= 20) {
-    return [extras.join(" "), primary].filter(Boolean).join("\n").replace(/\s+/g, " ").trim();
+  if (primary.length >= 12) {
+    return [...extras, primary].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
   }
 
-  const fromBlocks = $("p, li, h1, h2, h3, h4, td, th, article, section, dd, dt")
+  const fromBlocks = $(
+    "p, li, h1, h2, h3, h4, h5, h6, td, th, article, section, dd, dt, blockquote, figcaption, span.text, .prose"
+  )
     .map((_, el) => $(el).text())
     .get()
     .join(" ");
   const fallback = fromBlocks.replace(/\s+/g, " ").trim();
-  const merged = [extras.join(" "), fallback || primary].filter(Boolean).join("\n");
+  const merged = [...extras, fallback || primary].filter(Boolean).join(" ");
   return merged.replace(/\s+/g, " ").trim();
 }
 
-export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<string> {
+export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<CrawlWebsiteResult> {
   let base: URL;
   try {
-    assertUrlSafeForServerFetch(startUrl);
+    assertUrlSafeForServerFetch(startUrl, {
+      allowLocalhost: isLocalTrainingUrlAllowed(),
+    });
     base = new URL(startUrl);
   } catch (e) {
     throw e instanceof Error ? e : new Error("Invalid URL");
@@ -65,7 +164,9 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
   }
 
   const chunks: string[] = [];
-  const minCharsPerPage = 15;
+  /** Minimum extracted text per page to count (title-only pages often land ~10–30 chars). */
+  const minCharsPerPage = 8;
+  let fetchFailures = 0;
 
   while (queue.length && visited.size < pageLimit) {
     const raw = queue.shift()!;
@@ -83,20 +184,23 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
       const t = setTimeout(() => controller.abort(), 15000);
       const res = await fetch(url, {
         headers: {
-          "User-Agent": UA,
-          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.9",
+          ...BROWSER_FETCH_HEADERS,
         },
         signal: controller.signal,
         redirect: "follow",
       });
       clearTimeout(t);
       const ct = res.headers.get("content-type") ?? "";
-      const looksHtml = /\btext\/html\b/i.test(ct) || /\bapplication\/xhtml/i.test(ct);
-      if (!res.ok || !looksHtml) {
+      const html = await res.text();
+      const looksHtml = res.ok && responseLooksLikeHtml(ct, html);
+      if (!res.ok) {
+        fetchFailures++;
         continue;
       }
-      const html = await res.text();
+      if (!looksHtml) {
+        fetchFailures++;
+        continue;
+      }
       const $ = cheerio.load(html);
       const text = extractPageText($);
       if (text.length >= minCharsPerPage) {
@@ -118,9 +222,18 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<str
         }
       });
     } catch {
-      /* skip failed fetches */
+      fetchFailures++;
     }
   }
 
-  return chunks.join("\n\n");
+  const text = chunks.join("\n\n");
+  return {
+    text,
+    stats: {
+      pagesVisited: visited.size,
+      pagesWithUsableText: chunks.length,
+      totalChars: text.length,
+      fetchFailures,
+    },
+  };
 }

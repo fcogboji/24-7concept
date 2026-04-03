@@ -42,13 +42,15 @@ export async function POST(_req: Request, context: RouteContext) {
   }
 
   try {
-    const raw = await crawlWebsite(bot.websiteUrl, 8);
-    if (!raw || raw.length < 40) {
+    const { text: raw, stats: crawlStats } = await crawlWebsite(bot.websiteUrl, 10);
+    if (!raw || raw.length < 24) {
       return NextResponse.json(
         {
           error:
             "Could not read enough text from that site. The page may block crawlers, require JavaScript, or have very little HTML text.",
-          hint: "Try the site’s homepage URL, or a simpler public page with visible text. If it still fails, the host may be blocking automated requests.",
+          hint:
+            "Training crawls the Website URL above — not this app’s address. Use a public page with text in the HTML, or set ALLOW_LOCAL_TRAINING_URL=1 to allow http://localhost URLs for local sites.",
+          crawl: crawlStats,
         },
         { status: 422 }
       );

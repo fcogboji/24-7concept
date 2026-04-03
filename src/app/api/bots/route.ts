@@ -4,7 +4,7 @@ import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { canUserCreateBot, FREE_MAX_ASSISTANTS } from "@/lib/plan";
-import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
+import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
 import { rateLimitBotCreate } from "@/lib/rate-limit";
 
 const createSchema = z.object({
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
   if (url) {
     try {
-      assertUrlSafeForServerFetch(url);
+      assertUrlSafeForServerFetch(url, { allowLocalhost: isLocalTrainingUrlAllowed() });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Invalid URL";
       return NextResponse.json({ error: msg }, { status: 400 });

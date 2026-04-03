@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 function NavIcon({ name }: { name: string }) {
   const cls = "h-5 w-5 shrink-0";
@@ -68,6 +69,16 @@ function NavIcon({ name }: { name: string }) {
           />
         </svg>
       );
+    case "shield":
+      return (
+        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+          />
+        </svg>
+      );
     default:
       return null;
   }
@@ -100,6 +111,7 @@ export function DashboardSidebar({
   const pathname = usePathname();
   const { signOut } = useClerk();
   const { user, isLoaded } = useUser();
+  const showAdminNav = useClerkAdminNav();
   const [menuOpen, setMenuOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -132,6 +144,8 @@ export function DashboardSidebar({
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
+
+  const adminNavActive = pathname === "/admin" || pathname.startsWith("/admin/");
 
   function isActive(item: NavItem) {
     if (item.exact) return pathname === item.href;
@@ -206,6 +220,26 @@ export function DashboardSidebar({
             </ul>
           )}
         </div>
+
+        {showAdminNav ? (
+          <div>
+            <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-wider text-teal-200/80">
+              Platform
+            </p>
+            <ul className="space-y-0.5">
+              <li>
+                <Link
+                  href="/admin"
+                  className={linkClass(adminNavActive)}
+                  onClick={onNavLinkClick}
+                >
+                  <NavIcon name="shield" />
+                  Admin
+                </Link>
+              </li>
+            </ul>
+          </div>
+        ) : null}
       </nav>
 
       {/*

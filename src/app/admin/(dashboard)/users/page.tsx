@@ -89,7 +89,7 @@ export default async function AdminUsersPage({
                 <td className="px-4 py-3">{u.plan}</td>
                 <td className="px-4 py-3">{u._count.bots}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-stone-600">
-                  {u.createdAt.toLocaleDateString(undefined, {
+                  {u.createdAt.toLocaleString(undefined, {
                     dateStyle: "medium",
                     timeStyle: "short",
                   })}

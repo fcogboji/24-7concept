@@ -3,6 +3,7 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 const links = [
   { href: "#moments", label: "Product" },
@@ -17,6 +18,7 @@ export function MarketingHeader() {
   const { isSignedIn } = useAuth();
   const { signOut } = useClerk();
   const isLoggedIn = Boolean(isSignedIn);
+  const showAdminNav = useClerkAdminNav();
 
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
@@ -56,6 +58,11 @@ export function MarketingHeader() {
                 <Link href="/dashboard" className="transition-colors hover:text-gray-900">
                   Dashboard
                 </Link>
+                {showAdminNav ? (
+                  <Link href="/admin" className="transition-colors hover:text-gray-900">
+                    Admin
+                  </Link>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => signOut({ redirectUrl: "/" })}
@@ -159,6 +166,15 @@ export function MarketingHeader() {
                 >
                   Dashboard
                 </Link>
+                {showAdminNav ? (
+                  <Link
+                    href="/admin"
+                    className="rounded-xl px-3 py-3.5 text-lg font-medium text-gray-800 active:bg-gray-100"
+                    onClick={() => setOpen(false)}
+                  >
+                    Admin
+                  </Link>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {

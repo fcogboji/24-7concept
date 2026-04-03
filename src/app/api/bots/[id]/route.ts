@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
-import { assertUrlSafeForServerFetch } from "@/lib/url-safety";
+import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
 
 const patchSchema = z.object({
   name: z.string().min(1).max(120).optional(),
@@ -41,7 +41,9 @@ export async function PATCH(req: Request, context: RouteContext) {
         : parsed.data.websiteUrl;
     if (data.websiteUrl) {
       try {
-        assertUrlSafeForServerFetch(data.websiteUrl);
+        assertUrlSafeForServerFetch(data.websiteUrl, {
+          allowLocalhost: isLocalTrainingUrlAllowed(),
+        });
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Invalid URL";
         return NextResponse.json({ error: msg }, { status: 400 });

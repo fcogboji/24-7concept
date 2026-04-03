@@ -70,10 +70,21 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
         chunks?: number;
         error?: string;
         hint?: string;
+        crawl?: {
+          pagesVisited: number;
+          pagesWithUsableText: number;
+          totalChars: number;
+          fetchFailures: number;
+        };
       };
       if (!res.ok) {
-        const msg = [data.error ?? "Training failed", data.hint].filter(Boolean).join(" ");
-        setStatus(msg);
+        const parts = [data.error ?? "Training failed", data.hint].filter(Boolean);
+        if (data.crawl) {
+          parts.push(
+            `Details: ${data.crawl.pagesVisited} page(s) opened, ${data.crawl.pagesWithUsableText} had enough text, ${data.crawl.totalChars} characters total, ${data.crawl.fetchFailures} failed fetches.`
+          );
+        }
+        setStatus(parts.join(" "));
         return;
       }
       setStatus(`Indexed ${data.chunks ?? 0} text chunks.`);
@@ -115,7 +126,8 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
       <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Train from website</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Run training to refresh indexed content from your site.
+          Run training to refresh indexed content from your site. Use a URL whose page has real text in the HTML (homepage,
+          About, Contact, or docs). JavaScript-only shells with an empty initial HTML body often train poorly.
         </p>
         <button
           type="button"

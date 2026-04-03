@@ -1,3 +1,4 @@
+import "./ensure-ws-no-bufferutil";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client";
 import { Pool, neonConfig } from "@neondatabase/serverless";
