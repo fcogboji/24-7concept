@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
-import { getPublicAppUrl } from "@/lib/public-app-url";
+import { getAppUrlForStripeRedirects } from "@/lib/public-app-url";
 import { rateLimitStripeBilling } from "@/lib/rate-limit";
 import { getStripeCheckoutConfigIssue } from "@/lib/stripe-env";
 
@@ -38,7 +38,7 @@ export async function POST() {
     return NextResponse.json(body, { status: 503 });
   }
 
-  const appUrl = (await getPublicAppUrl()).replace(/\/$/, "");
+  const appUrl = (await getAppUrlForStripeRedirects()).replace(/\/$/, "");
 
   const stripe = new Stripe(cfg.secretKey, {
     apiVersion: "2026-03-25.dahlia",

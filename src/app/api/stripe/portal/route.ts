@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
-import { getPublicAppUrl } from "@/lib/public-app-url";
+import { getAppUrlForStripeRedirects } from "@/lib/public-app-url";
 import { rateLimitStripeBilling } from "@/lib/rate-limit";
 import { getStripeSecretKey } from "@/lib/stripe-env";
 
@@ -35,7 +35,7 @@ export async function POST() {
     );
   }
 
-  const appUrl = (await getPublicAppUrl()).replace(/\/$/, "");
+  const appUrl = (await getAppUrlForStripeRedirects()).replace(/\/$/, "");
 
   const user = await prisma.user.findUnique({
     where: { id: appUser.id },
