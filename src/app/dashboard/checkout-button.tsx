@@ -11,12 +11,25 @@ export function CheckoutButton() {
     setLoading(true);
     try {
       const res = await fetch("/api/stripe/checkout", { method: "POST" });
-      const data = (await res.json()) as { url?: string; error?: string };
+      let data = {} as { url?: string; error?: string; code?: string; detail?: string };
+      try {
+        data = await res.json();
+      } catch {
+        setError(`Checkout failed (HTTP ${res.status}). Try again or contact support.`);
+        return;
+      }
       if (data.url) {
         window.location.href = data.url;
         return;
       }
-      setError(data.error ?? "Checkout unavailable. Configure Stripe for production.");
+      const msg =
+        data.error ??
+        (res.status === 503
+          ? "Billing env vars are missing on this deployment. In Vercel: set STRIPE_SECRET_KEY and STRIPE_PRICE_PRO for Production, then redeploy."
+          : "Checkout unavailable.");
+      setError(process.env.NODE_ENV === "development" && data.detail ? `${msg} (${data.detail})` : msg);
+    } catch {
+      setError("Network error. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

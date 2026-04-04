@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
+import { getPublicAppUrl } from "@/lib/public-app-url";
 import { rateLimitStripeBilling } from "@/lib/rate-limit";
+import { getStripeSecretKey } from "@/lib/stripe-env";
 
 export const runtime = "nodejs";
 
@@ -20,12 +22,20 @@ export async function POST() {
     );
   }
 
-  const secret = process.env.STRIPE_SECRET_KEY;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const secret = getStripeSecretKey();
 
-  if (!secret || !appUrl) {
-    return NextResponse.json({ error: "Billing is not configured" }, { status: 503 });
+  if (!secret) {
+    return NextResponse.json(
+      {
+        error:
+          "Stripe secret key is not set on the server. Add STRIPE_SECRET_KEY (or STRIPE_API_KEY) and redeploy.",
+        code: "MISSING_STRIPE_SECRET",
+      },
+      { status: 503 }
+    );
   }
+
+  const appUrl = (await getPublicAppUrl()).replace(/\/$/, "");
 
   const user = await prisma.user.findUnique({
     where: { id: appUser.id },

@@ -8,11 +8,13 @@ import {
   subscriptionGrantsPro,
 } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
+import { syncUserPlanFromCheckoutSession, syncUserPlanFromStripeByEmail } from "@/lib/stripe-sync-user-plan";
 import { redirect } from "next/navigation";
 import { ConversationVolumeChart, TopicDistributionChart } from "@/components/dashboard/dashboard-charts";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { CheckoutButton } from "./checkout-button";
 import { ManageBillingButton } from "./manage-billing-button";
+import { SyncPlanButton } from "./sync-plan-button";
 
 function TrendBadge({ value, positive }: { value: string; positive: boolean }) {
   return (
@@ -54,12 +56,31 @@ function KpiCard({
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; session_id?: string }>;
 }) {
   const appUser = await getOrCreateAppUser();
   if (!appUser) redirect("/login");
 
   const params = await searchParams;
+
+  if (typeof params.session_id === "string" && params.session_id.length > 0) {
+    await syncUserPlanFromCheckoutSession(params.session_id, appUser.id);
+    redirect("/dashboard?checkout=success");
+  }
+
+  if (params.checkout === "success") {
+    const snap = await prisma.user.findUnique({
+      where: { id: appUser.id },
+      select: { plan: true, subscriptionStatus: true },
+    });
+    if (snap && !subscriptionGrantsPro(snap.plan, snap.subscriptionStatus)) {
+      const { ok } = await syncUserPlanFromStripeByEmail(appUser.id, appUser.email);
+      if (ok) {
+        redirect("/dashboard?checkout=success");
+      }
+    }
+  }
+
   const bots = await prisma.bot.findMany({
     where: { userId: appUser.id },
     orderBy: { createdAt: "desc" },
@@ -91,7 +112,8 @@ export default async function DashboardPage({
     <div>
       {params.checkout === "success" && (
         <p className="mb-6 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
-          Thanks — payment received. Your plan should show Pro within a few seconds; refresh if needed.
+          Thanks — payment received. If the sidebar still says Free, click <strong>Refresh plan from Stripe</strong> below
+          (your database may not have received the webhook yet, e.g. on localhost).
         </p>
       )}
       {params.checkout === "cancel" && (
@@ -135,8 +157,9 @@ export default async function DashboardPage({
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         {!effectivePro && <CheckoutButton />}
+        {!effectivePro && <SyncPlanButton />}
         {user?.stripeCustomerId && <ManageBillingButton />}
       </div>
 

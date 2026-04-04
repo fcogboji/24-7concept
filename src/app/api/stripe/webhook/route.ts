@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { getStripeSecretKey } from "@/lib/stripe-env";
 
 export const runtime = "nodejs";
 
@@ -14,8 +15,8 @@ function isUniqueViolation(e: unknown): boolean {
 }
 
 export async function POST(req: Request) {
-  const secret = process.env.STRIPE_SECRET_KEY;
-  const whSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = getStripeSecretKey();
+  const whSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
 
   if (!secret || !whSecret) {
     return NextResponse.json({ error: "Not configured" }, { status: 503 });
@@ -66,7 +67,10 @@ export async function POST(req: Request) {
       }
     }
 
-    if (event.type === "customer.subscription.updated") {
+    if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated"
+    ) {
       const sub = event.data.object as Stripe.Subscription;
       const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
       if (!customerId) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { isEmailConfigured } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { getStripeProPriceId, getStripeSecretKey } from "@/lib/stripe-env";
 
 export default async function AdminSystemPage() {
   let dbOk = false;
@@ -14,7 +15,8 @@ export default async function AdminSystemPage() {
   const env = process.env.NODE_ENV;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "(not set)";
   const openai = process.env.OPENAI_API_KEY ? "configured" : "missing";
-  const stripe = process.env.STRIPE_SECRET_KEY ? "configured" : "missing";
+  const stripe = getStripeSecretKey() ? "configured" : "missing";
+  const stripeProPrice = getStripeProPriceId() ? "configured" : "missing";
   const clerkPub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "set" : "missing";
   const clerkSecret = process.env.CLERK_SECRET_KEY ? "set" : "missing";
   const emailFrom = process.env.EMAIL_FROM ?? "(not set)";
@@ -58,8 +60,12 @@ export default async function AdminSystemPage() {
           <dd className="font-mono text-stone-900">{openai}</dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
-          <dt className="text-stone-500">STRIPE_SECRET_KEY</dt>
+          <dt className="text-stone-500">STRIPE_SECRET_KEY (or STRIPE_API_KEY)</dt>
           <dd className="font-mono text-stone-900">{stripe}</dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
+          <dt className="text-stone-500">STRIPE_PRICE_PRO (or STRIPE_PRICE_ID)</dt>
+          <dd className="font-mono text-stone-900">{stripeProPrice}</dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
           <dt className="text-stone-500">UPSTASH_REDIS (rate limits)</dt>
