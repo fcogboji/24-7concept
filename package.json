@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbopack",
     "dev:free": "node scripts/free-dev-ports.mjs",
     "dev:fresh": "node scripts/free-dev-ports.mjs && next dev --webpack",
     "build": "prisma generate && next build",

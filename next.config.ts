@@ -12,6 +12,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
+          },
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+        ],
+      },
+      {
         source: "/widget.js",
         headers: [
           {
@@ -37,7 +50,7 @@ const nextConfig: NextConfig = {
       },
       // Do not apply nosniff to /widget.js or /api/embed — can trigger ORB on cross-origin <script src>.
       {
-        source: "/((?!widget\\.js$)(?!api/embed$).*)",
+        source: "/((?!widget\\.js$)(?!api/embed$)(?!sw\\.js$).*)",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
