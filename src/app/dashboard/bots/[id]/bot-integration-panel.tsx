@@ -81,7 +81,7 @@ export function BotIntegrationPanel({
         <p className="mt-3 text-sm text-amber-900/90">
           If your site uses a strict Content Security Policy, allow this app&apos;s origin in{" "}
           <code className="rounded bg-amber-100 px-1">script-src</code> and <code className="rounded bg-amber-100 px-1">connect-src</code>{" "}
-          (same host as in the snippet). Without that, the browser may block the script or API calls.
+          (same host as in the snippet). Without that, the browser may block the script or API calls. The widget only runs where you install it — it cannot override another company&apos;s security, ad blockers, or private apps.
         </p>
         <div className="relative mt-4">
           <pre className="max-h-[min(40vh,320px)] overflow-auto rounded-xl bg-gray-900 p-4 text-[11px] leading-relaxed text-gray-100 sm:text-xs">

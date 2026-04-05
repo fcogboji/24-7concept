@@ -1,9 +1,25 @@
 /**
- * 24/7concept embed — works on third-party sites (anonymous visitor chat).
- * Resolves <script> even when document.currentScript is null (e.g. async).
- * Uses Shadow DOM so host page CSS cannot break layout.
+ * 24/7concept embed — runs on customer sites with their permission (script tag).
+ * - Shadow DOM: host CSS cannot break the widget.
+ * - Idempotent per botId: safe if the script runs twice (SPA navigations).
+ * - Cannot bypass the host site’s CSP, ad blockers, or login walls — those are enforced by the visitor’s browser.
  */
 (function () {
+  var FETCH_OPTS = { mode: "cors", credentials: "omit", cache: "no-store" };
+
+  function fetchWithNetworkRetry(url, init) {
+    var merged = {};
+    for (var k in FETCH_OPTS) merged[k] = FETCH_OPTS[k];
+    if (init) for (var k2 in init) merged[k2] = init[k2];
+    return fetch(url, merged).catch(function () {
+      return new Promise(function (resolve, reject) {
+        setTimeout(function () {
+          fetch(url, merged).then(resolve).catch(reject);
+        }, 650);
+      });
+    });
+  }
+
   function findEmbedScript() {
     var cs = document.currentScript;
     if (cs && cs.getAttribute("data-bot-id")) return cs;
@@ -18,8 +34,11 @@
   }
 
   function run() {
-    if (!document.body) {
-      document.addEventListener("DOMContentLoaded", run);
+    var mount = document.documentElement;
+    if (!mount) {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", run);
+      }
       return;
     }
 
@@ -28,6 +47,11 @@
 
     var botId = script.getAttribute("data-bot-id");
     if (!botId) return;
+
+    var existingHosts = document.querySelectorAll('[data-247concept-embed="1"]');
+    for (var hi = 0; hi < existingHosts.length; hi++) {
+      if (existingHosts[hi].getAttribute("data-bot-id") === botId) return;
+    }
 
     var brand = script.getAttribute("data-brand") || "Support";
     var apiBase = script.getAttribute("data-api-base");
@@ -45,17 +69,18 @@
     var leadUiShown = false;
 
     var host = document.createElement("div");
-    host.id = "hb-247concept-host";
+    host.id = "hb-247concept-host-" + botId.replace(/[^a-zA-Z0-9_-]/g, "_");
     host.setAttribute("data-247concept-embed", "1");
+    host.setAttribute("data-bot-id", botId);
     var shadow = host.attachShadow({ mode: "open" });
 
     var style = document.createElement("style");
     style.textContent =
-      ":host{display:block;position:relative;z-index:2147483647;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;}" +
-      "#hb-launcher{position:fixed;z-index:2147483000;font-family:inherit;bottom:max(16px,env(safe-area-inset-bottom,0px));right:max(16px,env(safe-area-inset-right,0px));left:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}" +
+      ":host{display:block;position:relative;z-index:2147483647;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;pointer-events:none;visibility:visible;}" +
+      "#hb-launcher{position:fixed;z-index:2147483000;font-family:inherit;top:auto;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));left:auto;width:max-content;max-width:calc(100vw - 32px);margin:0;padding:0;border:0;background:transparent;box-shadow:none;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}" +
       "#hb-btn{appearance:none;border:0;cursor:pointer;border-radius:999px;min-height:44px;padding:12px 18px;background:#1c1917;color:#fafaf9;font-size:15px;font-weight:600;letter-spacing:0.01em;box-shadow:0 10px 30px rgba(0,0,0,0.18);transition:transform .15s ease,box-shadow .15s ease;font-family:inherit;}" +
       "#hb-btn:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(0,0,0,0.22);}" +
-      "#hb-panel{position:fixed;z-index:2147483000;display:none;flex-direction:column;border-radius:18px;overflow:hidden;background:#fafaf9;border:1px solid #e7e5e4;box-shadow:0 24px 60px rgba(0,0,0,0.15);font-family:inherit;bottom:calc(72px + env(safe-area-inset-bottom,0px));right:max(12px,env(safe-area-inset-right,0px));left:auto;width:min(380px,calc(100vw - 24px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));max-height:min(520px,calc(100dvh - 120px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));}" +
+      "#hb-panel{position:fixed;z-index:2147483000;display:none;flex-direction:column;border-radius:18px;overflow:hidden;background:#fafaf9;border:1px solid #e7e5e4;box-shadow:0 24px 60px rgba(0,0,0,0.15);font-family:inherit;top:auto;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(72px + env(safe-area-inset-bottom,0px));left:auto;width:min(380px,calc(100vw - 24px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));max-height:min(520px,calc(100dvh - 120px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));margin:0;pointer-events:auto;}" +
       "#hb-panel.hb-open{display:flex;}" +
       "#hb-head{padding:14px 16px;background:#1c1917;color:#fafaf9;font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:space-between;gap:8px;}" +
       "#hb-close{appearance:none;border:0;background:transparent;color:#a8a29e;cursor:pointer;font-size:18px;line-height:1;min-width:44px;min-height:44px;padding:12px;border-radius:8px;touch-action:manipulation;}" +
@@ -208,7 +233,7 @@
         var em = (emailInput.value || "").trim();
         if (!em) return;
         leadBtn.disabled = true;
-        fetch(leadUrl, {
+        fetchWithNetworkRetry(leadUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ botId: botId, email: em }),
@@ -255,7 +280,7 @@
       sendBtn.disabled = true;
       setTyping(true);
 
-      fetch(chatUrl, {
+      fetchWithNetworkRetry(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ botId: botId, message: text }),
@@ -311,7 +336,11 @@
       }
     });
 
-    document.body.appendChild(host);
+    try {
+      mount.appendChild(host);
+    } catch (err) {
+      if (document.body) document.body.appendChild(host);
+    }
   }
 
   run();

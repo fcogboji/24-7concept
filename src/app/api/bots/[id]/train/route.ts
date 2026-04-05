@@ -4,10 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { chunkText } from "@/lib/chunk";
 import { createEmbedding } from "@/lib/embeddings";
 import { logAudit } from "@/lib/audit";
-import { crawlWebsite } from "@/lib/crawler";
+import { crawlWebsiteForTraining } from "@/lib/crawler";
 import { rateLimitTrain } from "@/lib/rate-limit";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+/** Headless crawl can exceed default serverless limits on Vercel Pro+. */
+export const maxDuration = 120;
 
 export async function POST(_req: Request, context: RouteContext) {
   const appUser = await getOrCreateAppUser();
@@ -42,14 +45,14 @@ export async function POST(_req: Request, context: RouteContext) {
   }
 
   try {
-    const { text: raw, stats: crawlStats } = await crawlWebsite(bot.websiteUrl, 10);
+    const { text: raw, stats: crawlStats } = await crawlWebsiteForTraining(bot.websiteUrl, 10);
     if (!raw || raw.length < 24) {
       return NextResponse.json(
         {
           error:
-            "Could not read enough text from that site. The page may block crawlers, require JavaScript, or have very little HTML text.",
+            "Could not read enough text from that site. It may require sign-in (e.g. Clerk), block bots, or show almost everything only after JavaScript — we still could not see enough public text.",
           hint:
-            "Training crawls the Website URL above — not this app’s address. Use a public page with text in the HTML, or set ALLOW_LOCAL_TRAINING_URL=1 to allow http://localhost URLs for local sites.",
+            "Use a URL that is publicly readable without logging in (marketing, docs, /about). If your whole site is behind auth, add a public page with your FAQs and train on that. For local dev: ALLOW_LOCAL_TRAINING_URL=1. To skip the browser crawl: CRAWLER_DISABLE_RENDER=1.",
           crawl: crawlStats,
         },
         { status: 422 }
@@ -76,7 +79,11 @@ export async function POST(_req: Request, context: RouteContext) {
       action: "bot.trained",
       resourceType: "bot",
       resourceId: botId,
-      meta: { chunks: pieces.length, websiteUrl: bot.websiteUrl },
+      meta: {
+        chunks: pieces.length,
+        websiteUrl: bot.websiteUrl,
+        crawlUsedPlaywright: crawlStats.usedPlaywright === true,
+      },
     });
 
     return NextResponse.json({ ok: true, chunks: pieces.length });

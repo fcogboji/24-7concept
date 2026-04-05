@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["playwright-core", "playwright", "@sparticuz/chromium"],
   async rewrites() {
     return [
       // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.

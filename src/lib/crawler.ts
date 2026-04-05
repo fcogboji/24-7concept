@@ -40,6 +40,10 @@ export type CrawlWebsiteStats = {
   pagesWithUsableText: number;
   totalChars: number;
   fetchFailures: number;
+  /** Set when a headless browser crawl ran (JS-rendered / SPA pages). */
+  usedPlaywright?: boolean;
+  /** Characters gathered from the initial static fetch before Playwright (if any). */
+  staticCrawlChars?: number;
 };
 
 export type CrawlWebsiteResult = {
@@ -137,6 +141,16 @@ function extractPageText($: cheerio.CheerioAPI): string {
   return merged.replace(/\s+/g, " ").trim();
 }
 
+/** Parse HTML (e.g. after Playwright) with the same rules as the static crawler. */
+export function extractTextFromHtmlString(html: string): string {
+  const $ = cheerio.load(html);
+  return extractPageText($);
+}
+
+/**
+ * Static HTML fetch + link crawl. Does not execute JavaScript — SPAs and auth-only pages often look empty.
+ * Prefer `crawlWebsiteForTraining` from this module for user-facing training.
+ */
 export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<CrawlWebsiteResult> {
   let base: URL;
   try {
@@ -236,4 +250,40 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<Cra
       fetchFailures,
     },
   };
+}
+
+/**
+ * Runs the static crawler first; if there is not enough text (common for Next.js + Clerk / client-rendered sites),
+ * retries with a headless Chromium crawl (Playwright). Set `CRAWLER_DISABLE_RENDER=1` to skip the browser pass.
+ */
+export async function crawlWebsiteForTraining(
+  startUrl: string,
+  pageLimit = 10
+): Promise<CrawlWebsiteResult> {
+  const staticResult = await crawlWebsite(startUrl, pageLimit);
+  if (staticResult.text.length >= 24) {
+    return staticResult;
+  }
+  if (process.env.CRAWLER_DISABLE_RENDER === "1") {
+    return staticResult;
+  }
+
+  try {
+    const { crawlWebsiteRendered } = await import("@/lib/crawler-rendered");
+    const rendered = await crawlWebsiteRendered(startUrl, Math.min(pageLimit, 8));
+    if (rendered.text.length > staticResult.text.length) {
+      return {
+        text: rendered.text,
+        stats: {
+          ...rendered.stats,
+          usedPlaywright: true,
+          staticCrawlChars: staticResult.stats.totalChars,
+        },
+      };
+    }
+  } catch (e) {
+    console.error("[crawler] rendered crawl failed:", e);
+  }
+
+  return staticResult;
 }

@@ -75,13 +75,20 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           pagesWithUsableText: number;
           totalChars: number;
           fetchFailures: number;
+          usedPlaywright?: boolean;
+          staticCrawlChars?: number;
         };
       };
       if (!res.ok) {
         const parts = [data.error ?? "Training failed", data.hint].filter(Boolean);
         if (data.crawl) {
+          const c = data.crawl;
+          const mode =
+            c.usedPlaywright === true
+              ? `headless browser was used (static pass had ${c.staticCrawlChars ?? 0} chars).`
+              : "static HTML fetch only.";
           parts.push(
-            `Details: ${data.crawl.pagesVisited} page(s) opened, ${data.crawl.pagesWithUsableText} had enough text, ${data.crawl.totalChars} characters total, ${data.crawl.fetchFailures} failed fetches.`
+            `Details: ${c.pagesVisited} page(s) opened, ${c.pagesWithUsableText} had enough text, ${c.totalChars} characters total, ${c.fetchFailures} failed fetches — ${mode}`
           );
         }
         setStatus(parts.join(" "));
