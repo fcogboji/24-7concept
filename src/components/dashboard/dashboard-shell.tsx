@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 import { DashboardHelpFab } from "@/components/dashboard/dashboard-help-fab";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
@@ -54,7 +55,7 @@ export function DashboardShell({
       <header
         className="fixed inset-x-0 top-0 z-[45] border-b border-gray-200 bg-white/95 px-4 pt-[env(safe-area-inset-top,0px)] backdrop-blur-sm supports-[backdrop-filter]:bg-white/90 lg:hidden"
       >
-        <div className="flex h-14 items-center justify-between gap-3">
+        <div className="flex h-16 items-center justify-between gap-3">
         <button
           type="button"
           onClick={() => setNavOpen(true)}
@@ -68,10 +69,10 @@ export function DashboardShell({
         </button>
         <Link
           href="/dashboard"
-          className="min-h-11 truncate py-2 text-center font-[family-name:var(--font-fraunces)] text-base font-semibold text-gray-900"
+          className="flex min-h-11 items-center justify-center py-1"
           onClick={closeNav}
         >
-          24/7concept
+          <BrandLogo variant="compact" />
         </Link>
         <span className="w-11 shrink-0" aria-hidden />
         </div>
@@ -106,7 +107,7 @@ export function DashboardShell({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col pt-[calc(3.5rem+env(safe-area-inset-top,0px))] lg:pt-0">
+        <div className="flex min-w-0 flex-1 flex-col pt-[calc(4rem+env(safe-area-inset-top,0px))] lg:pt-0">
           <main className="flex-1 px-4 py-6 pb-[max(6.5rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-8 lg:pb-8">
             {children}
           </main>

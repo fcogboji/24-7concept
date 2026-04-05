@@ -4,6 +4,7 @@ import { DemoWidget } from "@/components/demo-widget";
 import { HeroRobotMarquee } from "@/components/hero-robot-marquee";
 import { LandingHeroBackground } from "@/components/landing-hero-background";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
+import { BrandLogo } from "@/components/brand-logo";
 import { MarketingHeader } from "@/components/marketing-header";
 
 const teal = "bg-[#0d9488] hover:bg-[#0f7669]";
@@ -320,7 +321,9 @@ export default function HomePage() {
         </section>
 
         <footer className="border-t border-gray-200 bg-white px-4 py-12 text-center sm:px-6">
-          <p className="text-sm font-medium text-gray-900">24/7concept</p>
+          <div className="flex justify-center">
+            <BrandLogo variant="footer" />
+          </div>
           <p className="mt-2 text-sm text-gray-500">Built for teams who ship — not configure.</p>
           <div className="mt-6">
             <LegalFooterLinks className="text-gray-400" />

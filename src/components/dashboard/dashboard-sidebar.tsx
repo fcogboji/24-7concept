@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 function NavIcon({ name }: { name: string }) {
@@ -84,14 +85,6 @@ function NavIcon({ name }: { name: string }) {
   }
 }
 
-function RobotLogo() {
-  return (
-    <svg className="h-8 w-8 text-white" viewBox="0 0 32 32" fill="currentColor" aria-hidden>
-      <path d="M16 4c-2.2 0-4 1.8-4 4v1H9a3 3 0 00-3 3v10a3 3 0 003 3h14a3 3 0 003-3V12a3 3 0 00-3-3h-3V8c0-2.2-1.8-4-4-4zm0 2c1.1 0 2 .9 2 2v1h-4V8c0-1.1.9-2 2-2zM9 11h14a1 1 0 011 1v10a1 1 0 01-1 1H9a1 1 0 01-1-1V12a1 1 0 011-1zm3 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm8 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12 22h8v2h-8v-2z" />
-    </svg>
-  );
-}
-
 type NavItem = { href: string; label: string; icon: string; exact?: boolean };
 
 export function DashboardSidebar({
@@ -162,11 +155,8 @@ export function DashboardSidebar({
   return (
     <aside className="flex h-full min-h-screen w-full max-w-[17.5rem] shrink-0 flex-col bg-[#0d9488] text-white lg:max-w-none lg:w-64">
       <div className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-5">
-        <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5" onClick={onNavLinkClick}>
-          <RobotLogo />
-          <span className="truncate font-[family-name:var(--font-fraunces)] text-lg font-semibold tracking-tight">
-            24/7concept
-          </span>
+        <Link href="/dashboard" className="flex min-w-0 items-center" onClick={onNavLinkClick}>
+          <BrandLogo variant="sidebar" />
         </Link>
         {onNavLinkClick ? (
           <button

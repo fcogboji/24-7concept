@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SignUp } from "@clerk/nextjs";
+import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 import { safeAppRedirectPath } from "@/lib/safe-redirect";
 
@@ -21,9 +22,9 @@ export default async function RegisterPage({
       }}
     >
       <div className="mx-auto w-full max-w-sm min-w-0">
-        <p className="text-center font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
-          24/7concept
-        </p>
+        <div className="flex justify-center">
+          <BrandLogo variant="auth" />
+        </div>
         <h1 className="mt-2 text-center text-lg text-stone-600">Create your workspace</h1>
         <div className="mt-8 flex w-full justify-center overflow-x-auto">
           <div className="w-full max-w-[100vw] sm:max-w-none">

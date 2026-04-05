@@ -3,6 +3,7 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 const links = [
@@ -31,16 +32,13 @@ export function MarketingHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-gray-200/90 bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex min-h-[3.5rem] max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:min-h-[4.5rem] sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 font-[family-name:var(--font-fraunces)] text-lg font-semibold tracking-tight text-gray-900 sm:text-xl"
+            className="flex items-center outline-offset-4 rounded-md"
             onClick={() => setOpen(false)}
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0d9488] text-xs font-bold text-white">
-              AI
-            </span>
-            24/7concept
+            <BrandLogo variant="header" priority />
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-gray-600 md:flex">

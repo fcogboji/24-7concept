@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "dev:turbo": "next dev --turbopack",
+    "dev:free": "node scripts/free-dev-ports.mjs",
+    "dev:fresh": "node scripts/free-dev-ports.mjs && next dev --webpack",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "npx tsx prisma/seed.ts"
+    "db:seed": "npx tsx prisma/seed.ts",
+    "verify:embed": "node scripts/verify-embed.mjs"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

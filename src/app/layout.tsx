@@ -3,7 +3,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { DM_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import { CookieConsent } from "@/components/cookie-consent";
-import { Providers } from "./providers";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -71,7 +70,7 @@ export default function RootLayout({
     <html lang="en" className={`${dmSans.variable} ${fraunces.variable} h-full`}>
       <body className="min-h-full antialiased">
         <ClerkProvider publishableKey={clerkPublishableKey}>
-          <Providers>{children}</Providers>
+          {children}
           <CookieConsent />
         </ClerkProvider>
       </body>

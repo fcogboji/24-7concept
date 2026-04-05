@@ -1,4 +1,5 @@
 import { SignIn } from "@clerk/nextjs";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function AdminSignInPage() {
   return (
@@ -9,9 +10,10 @@ export default function AdminSignInPage() {
         paddingTop: "max(2.5rem, env(safe-area-inset-top))",
       }}
     >
-      <p className="mb-6 font-[family-name:var(--font-fraunces)] text-xl font-semibold text-stone-900">
-        24/7concept admin
-      </p>
+      <div className="mb-6 flex flex-col items-center gap-2">
+        <BrandLogo variant="auth" />
+        <p className="text-sm font-semibold text-stone-600">Admin</p>
+      </div>
       <SignIn path="/admin/sign-in" routing="path" fallbackRedirectUrl="/admin" forceRedirectUrl="/admin" />
     </div>
   );

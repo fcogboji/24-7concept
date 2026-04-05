@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import { BrandLogo } from "@/components/brand-logo";
 
 const nav = [
   { href: "/admin", label: "Overview" },
@@ -26,8 +27,15 @@ export function AdminSidebar() {
   return (
     <aside className="flex w-full flex-col border-b border-stone-700 bg-stone-900 text-stone-100 md:w-56 md:shrink-0 md:border-b-0 md:border-r">
       <div className="flex items-center justify-between gap-2 px-3 py-3 md:px-4">
-        <Link href="/admin" className="shrink-0 font-semibold tracking-tight">
-          Admin
+        <Link
+          href="/admin"
+          className="flex shrink-0 items-center gap-2 font-semibold tracking-tight text-white"
+          aria-label="24/7concept admin home"
+        >
+          <span className="rounded-md bg-white/95 p-1 ring-1 ring-white/10">
+            <BrandLogo variant="adminBar" />
+          </span>
+          <span>Admin</span>
         </Link>
         <div className="shrink-0">
           <UserButton />

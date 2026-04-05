@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+/**
+ * Verifies widget asset + CORS preflight for cross-origin embeds.
+ * Requires the app running: npm run dev (default http://127.0.0.1:3000)
+ *
+ * Usage: node scripts/verify-embed.mjs
+ *        BASE_URL=http://localhost:3000 node scripts/verify-embed.mjs
+ *
+ * Manual UI check (third-party origin): create any local HTML that loads
+ *   <script src="YOUR_APP_ORIGIN/widget.js" defer data-api-base="YOUR_APP_ORIGIN" data-bot-id="…"></script>
+ * and open it via a second static server on another port (e.g. npx serve . -l 8765).
+ */
+
+const base = (process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
+const foreignOrigin = "http://127.0.0.1:8765";
+
+async function main() {
+  const w = await fetch(`${base}/widget.js`);
+  if (!w.ok) {
+    console.error(`FAIL: GET /widget.js → ${w.status}`);
+    process.exit(1);
+  }
+  const js = await w.text();
+  if (!js.includes("findEmbedScript") || !js.includes("attachShadow")) {
+    console.error("FAIL: widget.js body looks unexpected");
+    process.exit(1);
+  }
+  console.log("OK  GET /widget.js", w.status, `(${js.length} bytes)`);
+
+  const opt = await fetch(`${base}/api/chat`, {
+    method: "OPTIONS",
+    headers: {
+      Origin: foreignOrigin,
+      "Access-Control-Request-Method": "POST",
+      "Access-Control-Request-Headers": "content-type",
+    },
+  });
+
+  const allow = opt.headers.get("access-control-allow-origin");
+  if (opt.status !== 204 || allow !== foreignOrigin) {
+    console.error(`FAIL: OPTIONS /api/chat → ${opt.status}, ACAO=${allow} (expected 204 + ${foreignOrigin})`);
+    process.exit(1);
+  }
+  console.log("OK  OPTIONS /api/chat", opt.status, "ACAO=", allow);
+
+  const post = await fetch(`${base}/api/chat`, {
+    method: "POST",
+    headers: {
+      Origin: foreignOrigin,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ botId: "demo_site_assistant", message: "ping" }),
+  });
+
+  const ct = post.headers.get("content-type") || "";
+  const postAllow = post.headers.get("access-control-allow-origin");
+  if (postAllow !== foreignOrigin && postAllow !== "*") {
+    console.warn("WARN: POST ACAO=", postAllow, "(browser may still allow if credentialed=false)");
+  }
+  console.log("OK  POST /api/chat", post.status, ct.slice(0, 40));
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

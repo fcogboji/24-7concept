@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 export const metadata: Metadata = {
@@ -17,9 +18,9 @@ export default function VerifyEmailPage() {
       }}
     >
       <div className="mx-auto w-full max-w-sm text-center">
-        <p className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-stone-900">
-          24/7concept
-        </p>
+        <div className="flex justify-center">
+          <BrandLogo variant="auth" />
+        </div>
         <h1 className="mt-2 text-lg text-stone-600">Email verification</h1>
         <p className="mt-6 text-sm text-stone-600">
           Email verification is handled when you sign up. If you need help, sign in and open your account settings,
