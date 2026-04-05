@@ -61,6 +61,15 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error(e);
+  const refused = e?.cause?.code === "ECONNREFUSED" || e?.code === "ECONNREFUSED";
+  if (refused) {
+    console.error(
+      `Cannot reach ${base} (connection refused).\n` +
+        `  • Start the app in another terminal: npm run dev\n` +
+        `  • Or check a deployed build: BASE_URL=https://your-app.vercel.app npm run verify:embed`
+    );
+  } else {
+    console.error(e);
+  }
   process.exit(1);
 });

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 import { DashboardHelpFab } from "@/components/dashboard/dashboard-help-fab";
@@ -24,8 +24,12 @@ export function DashboardShell({
   const [navOpen, setNavOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
+  // Close drawer and restore scroll before paint so a stale overlay / overflow:hidden
+  // cannot block taps on the new page (mobile client navigations).
+  useLayoutEffect(() => {
     setNavOpen(false);
+    document.body.style.overflow = "";
+    document.body.style.removeProperty("overflow");
   }, [pathname]);
 
   useEffect(() => {
@@ -56,25 +60,24 @@ export function DashboardShell({
         className="fixed inset-x-0 top-0 z-[45] border-b border-gray-200 bg-white/95 px-4 pt-[env(safe-area-inset-top,0px)] backdrop-blur-sm supports-[backdrop-filter]:bg-white/90 lg:hidden"
       >
         <div className="flex h-16 items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setNavOpen(true)}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-800 touch-manipulation"
-          aria-label="Open navigation menu"
-          aria-expanded={navOpen}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
-        <Link
-          href="/dashboard"
-          className="flex min-h-11 items-center justify-center py-1"
-          onClick={closeNav}
-        >
-          <BrandLogo variant="compact" />
-        </Link>
-        <span className="w-11 shrink-0" aria-hidden />
+          <Link
+            href="/dashboard"
+            className="flex min-h-11 min-w-0 flex-1 items-center justify-start py-1 touch-manipulation"
+            onClick={closeNav}
+          >
+            <BrandLogo variant="compact" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setNavOpen(true)}
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-gray-800 touch-manipulation"
+            aria-label="Open navigation menu"
+            aria-expanded={navOpen}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -106,8 +109,8 @@ export function DashboardShell({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col pt-[calc(4rem+env(safe-area-inset-top,0px))] lg:pt-0">
-          <main className="flex-1 px-4 py-6 pb-[max(6.5rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-8 lg:pb-8">
+        <div className="relative z-[1] flex min-w-0 flex-1 flex-col pt-[calc(4rem+env(safe-area-inset-top,0px))] lg:z-auto lg:pt-0">
+          <main className="relative flex-1 px-4 py-6 pb-[max(6.5rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-8 lg:pb-8">
             {children}
           </main>
           <footer className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6">
