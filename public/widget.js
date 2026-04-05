@@ -28,9 +28,25 @@
       var s = scripts[i];
       if (!s.getAttribute("data-bot-id")) continue;
       var src = s.src || "";
-      if (/\/widget\.js(\?|$)/i.test(src) || /\/api\/embed(\?|$)/i.test(src)) return s;
+      if (
+        /\/widget\.js(\?|$)/i.test(src) ||
+        /\/api\/embed(\?|$)/i.test(src) ||
+        /\/embed\/widget-js(\?|$)/i.test(src)
+      ) {
+        return s;
+      }
     }
     return null;
+  }
+
+  /** Stop clicks inside the embed from bubbling to the host page (avoids <a> wrappers / delegated navigators opening the script URL or app login). */
+  function trapPointerEventsOnHost(hostEl) {
+    var stop = function (e) {
+      e.stopPropagation();
+    };
+    ["click", "mousedown", "mouseup", "touchstart", "touchend", "pointerdown", "pointerup"].forEach(function (t) {
+      hostEl.addEventListener(t, stop, false);
+    });
   }
 
   function run() {
@@ -148,10 +164,16 @@
         c.type = "button";
         c.className = "hb-chip";
         c.textContent = label;
-        c.addEventListener("click", function () {
-          input.value = label;
-          send();
-        });
+        c.addEventListener(
+          "click",
+          function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = label;
+            send();
+          },
+          true
+        );
         chips.appendChild(c);
       });
     }
@@ -174,10 +196,38 @@
       }
     }
 
-    btn.addEventListener("click", toggle);
-    closeBtn.addEventListener("click", function () {
-      panel.classList.remove("hb-open");
-    });
+    function onLauncherPointer(e) {
+      if (typeof e.button === "number" && e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      toggle();
+    }
+
+    trapPointerEventsOnHost(host);
+
+    btn.addEventListener("click", onLauncherPointer, true);
+    btn.addEventListener(
+      "keydown",
+      function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          toggle();
+        }
+      },
+      true
+    );
+
+    closeBtn.addEventListener(
+      "click",
+      function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        panel.classList.remove("hb-open");
+      },
+      true
+    );
 
     function addUser(text) {
       var d = document.createElement("div");
@@ -262,10 +312,19 @@
             leadBtn.disabled = false;
           });
       }
-      leadBtn.addEventListener("click", submitLead);
+      leadBtn.addEventListener(
+        "click",
+        function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          submitLead();
+        },
+        true
+      );
       emailInput.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
+          e.stopPropagation();
           submitLead();
         }
       });
@@ -328,10 +387,19 @@
         });
     }
 
-    sendBtn.addEventListener("click", send);
+    sendBtn.addEventListener(
+      "click",
+      function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        send();
+      },
+      true
+    );
     input.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        e.stopPropagation();
         send();
       }
     });
