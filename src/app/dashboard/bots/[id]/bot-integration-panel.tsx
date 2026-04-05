@@ -11,11 +11,11 @@ type Bot = {
 
 export function BotIntegrationPanel({
   bot,
-  appUrl,
+  embedSnippet,
   compact = false,
 }: {
   bot: Bot;
-  appUrl: string;
+  embedSnippet: string;
   /** Hide title row when used next to Widget appearance in the two-column layout */
   compact?: boolean;
 }) {
@@ -23,14 +23,8 @@ export function BotIntegrationPanel({
   const [status, setStatus] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const snippet = `<script src="${escapeAttr(appUrl)}/widget.js" defer data-api-base="${escapeAttr(appUrl)}" data-bot-id="${escapeAttr(bot.id)}" data-brand="${escapeAttr(bot.name)}"></script>`;
-
-  function escapeAttr(s: string) {
-    return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-  }
-
   async function copy() {
-    await navigator.clipboard.writeText(snippet);
+    await navigator.clipboard.writeText(embedSnippet);
     setStatus("Copied to clipboard.");
     setTimeout(() => setStatus(null), 2500);
   }
@@ -85,7 +79,7 @@ export function BotIntegrationPanel({
         </p>
         <div className="relative mt-4">
           <pre className="max-h-[min(40vh,320px)] overflow-auto rounded-xl bg-gray-900 p-4 text-[11px] leading-relaxed text-gray-100 sm:text-xs">
-            {snippet}
+            {embedSnippet}
           </pre>
           <button
             type="button"
@@ -96,7 +90,8 @@ export function BotIntegrationPanel({
           </button>
         </div>
         <p className="mt-4 text-sm text-gray-500">
-          Need help? Check our guides. Works with WordPress, Shopify, and most static site hosts.
+          Same script is also available at <code className="rounded bg-gray-100 px-1">/embed/widget-js</code> (use either URL; keep{" "}
+          <code className="rounded bg-gray-100 px-1">data-api-base</code> pointed at this app). Need help? Works with WordPress, Shopify, and most static hosts.
         </p>
       </section>
 

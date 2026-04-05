@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { getPublicAppUrl } from "@/lib/public-app-url";
+import { buildWidgetEmbedSnippet, getVercelProtectionBypassSecret } from "@/lib/widget-embed-snippet";
 import { prisma } from "@/lib/prisma";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { BotWidgetSetupGrid } from "../bot-widget-setup-grid";
@@ -18,6 +19,12 @@ export default async function BotAppearancePage({ params }: { params: Promise<{ 
   if (!bot) notFound();
 
   const appUrl = await getPublicAppUrl();
+  const embedSnippet = buildWidgetEmbedSnippet({
+    appUrl,
+    botId: bot.id,
+    botName: bot.name,
+    bypassSecret: getVercelProtectionBypassSecret(),
+  });
 
   return (
     <div>
@@ -35,7 +42,7 @@ export default async function BotAppearancePage({ params }: { params: Promise<{ 
       <BotWidgetSetupGrid
         botName={bot.name}
         bot={{ id: bot.id, name: bot.name, isDemo: bot.isDemo }}
-        appUrl={appUrl}
+        embedSnippet={embedSnippet}
       />
     </div>
   );

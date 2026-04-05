@@ -13,9 +13,19 @@
 
 const base = (process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
 const foreignOrigin = "http://127.0.0.1:8765";
+const bypass =
+  process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim() ||
+  process.env.WIDGET_VERCEL_PROTECTION_BYPASS?.trim() ||
+  "";
+
+function widgetJsUrl() {
+  const u = new URL(`${base}/widget.js`);
+  if (bypass) u.searchParams.set("x-vercel-protection-bypass", bypass);
+  return u.toString();
+}
 
 async function main() {
-  const w = await fetch(`${base}/widget.js`);
+  const w = await fetch(widgetJsUrl());
   if (!w.ok) {
     console.error(`FAIL: GET /widget.js → ${w.status}`);
     process.exit(1);
@@ -26,6 +36,20 @@ async function main() {
     process.exit(1);
   }
   console.log("OK  GET /widget.js", w.status, `(${js.length} bytes)`);
+
+  const altPath = new URL(`${base}/embed/widget-js`);
+  if (bypass) altPath.searchParams.set("x-vercel-protection-bypass", bypass);
+  const alt = await fetch(altPath.toString());
+  if (!alt.ok) {
+    console.error(`FAIL: GET /embed/widget-js → ${alt.status}`);
+    process.exit(1);
+  }
+  const altBody = await alt.text();
+  if (!altBody.includes("findEmbedScript") || !altBody.includes("attachShadow")) {
+    console.error("FAIL: /embed/widget-js body looks unexpected");
+    process.exit(1);
+  }
+  console.log("OK  GET /embed/widget-js", alt.status, `(${altBody.length} bytes)`);
 
   const opt = await fetch(`${base}/api/chat`, {
     method: "OPTIONS",

@@ -12,11 +12,11 @@ type Bot = {
 export function BotWidgetSetupGrid({
   botName,
   bot,
-  appUrl,
+  embedSnippet,
 }: {
   botName: string;
   bot: Bot;
-  appUrl: string;
+  embedSnippet: string;
 }) {
   return (
     <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
@@ -38,7 +38,7 @@ export function BotWidgetSetupGrid({
             Active
           </span>
         </div>
-        <BotIntegrationPanel bot={bot} appUrl={appUrl} compact />
+        <BotIntegrationPanel bot={bot} embedSnippet={embedSnippet} compact />
       </div>
     </div>
   );

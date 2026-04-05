@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DemoWidget } from "@/components/demo-widget";
+import { getPublicAppUrl } from "@/lib/public-app-url";
+import { widgetDemoScriptUrl } from "@/lib/widget-embed-snippet";
 import { HeroRobotMarquee } from "@/components/hero-robot-marquee";
 import { LandingHeroBackground } from "@/components/landing-hero-background";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
@@ -23,7 +25,10 @@ function CheckIcon() {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const appUrl = await getPublicAppUrl();
+  const demoWidgetScriptSrc = widgetDemoScriptUrl(appUrl);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-50 text-gray-900">
       <MarketingHeader />
@@ -331,7 +336,7 @@ export default function HomePage() {
         </footer>
       </main>
 
-      <DemoWidget />
+      <DemoWidget scriptSrc={demoWidgetScriptSrc} />
     </div>
   );
 }

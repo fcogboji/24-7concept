@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },
+      {
+        source: "/embed/widget-js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+        ],
+      },
       // Same as /widget.js — used by older embeds; rewrite targets /widget.js but URL stays /api/embed.
       {
         source: "/api/embed",
@@ -51,7 +59,7 @@ const nextConfig: NextConfig = {
       },
       // Do not apply nosniff to /widget.js or /api/embed — can trigger ORB on cross-origin <script src>.
       {
-        source: "/((?!widget\\.js$)(?!api/embed$)(?!sw\\.js$).*)",
+        source: "/((?!widget\\.js$)(?!api/embed$)(?!embed/widget-js$)(?!sw\\.js$).*)",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
