@@ -10,8 +10,8 @@ const isPublicRoute = createRouteMatcher([
   "/reset-password(.*)",
   "/verify-email(.*)",
   "/widget.js",
-  "/embed/widget-js",
-  "/embed/chat(.*)",
+  // All embed routes (widget-js, chat, future paths) must stay public for third-party iframes/scripts.
+  "/embed(.*)",
   "/api/chat(.*)",
   "/api/bots/(.*)/suggestions",
   "/api/leads(.*)",

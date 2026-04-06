@@ -39,7 +39,8 @@ export function widgetScriptUrlWithBypassQuery(appUrl: string, bypassSecret: str
 export function widgetDemoScriptUrl(appUrl: string): string {
   const base = appUrl.replace(/\/$/, "");
   const u = new URL(`${base}/embed/widget-js`);
-  u.searchParams.set("v", "clerk");
+  // Avoid `v=clerk` — it confuses debugging and can stick to a stale CDN 404. Bump when changing widget output.
+  u.searchParams.set("v", "embed-2");
   return u.toString();
 }
 
