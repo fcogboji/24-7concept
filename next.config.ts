@@ -7,7 +7,8 @@ const nextConfig: NextConfig = {
       // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.
       { source: "/api/auth/session", destination: "/api/session" },
       // Serve the static widget (no App Route) so cross-origin <script src> always gets real JS + ORB-safe headers.
-      { source: "/api/embed", destination: "/widget.js" },
+      // Same JS as /widget.js but served by /embed/widget-js (can inject Vercel protection bypass).
+      { source: "/api/embed", destination: "/embed/widget-js" },
     ];
   },
   async headers() {

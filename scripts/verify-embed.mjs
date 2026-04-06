@@ -7,7 +7,7 @@
  *        BASE_URL=http://localhost:3000 node scripts/verify-embed.mjs
  *
  * Manual UI check (third-party origin): create any local HTML that loads
- *   <script src="YOUR_APP_ORIGIN/widget.js" defer data-api-base="YOUR_APP_ORIGIN" data-bot-id="…"></script>
+ *   <script src="YOUR_APP_ORIGIN/embed/widget-js" defer data-api-base="YOUR_APP_ORIGIN" data-bot-id="…"></script>
  * and open it via a second static server on another port (e.g. npx serve . -l 8765).
  */
 
@@ -31,7 +31,7 @@ async function main() {
     process.exit(1);
   }
   const js = await w.text();
-  if (!js.includes("findEmbedScript") || !js.includes("attachShadow")) {
+  if (!js.includes("findEmbedScript") || !js.includes("embed/chat")) {
     console.error("FAIL: widget.js body looks unexpected");
     process.exit(1);
   }
@@ -45,9 +45,12 @@ async function main() {
     process.exit(1);
   }
   const altBody = await alt.text();
-  if (!altBody.includes("findEmbedScript") || !altBody.includes("attachShadow")) {
+  if (!altBody.includes("findEmbedScript") || !altBody.includes("embed/chat")) {
     console.error("FAIL: /embed/widget-js body looks unexpected");
     process.exit(1);
+  }
+  if (bypass && !altBody.includes("__247CONCEPT_BYPASS")) {
+    console.warn("WARN: /embed/widget-js expected prelude __247CONCEPT_BYPASS when bypass env is set");
   }
   console.log("OK  GET /embed/widget-js", alt.status, `(${altBody.length} bytes)`);
 

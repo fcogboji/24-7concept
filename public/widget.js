@@ -54,14 +54,26 @@
     }
     var base = apiBase.replace(/\/$/, "");
 
+    function protectionBypass() {
+      try {
+        if (typeof window !== "undefined" && window.__247CONCEPT_BYPASS) {
+          return String(window.__247CONCEPT_BYPASS);
+        }
+      } catch (e) {}
+      try {
+        var scriptUrl = new URL(script.src);
+        var b = scriptUrl.searchParams.get("x-vercel-protection-bypass");
+        if (b) return b;
+      } catch (e) {}
+      var attr = script.getAttribute("data-vercel-bypass");
+      return attr || "";
+    }
+
     var u = new URL(base + "/embed/chat");
     u.searchParams.set("botId", botId);
     u.searchParams.set("brand", brand);
-    try {
-      var scriptUrl = new URL(script.src);
-      var bypass = scriptUrl.searchParams.get("x-vercel-protection-bypass");
-      if (bypass) u.searchParams.set("x-vercel-protection-bypass", bypass);
-    } catch (e) {}
+    var bypass = protectionBypass();
+    if (bypass) u.searchParams.set("x-vercel-protection-bypass", bypass);
 
     var iframe = document.createElement("iframe");
     iframe.src = u.toString();
