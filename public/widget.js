@@ -15,6 +15,7 @@
       if (
         /\/widget\.js(\?|$)/i.test(src) ||
         /\/api\/embed(\?|$)/i.test(src) ||
+        /\/embed\/widget\.js(\?|$)/i.test(src) ||
         /\/embed\/widget-js(\?|$)/i.test(src)
       ) {
         return s;

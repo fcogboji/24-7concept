@@ -1,6 +1,6 @@
 /**
  * Vercel Deployment Protection blocks anonymous GETs unless the bypass token is present.
- * Server route `GET /embed/widget-js` injects `window.__247CONCEPT_BYPASS` from env so
+ * Server route `GET /embed/widget.js` injects `window.__247CONCEPT_BYPASS` from env so
  * customers do not embed secrets in the script URL.
  *
  * @see https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection
@@ -16,13 +16,13 @@ export function getVercelProtectionBypassSecret(): string | null {
 }
 
 /**
- * Canonical script URL for embeds. Uses `/embed/widget-js` so the response can include
+ * Canonical script URL for embeds. Uses `/embed/widget.js` so the response can include
  * a server-injected bypass prelude. `bypassSecret` is kept for callers that still pass
  * it; the URL is clean (no secret in query) when using the dynamic route.
  */
 export function widgetScriptUrl(appUrl: string, _bypassSecret?: string | null): string {
   const origin = appUrl.replace(/\/$/, "");
-  return `${origin}/embed/widget-js`;
+  return `${origin}/embed/widget.js`;
 }
 
 /** Legacy: URL with bypass in query (for static `/widget.js` only, no server prelude). */
@@ -35,12 +35,12 @@ export function widgetScriptUrlWithBypassQuery(appUrl: string, bypassSecret: str
   return `${url}?${q.toString()}`;
 }
 
-/** Homepage demo loader: cache-bust; bypass comes from `/embed/widget-js` prelude when env is set. */
+/** Homepage demo loader: cache-bust; bypass comes from `/embed/widget.js` prelude when env is set. */
 export function widgetDemoScriptUrl(appUrl: string): string {
   const base = appUrl.replace(/\/$/, "");
-  const u = new URL(`${base}/embed/widget-js`);
-  // Avoid `v=clerk` — it confuses debugging and can stick to a stale CDN 404. Bump when changing widget output.
-  u.searchParams.set("v", "embed-2");
+  const u = new URL(`${base}/embed/widget.js`);
+  // Bump when changing widget output (avoids stale CDN 404 on old query keys).
+  u.searchParams.set("v", "embed-3");
   return u.toString();
 }
 

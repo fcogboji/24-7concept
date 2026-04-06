@@ -1,6 +1,5 @@
 import { embedWidgetScriptGET } from "@/lib/embed-widget-script-route";
 
-/** @deprecated Prefer `/embed/widget.js` — same response; kept for old embed URLs. */
 export async function GET() {
   return embedWidgetScriptGET();
 }

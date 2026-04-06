@@ -90,7 +90,7 @@ export function BotIntegrationPanel({
           </button>
         </div>
         <p className="mt-4 text-sm text-gray-500">
-          The snippet uses <code className="rounded bg-gray-100 px-1">/embed/widget-js</code> so the server can inject the Vercel protection bypass when needed. Legacy{" "}
+          The snippet uses <code className="rounded bg-gray-100 px-1">/embed/widget.js</code> so the server can inject the Vercel protection bypass when needed. Legacy{" "}
           <code className="rounded bg-gray-100 px-1">/widget.js</code> still works; keep{" "}
           <code className="rounded bg-gray-100 px-1">data-api-base</code> pointed at this app. Works with WordPress, Shopify, and most static hosts.
         </p>

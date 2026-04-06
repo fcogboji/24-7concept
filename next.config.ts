@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
       // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.
       { source: "/api/auth/session", destination: "/api/session" },
       // Serve the static widget (no App Route) so cross-origin <script src> always gets real JS + ORB-safe headers.
-      // Same JS as /widget.js but served by /embed/widget-js (can inject Vercel protection bypass).
-      { source: "/api/embed", destination: "/embed/widget-js" },
+      // Same JS as /widget.js but served by /embed/widget.js (can inject Vercel protection bypass).
+      { source: "/api/embed", destination: "/embed/widget.js" },
     ];
   },
   async headers() {
@@ -38,6 +38,14 @@ const nextConfig: NextConfig = {
             value: "application/javascript; charset=utf-8",
           },
           // Allow embedding <script src="https://your-app/widget.js"> on other sites (avoids ORB blocking in Chromium).
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+        ],
+      },
+      {
+        source: "/embed/widget.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },
@@ -76,7 +84,7 @@ const nextConfig: NextConfig = {
       },
       // Do not apply nosniff to /widget.js or /api/embed — can trigger ORB on cross-origin <script src>.
       {
-        source: "/((?!widget\\.js$)(?!api/embed$)(?!embed/widget-js$)(?!embed/chat$)(?!sw\\.js$).*)",
+        source: "/((?!widget\\.js$)(?!api/embed$)(?!embed/widget\\.js$)(?!embed/widget-js$)(?!embed/chat$)(?!sw\\.js$).*)",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
