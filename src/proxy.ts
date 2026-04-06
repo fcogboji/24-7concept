@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
   "/verify-email(.*)",
   "/widget.js",
   "/embed/widget-js",
+  "/embed/chat(.*)",
   "/api/chat(.*)",
   "/api/leads(.*)",
   "/api/health(.*)",

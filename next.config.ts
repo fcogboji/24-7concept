@@ -57,9 +57,25 @@ const nextConfig: NextConfig = {
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
         ],
       },
+      // Chat shell loaded inside cross-origin iframes — must not send X-Frame-Options: SAMEORIGIN.
+      {
+        source: "/embed/chat",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors *",
+          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
       // Do not apply nosniff to /widget.js or /api/embed — can trigger ORB on cross-origin <script src>.
       {
-        source: "/((?!widget\\.js$)(?!api/embed$)(?!embed/widget-js$)(?!sw\\.js$).*)",
+        source: "/((?!widget\\.js$)(?!api/embed$)(?!embed/widget-js$)(?!embed/chat$)(?!sw\\.js$).*)",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "X-Content-Type-Options", value: "nosniff" },
