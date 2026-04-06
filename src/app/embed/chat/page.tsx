@@ -177,7 +177,8 @@ function EmbedChatInner() {
         <div className="flex h-full w-full min-h-[56px] items-end justify-end p-2">
           <button
             type="button"
-            className="min-h-[44px] cursor-pointer rounded-full border-0 bg-stone-900 px-[18px] py-3 text-[15px] font-semibold text-stone-50 shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-px hover:shadow-[0_14px_36px_rgba(0,0,0,0.22)]"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center cursor-pointer rounded-full border-0 bg-stone-900 px-3 py-3 text-xl leading-none text-stone-50 shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-px hover:shadow-[0_14px_36px_rgba(0,0,0,0.22)]"
+            aria-label="Open chat"
             onClick={() => {
               setOpen(true);
               setMsgs((prev) =>
@@ -187,7 +188,7 @@ function EmbedChatInner() {
               );
             }}
           >
-            Message us
+            &#128172;
           </button>
         </div>
       )}
@@ -298,10 +299,11 @@ function EmbedChatInner() {
           <div className="flex shrink-0 justify-end px-2 pb-2">
             <button
               type="button"
-              className="min-h-[44px] cursor-pointer rounded-full border-0 bg-stone-900 px-[18px] py-3 text-[15px] font-semibold text-stone-50 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center cursor-pointer rounded-full border-0 bg-stone-900 px-3 py-3 text-xl leading-none text-stone-50 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+              aria-label="Toggle chat"
               onClick={() => setOpen((o) => !o)}
             >
-              Message us
+              &#128172;
             </button>
           </div>
         </div>

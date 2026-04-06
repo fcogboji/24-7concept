@@ -79,6 +79,11 @@
     iframe.src = u.toString();
     iframe.title = "Chat";
     iframe.setAttribute("aria-label", "Chat widget");
+    /**
+     * Prevent iframe content from navigating the top-level customer page.
+     * Keep only capabilities needed for Next.js app + form interactions inside widget.
+     */
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
     iframe.allow = "clipboard-read; clipboard-write";
     iframe.style.cssText =
       "position:fixed;border:0;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.15);z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:56px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);";
