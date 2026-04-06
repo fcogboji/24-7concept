@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 const SIZE_MSG = "247concept-size";
 
-const SUGGESTIONS = ["How does this work?", "What does it cost?", "How do I install it?"];
+const DEFAULT_SUGGESTIONS = ["What do you do?", "How can I contact you?", "What are your hours?"];
 
 function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<Response> {
   const merged: RequestInit = { mode: "cors", credentials: "omit", cache: "no-store", ...init };
@@ -33,12 +33,29 @@ function EmbedChatInner() {
   const [leadNote, setLeadNote] = useState<{ text: string; ok: boolean } | null>(null);
   const [leadSubmitting, setLeadSubmitting] = useState(false);
   const [origin, setOrigin] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
 
   const msgsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setOrigin(typeof window !== "undefined" ? window.location.origin : "");
   }, []);
+
+  useEffect(() => {
+    if (!botId || !origin) return;
+    fetch(`${origin}/api/bots/${botId}/suggestions`, {
+      mode: "cors",
+      credentials: "omit",
+      cache: "no-store",
+    })
+      .then((r) => r.json())
+      .then((j: { suggestions?: string[] }) => {
+        if (Array.isArray(j.suggestions) && j.suggestions.length > 0) {
+          setSuggestions(j.suggestions.slice(0, 3));
+        }
+      })
+      .catch(() => {});
+  }, [botId, origin]);
 
   /** Parent script sizes the iframe from the host viewport. Here we only signal open/closed — iframe inner dimensions are ~160×56 and must not be used for layout math. */
   const postSize = useCallback(() => {
@@ -183,7 +200,7 @@ function EmbedChatInner() {
               setOpen(true);
               setMsgs((prev) =>
                 prev.length === 0
-                  ? [{ role: "bot", text: "Hi — ask us anything about this page, or try a suggestion below." }]
+                  ? [{ role: "bot", text: `Hi! I'm here to help with ${brand}. Ask me anything.` }]
                   : prev
               );
             }}
@@ -208,7 +225,7 @@ function EmbedChatInner() {
               </button>
             </div>
             <div className="flex flex-wrap gap-1.5 px-4 pb-2.5 pt-0">
-              {SUGGESTIONS.map((label) => (
+              {suggestions.map((label) => (
                 <button
                   key={label}
                   type="button"

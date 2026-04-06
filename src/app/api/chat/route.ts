@@ -87,9 +87,16 @@ export async function POST(req: NextRequest) {
     }
 
     const chunks = await getRelevantChunks(botId, message);
-    const context = chunks.length
-      ? chunks.join("\n\n")
-      : "No indexed content yet. Say you are not sure and ask them to contact the business.";
+    const ragContext = chunks.length ? chunks.join("\n\n") : null;
+    const businessInfo = bot.businessInfo?.trim() || null;
+    const context =
+      businessInfo && ragContext
+        ? `--- Business information ---\n${businessInfo}\n\n--- Additional indexed content ---\n${ragContext}`
+        : businessInfo
+          ? `--- Business information ---\n${businessInfo}`
+          : ragContext
+            ? `--- Indexed content ---\n${ragContext}`
+            : "No indexed content yet. Say you are not sure and ask them to contact the business.";
 
     const stream = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",

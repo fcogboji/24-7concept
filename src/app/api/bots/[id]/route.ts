@@ -8,6 +8,7 @@ import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/ur
 const patchSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   websiteUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+  businessInfo: z.union([z.string().max(12000), z.literal(""), z.null()]).optional(),
 });
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -32,7 +33,7 @@ export async function PATCH(req: Request, context: RouteContext) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const data: { name?: string; websiteUrl?: string | null } = {};
+  const data: { name?: string; websiteUrl?: string | null; businessInfo?: string | null } = {};
   if (parsed.data.name !== undefined) data.name = parsed.data.name;
   if (parsed.data.websiteUrl !== undefined) {
     data.websiteUrl =
@@ -49,6 +50,10 @@ export async function PATCH(req: Request, context: RouteContext) {
         return NextResponse.json({ error: msg }, { status: 400 });
       }
     }
+  }
+  if (parsed.data.businessInfo !== undefined) {
+    const text = parsed.data.businessInfo;
+    data.businessInfo = text === "" || text === null ? null : text.trim();
   }
 
   const updated = await prisma.bot.update({
