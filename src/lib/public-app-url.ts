@@ -63,6 +63,18 @@ export async function getPublicAppUrl(): Promise<string> {
   const fromRequest = host ? `${proto}://${host}` : null;
 
   const envIsProduction = Boolean(raw && !raw.includes("localhost"));
+  if (envIsProduction && fromRequest) {
+    try {
+      const envHost = new URL(raw!).host;
+      const requestHost = new URL(fromRequest).host;
+      // Prefer the host this request actually used when env is stale/mismatched.
+      if (envHost !== requestHost && !requestHost.includes("localhost")) {
+        return fromRequest;
+      }
+    } catch {
+      // Fall through to env value below.
+    }
+  }
   if (envIsProduction) {
     return raw!;
   }
