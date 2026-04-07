@@ -19,6 +19,14 @@ export default async function AdminSystemPage() {
   const stripeProPrice = getStripeProPriceId() ? "configured" : "missing";
   const clerkPub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "set" : "missing";
   const clerkSecret = process.env.CLERK_SECRET_KEY ? "set" : "missing";
+  const clerkPubRaw = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
+  const clerkSecretRaw = process.env.CLERK_SECRET_KEY ?? "";
+  const clerkDevInProd =
+    env === "production" &&
+    (clerkPubRaw.startsWith("pk_test_") ||
+      clerkPubRaw.startsWith("pk_live_") === false ||
+      clerkSecretRaw.startsWith("sk_test_") ||
+      clerkSecretRaw.startsWith("sk_live_") === false);
   const emailFrom = process.env.EMAIL_FROM ?? "(not set)";
   const resend = process.env.RESEND_API_KEY ? "configured" : "missing";
   const transactionalEmail = isEmailConfigured() ? "ready (Resend + from)" : "incomplete";
@@ -39,6 +47,15 @@ export default async function AdminSystemPage() {
         <code className="rounded bg-stone-100 px-1">role: admin</code>) or optional{" "}
         <code className="rounded bg-stone-100 px-1">ADMIN_CLERK_USER_IDS</code>.
       </p>
+      {clerkDevInProd && (
+        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Clerk keys look non-production for a production environment. Set
+          <code className="mx-1 rounded bg-amber-100 px-1">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_…</code>
+          and
+          <code className="mx-1 rounded bg-amber-100 px-1">CLERK_SECRET_KEY=sk_live_…</code>
+          in Vercel, then redeploy.
+        </div>
+      )}
 
       <dl className="mt-8 space-y-4 rounded-2xl border border-stone-200 bg-white p-5 text-sm shadow-sm">
         <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">

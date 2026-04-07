@@ -187,6 +187,7 @@ function EmbedChatInner() {
   }
 
   const showLeadBox = assistantReplies >= 2 && !leadDone;
+  const brandInitial = brand.trim().charAt(0).toUpperCase() || "S";
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-transparent font-sans text-stone-900">
@@ -200,7 +201,7 @@ function EmbedChatInner() {
               setOpen(true);
               setMsgs((prev) =>
                 prev.length === 0
-                  ? [{ role: "bot", text: `Hi! I'm here to help with ${brand}. Ask me anything.` }]
+                  ? [{ role: "bot", text: `Hi there. Welcome to ${brand}. How can I help today?` }]
                   : prev
               );
             }}
@@ -213,8 +214,16 @@ function EmbedChatInner() {
       {open && (
         <div className="flex h-full min-h-0 flex-col">
           <div className="mx-2 mb-2 flex min-h-0 max-h-[min(520px,calc(100%-72px))] flex-1 flex-col overflow-hidden rounded-[18px] border border-stone-200 bg-stone-50 shadow-[0_24px_60px_rgba(0,0,0,0.15)]">
-            <div className="flex items-center justify-between gap-2 bg-stone-900 px-4 py-3.5 text-[15px] font-semibold text-stone-50">
-              <span>{brand}</span>
+            <div className="flex items-center justify-between gap-2 bg-stone-900 px-4 py-3.5 text-stone-50">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-700 text-sm font-bold text-stone-100">
+                  {brandInitial}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-[15px] font-semibold">{brand}</div>
+                  <div className="text-[11px] text-stone-300">Online - typically replies instantly</div>
+                </div>
+              </div>
               <button
                 type="button"
                 className="min-h-[44px] min-w-[44px] cursor-pointer rounded-lg border-0 bg-transparent p-3 text-lg leading-none text-stone-400 hover:bg-white/10 hover:text-stone-50"
@@ -293,7 +302,7 @@ function EmbedChatInner() {
               <input
                 className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3 py-2.5 text-base text-stone-900 outline-none focus:border-stone-400 focus:shadow-[0_0_0_3px_rgba(120,113,108,0.15)]"
                 type="text"
-                placeholder="Write a message…"
+                placeholder={`Message ${brand}…`}
                 autoComplete="off"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}

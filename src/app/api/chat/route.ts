@@ -89,6 +89,23 @@ export async function POST(req: NextRequest) {
     const chunks = await getRelevantChunks(botId, message);
     const ragContext = chunks.length ? chunks.join("\n\n") : null;
     const businessInfo = bot.businessInfo?.trim() || null;
+    if (!businessInfo && !ragContext) {
+      const fallback =
+        "I don't have that information right now. Please contact the business directly and they will be happy to help.";
+      await prisma.message.createMany({
+        data: [
+          { botId, role: "user", content: message },
+          { botId, role: "assistant", content: fallback },
+        ],
+      });
+      return new NextResponse(fallback, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          ...cors,
+        },
+      });
+    }
     const context =
       businessInfo && ragContext
         ? `--- Business information ---\n${businessInfo}\n\n--- Additional indexed content ---\n${ragContext}`
@@ -104,7 +121,8 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are a calm, helpful member of the business team answering website visitors.
+          content: `You are the customer assistant for ${bot.name}.
+Speak as a representative of ${bot.name}, not as an AI tool or third-party platform.
 
 Use ONLY the context below. If something is not covered, say you are not sure and suggest they contact the business directly. Do not invent policies, prices, or hours.
 
