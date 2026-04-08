@@ -23,7 +23,10 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
   const [savingBusinessInfo, setSavingBusinessInfo] = useState(false);
   const [businessInfoSaved, setBusinessInfoSaved] = useState(false);
   const [autoLearning, setAutoLearning] = useState(false);
+  const [pastedText, setPastedText] = useState("");
+  const [trainingFromText, setTrainingFromText] = useState(false);
   const BUSINESS_INFO_MAX = 12000;
+  const PASTE_TEXT_MAX = 100_000;
 
   async function saveUrl() {
     setSavingUrl(true);
@@ -202,6 +205,41 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
     }
   }
 
+  async function trainFromText() {
+    const t = pastedText.trim();
+    if (t.length < 24) {
+      setStatus("Please paste at least a few sentences of content to train on.");
+      setStatusTone("error");
+      return;
+    }
+    setTrainingFromText(true);
+    setStatus(null);
+    setStatusTone("neutral");
+    try {
+      const res = await fetch(`/api/bots/${bot.id}/train-text`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: t }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        chunks?: number;
+        error?: string;
+      };
+      if (!res.ok) {
+        setStatus(data.error ?? "Training from pasted text failed");
+        setStatusTone("error");
+        return;
+      }
+      setStatus(`Indexed ${data.chunks ?? 0} text chunks from pasted content.`);
+      setStatusTone("success");
+      setPastedText("");
+      router.refresh();
+    } finally {
+      setTrainingFromText(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -298,6 +336,43 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           className="mt-4 rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
         >
           {training ? "Training…" : "Run training"}
+        </button>
+      </section>
+
+      <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Train from pasted text</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          If your site is behind authentication (e.g. Clerk) or blocks crawlers, paste your page content here instead.
+          Copy text from your site and paste it below — we&apos;ll index it the same way.
+        </p>
+        <textarea
+          value={pastedText}
+          onChange={(e) => setPastedText(e.target.value)}
+          rows={8}
+          placeholder="Paste your website content here — FAQs, service descriptions, about page text, etc."
+          className="mt-4 w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-[#0d9488] focus:outline-none focus:ring-2 focus:ring-[#0d9488]/25"
+        />
+        <div className="mt-2 flex items-center justify-between text-xs">
+          <span className="text-gray-500">Paste content from pages the crawler cannot reach.</span>
+          <span
+            className={
+              pastedText.length > PASTE_TEXT_MAX
+                ? "font-medium text-red-600"
+                : pastedText.length > PASTE_TEXT_MAX * 0.9
+                  ? "font-medium text-amber-600"
+                  : "text-gray-400"
+            }
+          >
+            {pastedText.length > 0 ? `${pastedText.length.toLocaleString()}/${PASTE_TEXT_MAX.toLocaleString()}` : ""}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={trainFromText}
+          disabled={trainingFromText || training || pastedText.trim().length < 24 || pastedText.length > PASTE_TEXT_MAX}
+          className="mt-4 rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
+        >
+          {trainingFromText ? "Training..." : "Train from pasted text"}
         </button>
       </section>
 
