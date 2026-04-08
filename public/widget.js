@@ -87,7 +87,7 @@
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
     iframe.allow = "clipboard-read; clipboard-write";
     iframe.style.cssText =
-      "position:fixed;border:0;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.15);z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:56px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);";
+      "position:fixed;border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:72px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);";
     iframe.style.bottom = "max(16px, env(safe-area-inset-bottom, 0px))";
     iframe.style.right = "max(16px, env(safe-area-inset-right, 0px))";
     iframe.style.left = "auto";
@@ -105,7 +105,7 @@
         iframe.style.height = h + "px";
       } else {
         iframe.style.width = "160px";
-        iframe.style.height = "56px";
+        iframe.style.height = "72px";
       }
     }
 

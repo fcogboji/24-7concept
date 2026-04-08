@@ -199,7 +199,7 @@ function EmbedChatInner() {
         <div className="flex h-full w-full min-h-[56px] items-end justify-end p-2">
           <button
             type="button"
-            className="flex h-[56px] w-[56px] items-center justify-center cursor-pointer rounded-full border-0 bg-red-500 text-xl leading-none text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition hover:-translate-y-px hover:shadow-[0_14px_36px_rgba(0,0,0,0.22)] hover:bg-red-600"
+            className="flex cursor-pointer flex-col items-center border-0 bg-transparent p-0 transition hover:-translate-y-px"
             aria-label="Open chat"
             onClick={() => {
               setOpen(true);
@@ -210,7 +210,24 @@ function EmbedChatInner() {
               );
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div className="relative rounded-[18px] bg-[#0f766e] px-5 pb-3 pt-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur">
+              <span className="block text-center text-[15px] font-bold leading-tight text-white">Live Chat</span>
+              <div className="mt-1.5 flex items-center justify-center gap-1.5">
+                <span className="block h-2.5 w-2.5 rounded-full bg-white/50 animate-[chatDot_1.4s_ease-in-out_infinite]" />
+                <span className="block h-2.5 w-2.5 rounded-full bg-white/50 animate-[chatDot_1.4s_ease-in-out_0.2s_infinite]" />
+                <span className="block h-2.5 w-2.5 rounded-full bg-white/50 animate-[chatDot_1.4s_ease-in-out_0.4s_infinite]" />
+              </div>
+              <style>{`
+                @keyframes chatDot {
+                  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+                  40% { transform: scale(1.2); opacity: 1; }
+                }
+              `}</style>
+              {/* Speech bubble tail */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                <div className="h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-[#0f766e]" />
+              </div>
+            </div>
           </button>
         </div>
       )}
@@ -346,7 +363,7 @@ function EmbedChatInner() {
           <div className="flex shrink-0 justify-end px-2 pb-2">
             <button
               type="button"
-              className="flex h-[52px] w-[52px] items-center justify-center cursor-pointer rounded-full border-0 bg-red-500 text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-red-600 transition-colors"
+              className="flex h-[52px] w-[52px] items-center justify-center cursor-pointer rounded-full border-0 bg-[#0f766e] text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-[#0d6b63] transition-colors"
               aria-label="Close chat"
               onClick={() => setOpen(false)}
             >
