@@ -100,6 +100,23 @@ export async function POST(req: Request) {
       }
     }
 
+    if (event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customerId =
+        typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+      if (customerId) {
+        // Downgrade to free when payment fails — Stripe will retry, and
+        // customer.subscription.updated will restore "pro" if a retry succeeds.
+        await prisma.user.updateMany({
+          where: { stripeCustomerId: customerId },
+          data: {
+            plan: "free",
+            subscriptionStatus: "past_due",
+          },
+        });
+      }
+    }
+
     if (event.type === "customer.subscription.deleted") {
       const sub = event.data.object as Stripe.Subscription;
       const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;

@@ -135,6 +135,11 @@ ${context}`,
       ],
     });
 
+    // Save the user message immediately so it's never lost.
+    await prisma.message.create({
+      data: { botId, role: "user", content: message },
+    });
+
     const encoder = new TextEncoder();
     let fullReply = "";
 
@@ -146,11 +151,8 @@ ${context}`,
             fullReply += text;
             controller.enqueue(encoder.encode(text));
           }
-          await prisma.message.createMany({
-            data: [
-              { botId, role: "user", content: message },
-              { botId, role: "assistant", content: fullReply || "(empty)" },
-            ],
+          await prisma.message.create({
+            data: { botId, role: "assistant", content: fullReply || "(empty)" },
           });
         } catch (e) {
           console.error(e);

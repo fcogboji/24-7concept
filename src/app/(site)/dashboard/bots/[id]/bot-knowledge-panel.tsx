@@ -22,6 +22,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
   const [savingUrl, setSavingUrl] = useState(false);
   const [savingBusinessInfo, setSavingBusinessInfo] = useState(false);
   const [businessInfoSaved, setBusinessInfoSaved] = useState(false);
+  const [autoLearning, setAutoLearning] = useState(false);
   const BUSINESS_INFO_MAX = 12000;
 
   async function saveUrl() {
@@ -76,6 +77,63 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
       router.refresh();
     } finally {
       setSavingBusinessInfo(false);
+    }
+  }
+
+  async function autoLearn() {
+    const u = urlDraft.trim();
+    if (!u && !bot.websiteUrl) {
+      setStatus("Add a website URL first.");
+      setStatusTone("error");
+      return;
+    }
+    setAutoLearning(true);
+    setStatus(null);
+    setStatusTone("neutral");
+    try {
+      // Save URL first if changed
+      if (u && u !== (bot.websiteUrl ?? "")) {
+        const patch = await fetch(`/api/bots/${bot.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ websiteUrl: u }),
+        });
+        if (!patch.ok) {
+          const data = (await patch.json()) as { error?: string };
+          setStatus(data.error ?? "Could not save URL");
+          setStatusTone("error");
+          return;
+        }
+        router.refresh();
+      }
+
+      const res = await fetch(`/api/bots/${bot.id}/auto-learn`, { method: "POST" });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        businessInfo?: string;
+        error?: string;
+        crawl?: { pagesVisited: number; pagesWithUsableText: number; totalChars: number };
+      };
+
+      if (!res.ok) {
+        const parts = [data.error ?? "Auto-learn failed"];
+        if (data.crawl) {
+          parts.push(
+            `(${data.crawl.pagesVisited} pages visited, ${data.crawl.pagesWithUsableText} had text, ${data.crawl.totalChars} chars)`
+          );
+        }
+        setStatus(parts.join(" "));
+        setStatusTone("error");
+        return;
+      }
+
+      if (data.businessInfo) {
+        setBusinessInfoDraft(data.businessInfo);
+        setStatus("Business info extracted from your website — review it below, then click Save.");
+        setStatusTone("success");
+      }
+    } finally {
+      setAutoLearning(false);
     }
   }
 
@@ -178,6 +236,19 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
         <p className="mt-2 text-sm text-gray-600">
           Add hours, services, pricing hints, location, contact details, and FAQs. The assistant uses this context in chat replies.
         </p>
+        <button
+          type="button"
+          onClick={autoLearn}
+          disabled={autoLearning || training}
+          className="mt-3 rounded-full border border-[#0d9488]/30 bg-teal-50 px-4 py-2 text-sm font-semibold text-[#0d9488] hover:bg-teal-100 disabled:opacity-60"
+        >
+          {autoLearning ? "Reading your website…" : "Auto-fill from website"}
+        </button>
+        {autoLearning && (
+          <p className="mt-2 text-xs text-gray-500">
+            Crawling your site and extracting business details. This may take up to a minute.
+          </p>
+        )}
         <textarea
           value={businessInfoDraft}
           onChange={(e) => setBusinessInfoDraft(e.target.value)}

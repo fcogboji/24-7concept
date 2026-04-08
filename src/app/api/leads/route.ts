@@ -52,13 +52,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Assistant not found" }, { status: 404, headers: cors });
     }
 
-    const lead = await prisma.lead.create({
+    const normEmail = email.toLowerCase().trim();
+
+    // Deduplicate: don't create a new lead if this email already exists for this bot.
+    const existing = await prisma.lead.findFirst({
+      where: { botId, email: normEmail },
+    });
+
+    const lead = existing ?? await prisma.lead.create({
       data: {
         botId,
-        email: email.toLowerCase().trim(),
+        email: normEmail,
         source: "widget",
       },
     });
+
+    if (existing) {
+      // Already captured — return success without duplicate audit entry.
+      return NextResponse.json({ ok: true }, { headers: cors });
+    }
 
     await logAudit({
       userId: bot.userId,

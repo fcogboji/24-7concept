@@ -44,6 +44,20 @@ export async function POST(_req: Request, context: RouteContext) {
     return NextResponse.json({ error: "OPENAI_API_KEY is not configured" }, { status: 500 });
   }
 
+  // Prevent concurrent training — stale locks older than 5 minutes are ignored.
+  const LOCK_TTL_MS = 5 * 60 * 1000;
+  if (bot.trainingStartedAt && Date.now() - bot.trainingStartedAt.getTime() < LOCK_TTL_MS) {
+    return NextResponse.json(
+      { error: "Training is already in progress. Please wait for it to finish." },
+      { status: 409 }
+    );
+  }
+
+  await prisma.bot.update({
+    where: { id: botId },
+    data: { trainingStartedAt: new Date() },
+  });
+
   try {
     const { text: raw, stats: crawlStats } = await crawlWebsiteForTraining(bot.websiteUrl, 10);
     if (!raw || raw.length < 24) {
@@ -86,9 +100,16 @@ export async function POST(_req: Request, context: RouteContext) {
       },
     });
 
+    await prisma.bot.update({
+      where: { id: botId },
+      data: { trainingStartedAt: null },
+    });
+
     return NextResponse.json({ ok: true, chunks: pieces.length });
   } catch (e) {
     console.error(e);
+    // Clear the training lock so the user can retry.
+    await prisma.bot.update({ where: { id: botId }, data: { trainingStartedAt: null } }).catch(() => {});
     return NextResponse.json({ error: "Training failed" }, { status: 500 });
   }
 }
