@@ -32,7 +32,14 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    /*
+     * Run Clerk middleware on every route EXCEPT:
+     *  - _next internals & static assets (default Next.js convention)
+     *  - /embed/* paths — these load inside cross-origin iframes where
+     *    Clerk's dev-browser handshake fails (third-party cookies blocked
+     *    on real mobile devices), causing a blank iframe.
+     */
+    "/((?!_next|embed/|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
   ],
 };
