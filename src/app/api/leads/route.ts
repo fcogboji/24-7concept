@@ -8,6 +8,10 @@ import { getWidgetCorsHeaders } from "@/lib/widget-cors";
 const bodySchema = z.object({
   botId: z.string().min(1),
   email: z.string().email(),
+  name: z.string().max(200).optional(),
+  phone: z.string().max(30).optional(),
+  sessionId: z.string().regex(/^s_[a-f0-9]{8,64}$/).optional(),
+  pageUrl: z.string().max(2000).optional(),
 });
 
 function clientIp(req: NextRequest) {
@@ -37,7 +41,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or assistant" }, { status: 400, headers: cors });
     }
 
-    const { botId, email } = parsed.data;
+    const { botId, email, name, phone, sessionId, pageUrl } = parsed.data;
     const ip = clientIp(req);
     const limit = await rateLimitChat(`lead:${ip}:${botId}`);
     if (!limit.ok) {
@@ -63,9 +67,26 @@ export async function POST(req: NextRequest) {
       data: {
         botId,
         email: normEmail,
+        name: name?.trim() || null,
+        phone: phone?.trim() || null,
+        sessionId: sessionId || null,
+        pageUrl: pageUrl || null,
         source: "widget",
       },
     });
+
+    // If lead already exists, update name/phone if newly provided
+    if (existing && (name || phone)) {
+      await prisma.lead.update({
+        where: { id: existing.id },
+        data: {
+          ...(name?.trim() && !existing.name ? { name: name.trim() } : {}),
+          ...(phone?.trim() && !existing.phone ? { phone: phone.trim() } : {}),
+          ...(sessionId && !existing.sessionId ? { sessionId } : {}),
+          ...(pageUrl && !existing.pageUrl ? { pageUrl } : {}),
+        },
+      });
+    }
 
     if (existing) {
       // Already captured — return success without duplicate audit entry.

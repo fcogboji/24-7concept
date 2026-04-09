@@ -29,14 +29,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { botId, message } = (await req.json()) as {
+    const { botId, message, sessionId, pageUrl } = (await req.json()) as {
       botId?: string;
       message?: string;
+      sessionId?: string;
+      pageUrl?: string;
     };
 
     if (!botId || !message?.trim()) {
       return NextResponse.json(
         { error: "Missing botId or message" },
+        { status: 400, headers: cors }
+      );
+    }
+
+    // Validate sessionId format if provided
+    if (sessionId && !/^s_[a-f0-9]{8,64}$/.test(sessionId)) {
+      return NextResponse.json(
+        { error: "Invalid session" },
         { status: 400, headers: cors }
       );
     }
@@ -94,8 +104,8 @@ export async function POST(req: NextRequest) {
         "I don't have that information right now. Please contact the business directly and they will be happy to help.";
       await prisma.message.createMany({
         data: [
-          { botId, role: "user", content: message },
-          { botId, role: "assistant", content: fallback },
+          { botId, role: "user", content: message, sessionId: sessionId || null, pageUrl: pageUrl || null },
+          { botId, role: "assistant", content: fallback, sessionId: sessionId || null, pageUrl: pageUrl || null },
         ],
       });
       return new NextResponse(fallback, {
@@ -137,7 +147,7 @@ ${context}`,
 
     // Save the user message immediately so it's never lost.
     await prisma.message.create({
-      data: { botId, role: "user", content: message },
+      data: { botId, role: "user", content: message, sessionId: sessionId || null, pageUrl: pageUrl || null },
     });
 
     const encoder = new TextEncoder();
@@ -152,7 +162,7 @@ ${context}`,
             controller.enqueue(encoder.encode(text));
           }
           await prisma.message.create({
-            data: { botId, role: "assistant", content: fullReply || "(empty)" },
+            data: { botId, role: "assistant", content: fullReply || "(empty)", sessionId: sessionId || null, pageUrl: pageUrl || null },
           });
         } catch (e) {
           console.error(e);

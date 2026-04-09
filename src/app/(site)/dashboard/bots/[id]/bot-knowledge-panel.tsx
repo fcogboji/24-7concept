@@ -262,7 +262,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
             type="button"
             onClick={saveUrl}
             disabled={savingUrl}
-            className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+            className="min-h-[44px] rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
           >
             {savingUrl ? "Saving…" : "Save URL"}
           </button>
@@ -278,7 +278,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           type="button"
           onClick={autoLearn}
           disabled={autoLearning || training}
-          className="mt-3 rounded-full border border-[#0d9488]/30 bg-teal-50 px-4 py-2 text-sm font-semibold text-[#0d9488] hover:bg-teal-100 disabled:opacity-60"
+          className="mt-3 min-h-[44px] rounded-full border border-[#0d9488]/30 bg-teal-50 px-4 py-2 text-sm font-semibold text-[#0d9488] hover:bg-teal-100 disabled:opacity-60"
         >
           {autoLearning ? "Reading your website…" : "Auto-fill from website"}
         </button>
@@ -312,7 +312,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           type="button"
           onClick={saveBusinessInfo}
           disabled={savingBusinessInfo || businessInfoDraft.length > BUSINESS_INFO_MAX}
-          className="mt-4 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+          className="mt-4 min-h-[44px] rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
         >
           {savingBusinessInfo ? "Saving…" : "Save business info"}
         </button>
@@ -333,7 +333,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           type="button"
           onClick={train}
           disabled={training}
-          className="mt-4 rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
+          className="mt-4 min-h-[44px] rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
         >
           {training ? "Training…" : "Run training"}
         </button>
@@ -370,7 +370,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           type="button"
           onClick={trainFromText}
           disabled={trainingFromText || training || pastedText.trim().length < 24 || pastedText.length > PASTE_TEXT_MAX}
-          className="mt-4 rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
+          className="mt-4 min-h-[44px] rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
         >
           {trainingFromText ? "Training..." : "Train from pasted text"}
         </button>

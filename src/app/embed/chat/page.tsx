@@ -18,6 +18,15 @@ function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<Respons
   );
 }
 
+function generateSessionId() {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return "s_" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  return "s_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
 function EmbedChatInner() {
   const sp = useSearchParams();
   const botId = (sp.get("botId") || "").trim();
@@ -30,10 +39,15 @@ function EmbedChatInner() {
   const [assistantReplies, setAssistantReplies] = useState(0);
   const [leadDone, setLeadDone] = useState(false);
   const [leadEmail, setLeadEmail] = useState("");
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
   const [leadNote, setLeadNote] = useState<{ text: string; ok: boolean } | null>(null);
   const [leadSubmitting, setLeadSubmitting] = useState(false);
   const [origin, setOrigin] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
+  const [sessionId] = useState(generateSessionId);
+
+  const pageUrl = typeof window !== "undefined" ? (window.parent !== window ? document.referrer : window.location.href) : "";
 
   const msgsRef = useRef<HTMLDivElement>(null);
 
@@ -87,7 +101,14 @@ function EmbedChatInner() {
     fetchWithNetworkRetry(leadUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ botId, email: em }),
+      body: JSON.stringify({
+        botId,
+        email: em,
+        name: leadName.trim() || undefined,
+        phone: leadPhone.trim() || undefined,
+        sessionId,
+        pageUrl: pageUrl || undefined,
+      }),
     })
       .then((r) => r.json())
       .then((j: { ok?: boolean; error?: string }) => {
@@ -100,7 +121,7 @@ function EmbedChatInner() {
       })
       .catch(() => setLeadNote({ text: "Something went wrong.", ok: false }))
       .finally(() => setLeadSubmitting(false));
-  }, [botId, leadEmail, leadUrl]);
+  }, [botId, leadEmail, leadName, leadPhone, leadUrl, sessionId, pageUrl]);
 
   const sendMessage = useCallback(
     (textOverride?: string) => {
@@ -115,7 +136,7 @@ function EmbedChatInner() {
       fetchWithNetworkRetry(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ botId, message: text }),
+        body: JSON.stringify({ botId, message: text, sessionId, pageUrl: pageUrl || undefined }),
       })
         .then((res) => {
           const ct = res.headers.get("content-type") || "";
@@ -175,7 +196,7 @@ function EmbedChatInner() {
           });
         });
     },
-    [botId, chatUrl, input]
+    [botId, chatUrl, input, sessionId, pageUrl]
   );
 
   if (!botId) {
@@ -292,15 +313,31 @@ function EmbedChatInner() {
 
               {showLeadBox && (
                 <div className="mt-2.5 rounded-[14px] border border-dashed border-stone-300 bg-white p-3">
-                  <p className="mb-2 text-xs leading-snug text-stone-500">Want someone to follow up by email?</p>
-                  <div className="flex items-center gap-2">
+                  <p className="mb-2 text-xs leading-snug text-stone-500">Leave your details so we can follow up:</p>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
+                      placeholder="Your name"
+                      autoComplete="name"
+                      value={leadName}
+                      onChange={(e) => setLeadName(e.target.value)}
+                    />
                     <input
                       type="email"
-                      className="min-w-0 flex-1 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
+                      className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
                       placeholder="you@company.com"
                       autoComplete="email"
                       value={leadEmail}
                       onChange={(e) => setLeadEmail(e.target.value)}
+                    />
+                    <input
+                      type="tel"
+                      className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
+                      placeholder="Phone (optional)"
+                      autoComplete="tel"
+                      value={leadPhone}
+                      onChange={(e) => setLeadPhone(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -310,8 +347,8 @@ function EmbedChatInner() {
                     />
                     <button
                       type="button"
-                      disabled={leadSubmitting}
-                      className="shrink-0 cursor-pointer rounded-[10px] border-0 bg-red-500 px-3.5 py-2 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50"
+                      disabled={leadSubmitting || !leadEmail.trim()}
+                      className="cursor-pointer rounded-[10px] border-0 bg-red-500 px-3.5 py-2.5 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50"
                       onClick={submitLead}
                     >
                       Send

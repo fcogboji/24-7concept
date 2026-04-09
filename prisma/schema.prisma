@@ -85,11 +85,17 @@ model Lead {
   id        String   @id @default(cuid())
   botId     String
   email     String
+  name      String?
+  phone     String?
+  sessionId String?
+  pageUrl   String?
+  status    String   @default("new")
   source    String   @default("widget")
   createdAt DateTime @default(now())
   bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
 
   @@index([botId, createdAt])
+  @@index([sessionId])
 }
 
 model Source {
@@ -108,8 +114,11 @@ model Message {
   botId     String
   role      String
   content   String   @db.Text
+  sessionId String?
+  pageUrl   String?
   createdAt DateTime @default(now())
   bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
 
   @@index([botId, createdAt])
+  @@index([sessionId])
 }
