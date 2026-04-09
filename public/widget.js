@@ -85,18 +85,30 @@
      * Keep only capabilities needed for Next.js app + form interactions inside widget.
      */
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
+    iframe.setAttribute("allowtransparency", "true");
     iframe.allow = "clipboard-read; clipboard-write";
 
-    /** Must use the host page viewport — iframe innerWidth/innerHeight are ~160×56 and must never size the iframe. */
+    /**
+     * Must use the host page viewport — iframe innerWidth/innerHeight are ~160×56
+     * and must never size the iframe.
+     *
+     * Uses CSS viewport units (min()) so the browser handles orientation changes
+     * natively and the iframe does NOT shrink when the mobile virtual keyboard opens
+     * (CSS viewport units exclude the keyboard, unlike window.innerHeight on Android).
+     * JS px values are set first as a fallback for very old browsers.
+     */
     var panelOpen = false;
     function applyIframeSize() {
-      var vw = window.innerWidth;
-      var vh = window.innerHeight;
       if (panelOpen) {
-        var w = Math.min(380, Math.floor(vw * 0.96));
-        var h = Math.min(620, Math.floor(vh * 0.88));
-        iframe.style.width = w + "px";
-        iframe.style.height = h + "px";
+        /* JS fallback (old browsers that lack min()) */
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        iframe.style.width = Math.min(380, Math.floor(vw * 0.96)) + "px";
+        iframe.style.height = Math.min(620, Math.floor(vh * 0.88)) + "px";
+        /* CSS viewport-unit override — survives keyboard open on mobile */
+        iframe.style.width = "min(380px, 96vw)";
+        iframe.style.height = "min(620px, 88vh)";
+        iframe.style.height = "min(620px, 88dvh)";
       } else {
         iframe.style.width = "160px";
         iframe.style.height = "72px";
@@ -129,7 +141,7 @@
     wrapper.style.cssText =
       "position:fixed;bottom:0;right:0;left:auto;top:auto;z-index:2147483647;margin:0;padding:0;border:0;background:transparent;pointer-events:none;line-height:0;";
     iframe.style.cssText =
-      "border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:72px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);display:block;";
+      "border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:72px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);display:block;color-scheme:normal;";
     iframe.style.bottom = "max(16px, env(safe-area-inset-bottom, 0px))";
     iframe.style.right = "max(16px, env(safe-area-inset-right, 0px))";
     iframe.style.left = "auto";

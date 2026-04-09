@@ -234,7 +234,7 @@ function EmbedChatInner() {
 
       {open && (
         <div className="flex h-full min-h-0 flex-col">
-          <div className="mx-2 mb-2 flex min-h-0 max-h-[min(520px,calc(100%-72px))] flex-1 flex-col overflow-hidden rounded-[18px] border border-stone-200 bg-white shadow-[0_24px_60px_rgba(0,0,0,0.15)]">
+          <div className="mx-2 mb-2 flex min-h-0 max-h-[min(520px,calc(100dvh-72px))] flex-1 flex-col overflow-hidden rounded-[18px] border border-stone-200 bg-white shadow-[0_24px_60px_rgba(0,0,0,0.15)]">
             {/* Header */}
             <div className="flex items-center justify-between gap-2 rounded-t-[18px] bg-stone-800 px-4 py-3.5 text-white">
               <div className="flex min-w-0 items-center gap-2.5">
@@ -331,10 +331,11 @@ function EmbedChatInner() {
             <div className="border-t border-stone-200 bg-white px-3 py-3 pb-[max(12px,env(safe-area-inset-bottom,0px))]">
               <div className="flex items-center gap-2">
                 <input
-                  className="min-w-0 flex-1 rounded-xl border border-red-200 px-3.5 py-2.5 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
+                  className="min-w-0 flex-1 rounded-xl border border-red-200 px-3.5 py-2.5 text-base text-stone-900 outline-none placeholder:text-stone-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
                   type="text"
                   placeholder="Ask anything..."
                   autoComplete="off"
+                  enterKeyHint="send"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
