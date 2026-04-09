@@ -16,7 +16,7 @@ export default function EmbedChatLayout({ children }: { children: React.ReactNod
   return (
     <>
       {/* Fix the height chain (body only has min-h-full) and make background transparent for the embed iframe */}
-      <style>{`body{height:100%!important;background:transparent!important;overflow:hidden!important;padding:0!important}`}</style>
+      <style>{`html,body{height:100%!important;background:transparent!important;overflow:hidden!important;padding:0!important;margin:0!important}`}</style>
       <div className="h-full min-h-0 bg-transparent">{children}</div>
     </>
   );
