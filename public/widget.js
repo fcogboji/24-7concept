@@ -86,12 +86,6 @@
      */
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
     iframe.allow = "clipboard-read; clipboard-write";
-    iframe.style.cssText =
-      "position:fixed;border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:72px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);";
-    iframe.style.bottom = "max(16px, env(safe-area-inset-bottom, 0px))";
-    iframe.style.right = "max(16px, env(safe-area-inset-right, 0px))";
-    iframe.style.left = "auto";
-    iframe.style.top = "auto";
 
     /** Must use the host page viewport — iframe innerWidth/innerHeight are ~160×56 and must never size the iframe. */
     var panelOpen = false;
@@ -119,16 +113,35 @@
     });
     window.addEventListener("resize", applyIframeSize);
 
+    /**
+     * Shadow DOM isolates the widget from host-site CSS that may hide it on mobile
+     * (e.g. `[id*="chat"] { display:none }` or mobile media queries).
+     */
     var host = document.createElement("div");
     host.id = "hb-247concept-host-" + botId.replace(/[^a-zA-Z0-9_-]/g, "_");
     host.setAttribute("data-247concept-embed", "1");
     host.setAttribute("data-bot-id", botId);
     host.style.cssText =
-      "position:fixed;inset:auto 0 0 auto;z-index:2147483647;margin:0;padding:0;border:0;background:transparent;pointer-events:none;line-height:0;";
-    host.appendChild(iframe);
+      "position:fixed !important;bottom:0 !important;right:0 !important;left:auto !important;top:auto !important;z-index:2147483647 !important;margin:0 !important;padding:0 !important;border:0 !important;background:transparent !important;pointer-events:none !important;line-height:0 !important;display:block !important;visibility:visible !important;opacity:1 !important;width:auto !important;height:auto !important;overflow:visible !important;";
 
+    var shadow = host.attachShadow({ mode: "open" });
+    var wrapper = document.createElement("div");
+    wrapper.style.cssText =
+      "position:fixed;bottom:0;right:0;left:auto;top:auto;z-index:2147483647;margin:0;padding:0;border:0;background:transparent;pointer-events:none;line-height:0;";
+    iframe.style.cssText =
+      "border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:72px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);display:block;";
+    iframe.style.bottom = "max(16px, env(safe-area-inset-bottom, 0px))";
+    iframe.style.right = "max(16px, env(safe-area-inset-right, 0px))";
+    iframe.style.left = "auto";
+    iframe.style.top = "auto";
+    iframe.style.position = "fixed";
+    wrapper.appendChild(iframe);
+    shadow.appendChild(wrapper);
+
+    /* Append to body so fixed positioning works reliably on mobile */
+    var target = document.body || mount;
     try {
-      mount.appendChild(host);
+      target.appendChild(host);
     } catch (err) {
       if (document.body) document.body.appendChild(host);
     }
