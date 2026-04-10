@@ -60,6 +60,16 @@ function NavIcon({ name }: { name: string }) {
           />
         </svg>
       );
+    case "calendar":
+      return (
+        <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+          />
+        </svg>
+      );
     case "code":
       return (
         <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -121,12 +131,14 @@ export function DashboardSidebar({
     { href: "/dashboard", label: "Dashboard", icon: "dashboard", exact: true },
     { href: "/dashboard/conversations", label: "Conversations", icon: "chat" },
     { href: "/dashboard/leads", label: "Leads", icon: "leads" },
+    { href: "/dashboard/appointments", label: "Appointments", icon: "calendar" },
   ];
 
   const configNav: NavItem[] = configBase
     ? [
         { href: `${configBase}/appearance`, label: "Widget", icon: "appearance" },
         { href: `${configBase}/knowledge`, label: "Knowledge Base", icon: "book" },
+        { href: `${configBase}/booking`, label: "Booking", icon: "calendar" },
       ]
     : [];
 

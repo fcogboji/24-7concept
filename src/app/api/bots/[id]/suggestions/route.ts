@@ -41,11 +41,23 @@ export async function GET(req: NextRequest, context: RouteContext) {
   const { id } = await context.params;
   const bot = await prisma.bot.findUnique({
     where: { id },
-    select: { businessInfo: true },
+    select: { businessInfo: true, bookingConfig: { select: { enabled: true } } },
   });
 
+  const suggestions = buildSuggestions(bot?.businessInfo);
+
+  // Prepend booking chip if booking is enabled
+  if (bot?.bookingConfig?.enabled) {
+    const bookingSuggestion = "Book an appointment";
+    if (!suggestions.includes(bookingSuggestion)) {
+      suggestions.unshift(bookingSuggestion);
+      // Keep max 3 suggestions
+      if (suggestions.length > 3) suggestions.length = 3;
+    }
+  }
+
   return NextResponse.json(
-    { suggestions: buildSuggestions(bot?.businessInfo) },
+    { suggestions },
     { headers: cors }
   );
 }

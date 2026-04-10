@@ -48,6 +48,7 @@ function EmbedChatInner() {
   const [sessionId] = useState(generateSessionId);
 
   const pageUrl = typeof window !== "undefined" ? (window.parent !== window ? document.referrer : window.location.href) : "";
+  const visitorTimezone = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "UTC";
 
   const msgsRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +137,7 @@ function EmbedChatInner() {
       fetchWithNetworkRetry(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ botId, message: text, sessionId, pageUrl: pageUrl || undefined }),
+        body: JSON.stringify({ botId, message: text, sessionId, pageUrl: pageUrl || undefined, visitorTimezone }),
       })
         .then((res) => {
           const ct = res.headers.get("content-type") || "";

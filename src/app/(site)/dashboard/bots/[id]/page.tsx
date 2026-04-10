@@ -39,6 +39,7 @@ export default async function BotDetailPage({
   const tabs = [
     { href: `/dashboard/bots/${bot.id}/appearance`, label: "Widget" },
     { href: `/dashboard/bots/${bot.id}/knowledge`, label: "Knowledge base" },
+    { href: `/dashboard/bots/${bot.id}/booking`, label: "Booking" },
   ];
 
   return (

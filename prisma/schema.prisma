@@ -77,6 +77,8 @@ model Bot {
   sources           Source[]
   messages          Message[]
   leads             Lead[]
+  bookingConfig     BookingConfig?
+  appointments      Appointment[]
 
   @@index([userId])
 }
@@ -121,4 +123,82 @@ model Message {
 
   @@index([botId, createdAt])
   @@index([sessionId])
+}
+
+model BookingConfig {
+  id              String        @id @default(cuid())
+  botId           String        @unique
+  enabled         Boolean       @default(false)
+  timezone        String        @default("America/New_York")
+  slotDurationMin Int           @default(30)
+  bufferMin       Int           @default(0)
+  maxAdvanceDays  Int           @default(30)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  bot             Bot           @relation(fields: [botId], references: [id], onDelete: Cascade)
+  weeklyHours     WeeklyHours[]
+  services        Service[]
+  blockedDates    BlockedDate[]
+}
+
+model WeeklyHours {
+  id              String        @id @default(cuid())
+  bookingConfigId String
+  dayOfWeek       Int
+  startTime       String
+  endTime         String
+  bookingConfig   BookingConfig @relation(fields: [bookingConfigId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingConfigId, dayOfWeek, startTime])
+  @@index([bookingConfigId])
+}
+
+model Service {
+  id              String        @id @default(cuid())
+  bookingConfigId String
+  name            String
+  durationMin     Int
+  description     String?       @db.Text
+  price           String?
+  active          Boolean       @default(true)
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  bookingConfig   BookingConfig @relation(fields: [bookingConfigId], references: [id], onDelete: Cascade)
+  appointments    Appointment[]
+
+  @@index([bookingConfigId])
+}
+
+model BlockedDate {
+  id              String        @id @default(cuid())
+  bookingConfigId String
+  date            DateTime      @db.Date
+  reason          String?
+  bookingConfig   BookingConfig @relation(fields: [bookingConfigId], references: [id], onDelete: Cascade)
+
+  @@index([bookingConfigId])
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  botId     String
+  serviceId String?
+  sessionId String?
+  name      String
+  email     String
+  phone     String?
+  startTime DateTime
+  endTime   DateTime
+  timezone  String   @default("UTC")
+  status    String   @default("confirmed")
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([botId, startTime])
+  @@index([botId, status])
+  @@index([sessionId])
+  @@index([email])
 }
