@@ -110,8 +110,8 @@
         iframe.style.height = "min(620px, 88vh)";
         iframe.style.height = "min(620px, 88dvh)";
       } else {
-        iframe.style.width = "160px";
-        iframe.style.height = "72px";
+        iframe.style.width = "220px";
+        iframe.style.height = "160px";
       }
     }
 
@@ -141,7 +141,7 @@
     wrapper.style.cssText =
       "position:fixed;bottom:0;right:0;left:auto;top:auto;z-index:2147483647;margin:0;padding:0;border:0;background:transparent;pointer-events:none;line-height:0;";
     iframe.style.cssText =
-      "border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:160px;height:72px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);display:block;color-scheme:normal;overflow:hidden;";
+      "border:0;border-radius:18px;box-shadow:none;z-index:2147483647;background:transparent;pointer-events:auto;width:220px;height:160px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);display:block;color-scheme:normal;overflow:hidden;";
     iframe.style.bottom = "max(16px, env(safe-area-inset-bottom, 0px))";
     iframe.style.right = "max(16px, env(safe-area-inset-right, 0px))";
     iframe.style.left = "auto";

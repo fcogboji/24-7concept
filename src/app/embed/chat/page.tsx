@@ -232,22 +232,31 @@ function EmbedChatInner() {
               );
             }}
           >
-            <div className="relative rounded-[18px] bg-[#0f766e] px-5 pb-3 pt-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)] backdrop-blur">
-              <span className="block text-center text-[15px] font-bold leading-tight text-white">Live Chat</span>
-              <div className="mt-1.5 flex items-center justify-center gap-1.5">
-                <span className="block h-2.5 w-2.5 rounded-full bg-white/50 animate-[chatDot_1.4s_ease-in-out_infinite]" />
-                <span className="block h-2.5 w-2.5 rounded-full bg-white/50 animate-[chatDot_1.4s_ease-in-out_0.2s_infinite]" />
-                <span className="block h-2.5 w-2.5 rounded-full bg-white/50 animate-[chatDot_1.4s_ease-in-out_0.4s_infinite]" />
-              </div>
-              <style>{`
-                @keyframes chatDot {
-                  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-                  40% { transform: scale(1.2); opacity: 1; }
-                }
-              `}</style>
+            {/* Speech bubble */}
+            <div className="relative mb-2 rounded-[18px] bg-white px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.12)]">
+              <span className="block text-center text-[15px] font-semibold text-stone-800 whitespace-nowrap">Hi, how can I help?</span>
               {/* Speech bubble tail */}
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                <div className="h-0 w-0 border-x-8 border-t-8 border-x-transparent border-t-[#0f766e]" />
+              <div className="absolute -bottom-2 right-6">
+                <div className="h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
+              </div>
+            </div>
+            {/* Red circle chat icon with notification badge */}
+            <div className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full bg-red-600 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+              {/* Two overlapping chat bubbles icon */}
+              <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+                {/* Back bubble */}
+                <rect x="4" y="4" width="17" height="14" rx="3" stroke="white" strokeWidth="2" fill="none" />
+                <line x1="8" y1="9" x2="17" y2="9" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="8" y1="13" x2="14" y2="13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                {/* Front bubble */}
+                <rect x="12" y="12" width="17" height="14" rx="3" stroke="white" strokeWidth="2" fill="none" />
+                <line x1="16" y1="17" x2="25" y2="17" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="16" y1="21" x2="22" y2="21" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              {/* Animated dot */}
+              <div className="absolute -top-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white shadow-sm">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex h-[10px] w-[10px] rounded-full bg-red-400"></span>
               </div>
             </div>
           </button>

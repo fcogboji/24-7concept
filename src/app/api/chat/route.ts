@@ -156,6 +156,25 @@ Always confirm the date, time, service, name, and email with the visitor BEFORE 
       data: { botId, role: "user", content: message, sessionId: sessionId || null, pageUrl: pageUrl || null },
     });
 
+    // Load conversation history for this session so the AI remembers prior messages
+    const historyMessages: ChatCompletionMessageParam[] = [];
+    if (sessionId) {
+      const prior = await prisma.message.findMany({
+        where: { botId, sessionId },
+        orderBy: { createdAt: "asc" },
+        take: 50, // limit to last 50 messages to stay within token budget
+      });
+      // Exclude the message we just saved (last user message) — we add it explicitly below
+      const priorWithoutCurrent = prior.slice(0, -1);
+      for (const m of priorWithoutCurrent) {
+        if (m.role === "user") {
+          historyMessages.push({ role: "user", content: m.content });
+        } else if (m.role === "assistant") {
+          historyMessages.push({ role: "assistant", content: m.content });
+        }
+      }
+    }
+
     const openai = getOpenAI();
     const toolCtx = { botId, sessionId };
 
@@ -163,6 +182,7 @@ Always confirm the date, time, service, name, and email with the visitor BEFORE 
     if (bookingEnabled) {
       const messages: ChatCompletionMessageParam[] = [
         { role: "system", content: systemPrompt },
+        ...historyMessages,
         { role: "user", content: message },
       ];
 
@@ -227,6 +247,7 @@ Always confirm the date, time, service, name, and email with the visitor BEFORE 
       stream: true,
       messages: [
         { role: "system", content: systemPrompt },
+        ...historyMessages,
         { role: "user", content: message },
       ],
     });
