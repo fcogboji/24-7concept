@@ -218,7 +218,7 @@ function EmbedChatInner() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-transparent font-sans text-stone-900">
       {!open && (
-        <div className="flex h-full w-full min-h-[56px] items-end justify-end p-2">
+        <div className="fixed bottom-2 right-0 z-50 flex items-end justify-end">
           <button
             type="button"
             className="flex cursor-pointer flex-col items-center border-0 bg-transparent p-0 transition hover:-translate-y-px"
@@ -408,7 +408,7 @@ function EmbedChatInner() {
           </div>
 
           {/* Close button */}
-          <div className="flex shrink-0 justify-end px-2 pb-2">
+          <div className="flex shrink-0 justify-end px-0 pb-2 sm:px-2">
             <button
               type="button"
               className="flex h-[52px] w-[52px] items-center justify-center cursor-pointer rounded-full border-0 bg-[#0f766e] text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-[#0d6b63] transition-colors"
