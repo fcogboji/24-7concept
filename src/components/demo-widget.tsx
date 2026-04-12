@@ -15,7 +15,7 @@ export function DemoWidget({ scriptSrc }: { scriptSrc: string }) {
     s.async = true;
     s.setAttribute("data-nestbot-widget", "1");
     s.dataset.botId = botId;
-    s.setAttribute("data-brand", "24/7concept");
+    s.setAttribute("data-brand", "nestbot");
     document.body.appendChild(s);
 
     return () => {

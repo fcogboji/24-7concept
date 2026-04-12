@@ -59,7 +59,7 @@ export function AdminSidebar() {
         <Link
           href="/admin"
           className="flex shrink-0 items-center gap-2 font-semibold tracking-tight text-white"
-          aria-label="24/7concept admin home"
+          aria-label="nestbot admin home"
           onClick={closeDrawer}
         >
           <span className="rounded-md bg-white/95 p-1 ring-1 ring-white/10">

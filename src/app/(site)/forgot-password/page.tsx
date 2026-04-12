@@ -4,7 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 export const metadata: Metadata = {
-  title: "Forgot password — 24/7concept",
+  title: "Forgot password — nestbot",
   robots: { index: false, follow: false },
 };
 

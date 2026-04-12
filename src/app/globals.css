@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html.cookie-banner-open [data-nestbot-embed] {
+  display: none !important;
+}
+
 :root {
   --background: #fafaf9;
   --foreground: #1c1917;

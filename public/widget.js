@@ -1,5 +1,5 @@
 /**
- * 24/7concept embed — runs on customer sites with their permission (script tag).
+ * nestbot embed — runs on customer sites with their permission (script tag).
  * Loads the chat UI in an iframe (same-origin to your app) so clicks never navigate the host page.
  * Idempotent per botId: safe if the script runs twice (SPA navigations).
  */

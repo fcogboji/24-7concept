@@ -4,8 +4,8 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — 24/7concept",
-  description: "How 24/7concept collects, uses, and protects personal data.",
+  title: "Privacy Policy — nestbot",
+  description: "How nestbot collects, uses, and protects personal data.",
 };
 
 export default function PrivacyPage() {
@@ -30,8 +30,8 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">1. Who we are</h2>
             <p className="mt-2">
-              24/7concept (“we”, “us”) provides an AI assistant product for websites. This policy explains how we process
-              personal data when you use our website, dashboard, or customer-facing chat widget. If you use 24/7concept on
+              nestbot (“we”, “us”) provides an AI assistant product for websites. This policy explains how we process
+              personal data when you use our website, dashboard, or customer-facing chat widget. If you use nestbot on
               someone else’s site, that site’s operator is also responsible for how they use the service.
             </p>
           </section>
@@ -133,7 +133,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">11. Contact</h2>
             <p className="mt-2">
-              24/7concept — privacy inquiries:{" "}
+              nestbot — privacy inquiries:{" "}
               <a href="mailto:privacy@nestbot.app" className="font-medium text-teal-800 underline">
                 privacy@nestbot.app
               </a>

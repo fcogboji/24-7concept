@@ -23,7 +23,7 @@ export function BrandLogo({ variant = "header", className = "", priority }: Bran
   return (
     <Image
       src="/logo.png"
-      alt="24/7concept"
+      alt="nestbot"
       width={INTRINSIC_W}
       height={INTRINSIC_H}
       priority={priority}

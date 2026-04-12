@@ -29,6 +29,13 @@ export function CookieConsent() {
     }
   }, [pathname]);
 
+  useEffect(() => {
+    const cls = "cookie-banner-open";
+    if (visible) document.documentElement.classList.add(cls);
+    else document.documentElement.classList.remove(cls);
+    return () => document.documentElement.classList.remove(cls);
+  }, [visible]);
+
   function save(choice: ConsentValue) {
     try {
       localStorage.setItem(STORAGE_KEY, choice);

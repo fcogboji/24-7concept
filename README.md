@@ -1,4 +1,4 @@
-# 24/7concept
+# nestbot
 
 Next.js app: train an AI assistant on site content, dashboard, Stripe billing, embeddable `widget.js` for visitor chat.
 

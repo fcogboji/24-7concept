@@ -4,7 +4,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 export const metadata: Metadata = {
-  title: "Verify email — 24/7concept",
+  title: "Verify email — nestbot",
   robots: { index: false, follow: false },
 };
 

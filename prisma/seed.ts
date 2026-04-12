@@ -5,7 +5,7 @@ import { prisma } from "../src/lib/prisma";
 const DEMO_BOT_ID = "demo_site_assistant";
 
 const DEMO_COPY = `
-24/7concept is a lightweight assistant for small businesses. It answers common questions on your website so you spend less time repeating the same information.
+nestbot is a lightweight assistant for small businesses. It answers common questions on your website so you spend less time repeating the same information.
 
 What it does: visitors open chat, ask about hours, services, shipping, or policies, and get short, accurate replies based on the text we learn from your site.
 
@@ -41,7 +41,7 @@ async function main() {
     data: {
       id: DEMO_BOT_ID,
       userId: user.id,
-      name: "24/7concept — homepage demo",
+      name: "nestbot — homepage demo",
       websiteUrl: "https://relay.app",
       isDemo: true,
     },
