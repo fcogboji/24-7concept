@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-const SIZE_MSG = "247concept-size";
+const SIZE_MSG = "nestbot-size";
 
 const DEFAULT_SUGGESTIONS = ["What do you do?", "How can I contact you?", "What are your hours?"];
 
@@ -45,6 +45,7 @@ function EmbedChatInner() {
   const [leadSubmitting, setLeadSubmitting] = useState(false);
   const [origin, setOrigin] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [sessionId] = useState(generateSessionId);
 
   const pageUrl = typeof window !== "undefined" ? (window.parent !== window ? document.referrer : window.location.href) : "";
@@ -64,9 +65,12 @@ function EmbedChatInner() {
       cache: "no-store",
     })
       .then((r) => r.json())
-      .then((j: { suggestions?: string[] }) => {
+      .then((j: { suggestions?: string[]; avatarUrl?: string | null }) => {
         if (Array.isArray(j.suggestions) && j.suggestions.length > 0) {
           setSuggestions(j.suggestions.slice(0, 3));
+        }
+        if (j.avatarUrl && /^https?:\/\//i.test(j.avatarUrl)) {
+          setAvatarUrl(j.avatarUrl);
         }
       })
       .catch(() => {});
@@ -221,7 +225,7 @@ function EmbedChatInner() {
         <div className="fixed bottom-2 right-0 z-50 flex items-end justify-end">
           <button
             type="button"
-            className="flex cursor-pointer flex-col items-center border-0 bg-transparent p-0 transition hover:-translate-y-px"
+            className="flex cursor-pointer flex-col items-end border-0 bg-transparent p-0 pr-2 transition hover:-translate-y-px"
             aria-label="Open chat"
             onClick={() => {
               setOpen(true);
@@ -242,16 +246,15 @@ function EmbedChatInner() {
             </div>
             {/* Red circle chat icon with notification badge */}
             <div className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full bg-red-600 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-              {/* Two overlapping chat bubbles icon */}
-              <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
-                {/* Back bubble */}
-                <rect x="4" y="4" width="17" height="14" rx="3" stroke="white" strokeWidth="2" fill="none" />
-                <line x1="8" y1="9" x2="17" y2="9" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="8" y1="13" x2="14" y2="13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                {/* Front bubble */}
-                <rect x="12" y="12" width="17" height="14" rx="3" stroke="white" strokeWidth="2" fill="none" />
-                <line x1="16" y1="17" x2="25" y2="17" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="16" y1="21" x2="22" y2="21" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+              {/* Speech bubble with three dots */}
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path
+                  d="M6 6h20a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-8l-6 5v-5H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
+                  fill="white"
+                />
+                <circle cx="11" cy="14" r="1.8" fill="#dc2626" />
+                <circle cx="16" cy="14" r="1.8" fill="#dc2626" />
+                <circle cx="21" cy="14" r="1.8" fill="#dc2626" />
               </svg>
               {/* Animated dot */}
               <div className="absolute -top-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white shadow-sm">
@@ -269,9 +272,19 @@ function EmbedChatInner() {
             {/* Header */}
             <div className="flex items-center justify-between gap-2 rounded-t-[18px] bg-stone-800 px-4 py-3.5 text-white">
               <div className="flex min-w-0 items-center gap-2.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white">
-                  {brandInitial}
-                </div>
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="h-9 w-9 shrink-0 rounded-full object-cover"
+                    onError={() => setAvatarUrl(null)}
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white">
+                    {brandInitial}
+                  </div>
+                )}
                 <div className="min-w-0">
                   <div className="truncate text-[15px] font-bold">{brand}</div>
                   <div className="flex items-center gap-1 text-[11px] text-stone-300">
@@ -402,7 +415,7 @@ function EmbedChatInner() {
                 </button>
               </div>
               <div className="mt-2 text-center text-[11px] text-stone-400">
-                Powered by <span className="font-medium text-stone-500">247concept</span> <span className="text-red-400">&#10022;</span>
+                Powered by <span className="font-medium text-stone-500">nestbot</span> <span className="text-red-400">&#10022;</span>
               </div>
             </div>
           </div>

@@ -24,7 +24,7 @@ export async function sendBookingNotificationToOwner(params: {
             ${params.serviceName ? `<tr><td style="padding:6px 0;color:#888">Service</td><td style="padding:6px 0">${esc(params.serviceName)}</td></tr>` : ""}
             <tr><td style="padding:6px 0;color:#888">Date & Time</td><td style="padding:6px 0"><strong>${esc(params.dateTime)}</strong></td></tr>
           </table>
-          <p style="margin:16px 0 0;font-size:13px;color:#999">You can manage appointments from your 247concept dashboard.</p>
+          <p style="margin:16px 0 0;font-size:13px;color:#999">You can manage appointments from your nestbot dashboard.</p>
         </div>
       `,
     });
@@ -53,7 +53,7 @@ export async function sendBookingConfirmationToVisitor(params: {
             <tr><td style="padding:6px 0;color:#888">Date & Time</td><td style="padding:6px 0"><strong>${esc(params.dateTime)}</strong></td></tr>
           </table>
           <p style="margin:16px 0 0;font-size:13px;color:#444">If you need to change or cancel, please contact the business directly.</p>
-          <p style="margin:12px 0 0;font-size:12px;color:#999">Powered by 247concept</p>
+          <p style="margin:12px 0 0;font-size:12px;color:#999">Powered by nestbot</p>
         </div>
       `,
     });

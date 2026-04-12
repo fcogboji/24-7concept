@@ -22,7 +22,7 @@ export async function embedWidgetScriptGET(): Promise<NextResponse> {
     const bypass = getVercelProtectionBypassSecret();
     const prelude =
       bypass && bypass.length > 0
-        ? `try{window.__247CONCEPT_BYPASS=${JSON.stringify(bypass)};}catch(e){}\n`
+        ? `try{window.__NESTBOT_BYPASS=${JSON.stringify(bypass)};}catch(e){}\n`
         : "";
     const body = prelude + file;
     return new NextResponse(body, { status: 200, headers: HEADERS });

@@ -134,8 +134,8 @@ export default function PrivacyPage() {
             <h2 className="text-base font-semibold text-stone-900">11. Contact</h2>
             <p className="mt-2">
               24/7concept — privacy inquiries:{" "}
-              <a href="mailto:privacy@247concept.app" className="font-medium text-teal-800 underline">
-                privacy@247concept.app
+              <a href="mailto:privacy@nestbot.app" className="font-medium text-teal-800 underline">
+                privacy@nestbot.app
               </a>
               . Replace this address with your company contact before production.
             </p>

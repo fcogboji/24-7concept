@@ -68,6 +68,7 @@ model Bot {
   userId            String
   name              String
   websiteUrl        String?
+  avatarUrl         String?
   businessInfo      String?   @db.Text
   isDemo            Boolean   @default(false)
   trainingStartedAt DateTime?

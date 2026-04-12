@@ -8,6 +8,7 @@ import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/ur
 const patchSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   websiteUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+  avatarUrl: z.union([z.string().url().max(2048), z.literal(""), z.null()]).optional(),
   businessInfo: z.union([z.string().max(12000), z.literal(""), z.null()]).optional(),
 });
 
@@ -33,8 +34,12 @@ export async function PATCH(req: Request, context: RouteContext) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const data: { name?: string; websiteUrl?: string | null; businessInfo?: string | null } = {};
+  const data: { name?: string; websiteUrl?: string | null; avatarUrl?: string | null; businessInfo?: string | null } = {};
   if (parsed.data.name !== undefined) data.name = parsed.data.name;
+  if (parsed.data.avatarUrl !== undefined) {
+    const v = parsed.data.avatarUrl;
+    data.avatarUrl = v === "" || v === null ? null : v;
+  }
   if (parsed.data.websiteUrl !== undefined) {
     data.websiteUrl =
       parsed.data.websiteUrl === "" || parsed.data.websiteUrl === null

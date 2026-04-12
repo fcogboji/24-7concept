@@ -31,7 +31,7 @@ function getChatRatelimit(): Ratelimit | null {
     chatRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(30, "60 s"),
-      prefix: "247concept:rl:chat",
+      prefix: "nestbot:rl:chat",
     });
   }
   return chatRatelimit;
@@ -46,7 +46,7 @@ function getAuth15mRatelimit(): Ratelimit | null {
     auth15mRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(5, "15 m"),
-      prefix: "247concept:rl:auth15",
+      prefix: "nestbot:rl:auth15",
     });
   }
   return auth15mRatelimit;
@@ -61,7 +61,7 @@ function getAuth1hRatelimit(): Ratelimit | null {
     auth1hRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(3, "60 m"),
-      prefix: "247concept:rl:auth60",
+      prefix: "nestbot:rl:auth60",
     });
   }
   return auth1hRatelimit;
@@ -76,7 +76,7 @@ function getBillingStripeRatelimit(): Ratelimit | null {
     billingStripeRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(20, "1 h"),
-      prefix: "247concept:rl:stripe",
+      prefix: "nestbot:rl:stripe",
     });
   }
   return billingStripeRatelimit;
@@ -91,7 +91,7 @@ function getSessionProbeRatelimit(): Ratelimit | null {
     sessionProbeRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(120, "1 m"),
-      prefix: "247concept:rl:session",
+      prefix: "nestbot:rl:session",
     });
   }
   return sessionProbeRatelimit;
@@ -106,7 +106,7 @@ function getTrainRatelimit(): Ratelimit | null {
     trainRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(8, "1 h"),
-      prefix: "247concept:rl:train",
+      prefix: "nestbot:rl:train",
     });
   }
   return trainRatelimit;
@@ -121,7 +121,7 @@ function getBotCreateRatelimit(): Ratelimit | null {
     botCreateRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(25, "1 h"),
-      prefix: "247concept:rl:botcreate",
+      prefix: "nestbot:rl:botcreate",
     });
   }
   return botCreateRatelimit;

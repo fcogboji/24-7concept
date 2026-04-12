@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "247concept_cookie_consent_v1";
+const STORAGE_KEY = "nestbot_cookie_consent_v1";
 
 export type ConsentValue = "accepted" | "essential";
 

@@ -1,6 +1,6 @@
 /**
  * Vercel Deployment Protection blocks anonymous GETs unless the bypass token is present.
- * Server route `GET /embed/widget.js` injects `window.__247CONCEPT_BYPASS` from env so
+ * Server route `GET /embed/widget.js` injects `window.__NESTBOT_BYPASS` from env so
  * customers do not embed secrets in the script URL.
  *
  * @see https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection

@@ -7,6 +7,7 @@ type Bot = {
   id: string;
   name: string;
   websiteUrl: string | null;
+  avatarUrl: string | null;
   businessInfo: string | null;
   sources: number;
   messages: number;
@@ -18,6 +19,8 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
   const [statusTone, setStatusTone] = useState<"neutral" | "success" | "error">("neutral");
   const [training, setTraining] = useState(false);
   const [urlDraft, setUrlDraft] = useState(bot.websiteUrl ?? "");
+  const [avatarDraft, setAvatarDraft] = useState(bot.avatarUrl ?? "");
+  const [savingAvatar, setSavingAvatar] = useState(false);
   const [businessInfoDraft, setBusinessInfoDraft] = useState(bot.businessInfo ?? "");
   const [savingUrl, setSavingUrl] = useState(false);
   const [savingBusinessInfo, setSavingBusinessInfo] = useState(false);
@@ -51,6 +54,32 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
       router.refresh();
     } finally {
       setSavingUrl(false);
+    }
+  }
+
+  async function saveAvatar() {
+    setSavingAvatar(true);
+    setStatus(null);
+    setStatusTone("neutral");
+    try {
+      const res = await fetch(`/api/bots/${bot.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          avatarUrl: avatarDraft.trim() === "" ? null : avatarDraft.trim(),
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setStatus(data.error ?? "Could not save avatar URL");
+        setStatusTone("error");
+        return;
+      }
+      setStatus("Saved profile picture.");
+      setStatusTone("success");
+      router.refresh();
+    } finally {
+      setSavingAvatar(false);
     }
   }
 
@@ -242,6 +271,44 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
 
   return (
     <div className="space-y-6">
+      <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Profile picture</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Shown in the chat widget header. Paste a public image URL (square images look best).
+        </p>
+        <div className="mt-4 flex items-center gap-4">
+          {avatarDraft.trim() ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarDraft.trim()}
+              alt=""
+              className="h-12 w-12 shrink-0 rounded-full border border-gray-200 object-cover"
+            />
+          ) : (
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-dashed border-gray-300 text-xs text-gray-400">
+              None
+            </div>
+          )}
+          <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+            <input
+              type="url"
+              value={avatarDraft}
+              onChange={(e) => setAvatarDraft(e.target.value)}
+              placeholder="https://example.com/avatar.png"
+              className="min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-base text-gray-900 shadow-sm focus:border-[#0d9488] focus:outline-none focus:ring-2 focus:ring-[#0d9488]/25"
+            />
+            <button
+              type="button"
+              onClick={saveAvatar}
+              disabled={savingAvatar}
+              className="min-h-[44px] rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+            >
+              {savingAvatar ? "Saving…" : "Save picture"}
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Website source</h2>
         <p className="mt-2 text-sm text-gray-600">

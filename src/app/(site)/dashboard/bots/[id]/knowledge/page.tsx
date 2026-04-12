@@ -35,6 +35,7 @@ export default async function BotKnowledgePage({ params }: { params: Promise<{ i
           id: bot.id,
           name: bot.name,
           websiteUrl: bot.websiteUrl,
+          avatarUrl: bot.avatarUrl,
           businessInfo: bot.businessInfo,
           sources: bot._count.sources,
           messages: bot._count.messages,

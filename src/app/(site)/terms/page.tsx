@@ -137,8 +137,8 @@ export default function TermsPage() {
             <h2 className="text-base font-semibold text-stone-900">12. Contact</h2>
             <p className="mt-2">
               Legal notices:{" "}
-              <a href="mailto:legal@247concept.app" className="font-medium text-teal-800 underline">
-                legal@247concept.app
+              <a href="mailto:legal@nestbot.app" className="font-medium text-teal-800 underline">
+                legal@nestbot.app
               </a>
               . Replace with your legal entity before production.
             </p>

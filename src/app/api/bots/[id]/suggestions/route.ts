@@ -41,7 +41,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
   const { id } = await context.params;
   const bot = await prisma.bot.findUnique({
     where: { id },
-    select: { businessInfo: true, bookingConfig: { select: { enabled: true } } },
+    select: { businessInfo: true, avatarUrl: true, bookingConfig: { select: { enabled: true } } },
   });
 
   const suggestions = buildSuggestions(bot?.businessInfo);
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
   }
 
   return NextResponse.json(
-    { suggestions },
+    { suggestions, avatarUrl: bot?.avatarUrl ?? null },
     { headers: cors }
   );
 }

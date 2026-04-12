@@ -15,11 +15,11 @@ Plans: a free tier includes fifty assistant replies per calendar month for testi
 
 Privacy: messages are used to provide the service and improve your assistant; we do not sell visitor chats to advertisers.
 
-Contact: hello@247concept.app — we read every message and usually respond within one business day.
+Contact: hello@nestbot.app — we read every message and usually respond within one business day.
 `.trim();
 
 async function main() {
-  const email = "demo@247concept.app";
+  const email = "demo@nestbot.app";
   const openaiKey = process.env.OPENAI_API_KEY;
 
   await prisma.source.deleteMany({ where: { botId: DEMO_BOT_ID } });
