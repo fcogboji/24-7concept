@@ -4,6 +4,8 @@ import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { rateLimitChat } from "@/lib/rate-limit";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
+import { sendLeadNotificationToOwner } from "@/lib/booking-emails";
+import { fireWebhooks } from "@/lib/webhooks";
 
 const bodySchema = z.object({
   botId: z.string().min(1),
@@ -100,6 +102,29 @@ export async function POST(req: NextRequest) {
       resourceId: lead.id,
       meta: { botId, email: lead.email },
       ip,
+    });
+
+    const owner = await prisma.user.findUnique({ where: { id: bot.userId }, select: { email: true } });
+    if (owner?.email) {
+      void sendLeadNotificationToOwner({
+        ownerEmail: owner.email,
+        botName: bot.name,
+        leadEmail: lead.email,
+        leadName: lead.name,
+        leadPhone: lead.phone,
+        pageUrl: lead.pageUrl,
+      });
+    }
+
+    void fireWebhooks(bot.userId, "lead.created", {
+      leadId: lead.id,
+      botId,
+      botName: bot.name,
+      email: lead.email,
+      name: lead.name,
+      phone: lead.phone,
+      pageUrl: lead.pageUrl,
+      sessionId: lead.sessionId,
     });
 
     return NextResponse.json({ ok: true }, { headers: cors });

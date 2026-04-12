@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { DemoWidget } from "@/components/demo-widget";
+import { PricingSection } from "@/components/pricing-section";
+import { currencyForCountry } from "@/lib/pricing";
 import { getPublicAppUrl } from "@/lib/public-app-url";
 import { widgetDemoScriptUrl } from "@/lib/widget-embed-snippet";
 import { HeroRobotMarquee } from "@/components/hero-robot-marquee";
@@ -28,6 +31,13 @@ function CheckIcon() {
 export default async function HomePage() {
   const appUrl = await getPublicAppUrl();
   const demoWidgetScriptSrc = widgetDemoScriptUrl(appUrl);
+  const h = await headers();
+  const country =
+    h.get("x-vercel-ip-country") ??
+    h.get("cf-ipcountry") ??
+    h.get("x-country") ??
+    null;
+  const currency = currencyForCountry(country);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-50 text-gray-900">
@@ -41,14 +51,14 @@ export default async function HomePage() {
           <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-16 pt-12 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-16 lg:flex-row lg:items-center lg:gap-8 lg:pb-24 lg:pt-12 xl:gap-12">
             <div className="w-full max-lg:px-6 lg:max-w-none lg:w-[46%] lg:min-w-0 lg:px-0 lg:pr-4">
               <p className="mb-5 inline-flex items-center rounded-full border border-white/40 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                AI support for your website
+                AI assistant for every business
               </p>
               <h1 className="font-[family-name:var(--font-fraunces)] text-[2rem] font-semibold leading-[1.12] tracking-tight text-white sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem]">
-                Answers that feel like your team — without another tool to manage.
+                Book appointments, answer questions, capture leads — 24/7.
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white">
-                Train on your public pages, embed one script, and give visitors instant help. Built for teams who want
-                maturity without complexity.
+                A chatbot trained on your website and content. Qualifies visitors, books meetings straight into
+                your calendar, and pushes every lead into your CRM — while your team focuses on closing.
               </p>
               {/* Solid buttons (no blend) so teal / light styles stay predictable */}
               <div className="relative z-10 mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -68,7 +78,7 @@ export default async function HomePage() {
               <p
                 className={`mt-5 inline-block max-w-full rounded-lg px-4 py-2.5 text-sm leading-relaxed text-white shadow-md shadow-black/20 ${teal}`}
               >
-                Free tier · 50 assistant replies / month · upgrade when you need more
+                From £79/mo · bookings, leads & CRM sync · 14-day free trial
               </p>
             </div>
 
@@ -93,9 +103,9 @@ export default async function HomePage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">What you get</p>
                 <ul className="space-y-3">
                   {[
-                    "Grounded answers from your own content",
-                    "One embed snippet — works on any stack",
-                    "Dashboard for training, leads, and conversations",
+                    "Books appointments straight into your calendar",
+                    "Qualifies visitors (budget, timeline, needs) before you spend a minute",
+                    "Pushes every lead to HubSpot, Pipedrive, Salesforce or any CRM via Zapier",
                   ].map((t) => (
                     <li key={t} className="flex gap-3 text-sm leading-relaxed text-gray-700">
                       <CheckIcon />
@@ -234,78 +244,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Pricing */}
-        <section id="pricing" className="border-t border-gray-100 bg-gray-50 py-16 md:py-24">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="text-center">
-              <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-gray-900 sm:text-3xl md:text-4xl">
-                Simple pricing
-              </h2>
-              <p className="mx-auto mt-4 max-w-lg text-gray-600">
-                Start free. Move to Pro when your assistant is handling real traffic.
-              </p>
-            </div>
-            <div className="mt-12 grid gap-6 md:grid-cols-2 md:gap-8">
-              <div className="flex flex-col rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900">Free</h3>
-                <p className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight text-gray-900">£0</span>
-                  <span className="text-gray-500">/mo</span>
-                </p>
-                <ul className="mt-8 flex-1 space-y-3 text-sm text-gray-600">
-                  <li className="flex gap-2">
-                    <CheckIcon />
-                    50 assistant replies / month
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckIcon />
-                    Website training + embed
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckIcon />
-                    Email support
-                  </li>
-                </ul>
-                <Link
-                  href="/register"
-                  className="mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
-                >
-                  Start free
-                </Link>
-              </div>
-              <div className="relative flex flex-col overflow-hidden rounded-xl border border-[#0d9488]/30 bg-white p-8 shadow-[0_12px_40px_-20px_rgba(13,148,136,0.2)]">
-                <span className="absolute right-6 top-6 rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-[#0f7669]">
-                  Popular
-                </span>
-                <h3 className="text-lg font-semibold text-gray-900">Pro</h3>
-                <p className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-semibold tracking-tight text-gray-900">£29</span>
-                  <span className="text-gray-500">/mo</span>
-                </p>
-                <ul className="mt-8 flex-1 space-y-3 text-sm text-gray-700">
-                  <li className="flex gap-2">
-                    <CheckIcon />
-                    Unlimited replies
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckIcon />
-                    Priority infrastructure
-                  </li>
-                  <li className="flex gap-2">
-                    <CheckIcon />
-                    Help when you are stuck
-                  </li>
-                </ul>
-                <Link
-                  href="/register"
-                  className={`mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold text-white shadow-sm ${teal}`}
-                >
-                  Get started
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        <PricingSection currency={currency} />
 
         {/* CTA band */}
         <section className="border-t border-gray-100 bg-[#0d9488] py-14 md:py-16">

@@ -54,6 +54,7 @@ export async function POST() {
       cancel_url: `${appUrl}/dashboard?checkout=cancel`,
       metadata: { userId: appUser.id },
       allow_promotion_codes: true,
+      subscription_data: { trial_period_days: 14 },
     });
   } catch (e) {
     console.error("[stripe/checkout] sessions.create failed", e);

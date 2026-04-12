@@ -132,6 +132,8 @@ export function DashboardSidebar({
     { href: "/dashboard/conversations", label: "Conversations", icon: "chat" },
     { href: "/dashboard/leads", label: "Leads", icon: "leads" },
     { href: "/dashboard/appointments", label: "Appointments", icon: "calendar" },
+    { href: "/dashboard/analytics", label: "Analytics", icon: "dashboard" },
+    { href: "/dashboard/webhooks", label: "Webhooks", icon: "code" },
   ];
 
   const configNav: NavItem[] = configBase

@@ -25,6 +25,20 @@ model User {
   bots                   Bot[]
   auditLogs              AuditLog[]
   authTokens             AuthToken[]
+  webhooks               Webhook[]
+}
+
+model Webhook {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  events    String
+  active    Boolean  @default(true)
+  label     String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model AuthToken {
@@ -40,6 +54,12 @@ model AuthToken {
 }
 
 model StripeWebhookEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  createdAt DateTime @default(now())
+}
+
+model PaystackWebhookEvent {
   id        String   @id @default(cuid())
   eventId   String   @unique
   createdAt DateTime @default(now())

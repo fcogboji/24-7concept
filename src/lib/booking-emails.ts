@@ -62,6 +62,37 @@ export async function sendBookingConfirmationToVisitor(params: {
   }
 }
 
+export async function sendLeadNotificationToOwner(params: {
+  ownerEmail: string;
+  botName: string;
+  leadEmail: string;
+  leadName?: string | null;
+  leadPhone?: string | null;
+  pageUrl?: string | null;
+}): Promise<void> {
+  try {
+    await sendTransactionalEmail({
+      to: params.ownerEmail,
+      subject: `New lead captured — ${params.botName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+          <h2 style="color:#0d9488;margin:0 0 16px">New Lead</h2>
+          <p style="margin:0 0 12px;color:#444">A visitor shared their details through <strong>${esc(params.botName)}</strong>.</p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            ${params.leadName ? `<tr><td style="padding:6px 0;color:#888">Name</td><td style="padding:6px 0">${esc(params.leadName)}</td></tr>` : ""}
+            <tr><td style="padding:6px 0;color:#888">Email</td><td style="padding:6px 0"><a href="mailto:${esc(params.leadEmail)}">${esc(params.leadEmail)}</a></td></tr>
+            ${params.leadPhone ? `<tr><td style="padding:6px 0;color:#888">Phone</td><td style="padding:6px 0">${esc(params.leadPhone)}</td></tr>` : ""}
+            ${params.pageUrl ? `<tr><td style="padding:6px 0;color:#888">Page</td><td style="padding:6px 0"><a href="${esc(params.pageUrl)}">${esc(params.pageUrl)}</a></td></tr>` : ""}
+          </table>
+          <p style="margin:16px 0 0;font-size:13px;color:#999">Follow up quickly — leads contacted within 5 minutes convert ~9× more often.</p>
+        </div>
+      `,
+    });
+  } catch (e) {
+    console.error("[lead-email] Failed to notify owner:", e);
+  }
+}
+
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }

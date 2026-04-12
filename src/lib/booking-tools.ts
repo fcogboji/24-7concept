@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { computeAvailableSlots, businessTimeToUtc } from "@/lib/booking-availability";
 import { sendBookingNotificationToOwner, sendBookingConfirmationToVisitor } from "@/lib/booking-emails";
 import { logAudit } from "@/lib/audit";
+import { fireWebhooks } from "@/lib/webhooks";
 
 /* ------------------------------------------------------------------ */
 /*  OpenAI tool definitions                                           */
@@ -278,6 +279,23 @@ async function handleCreateAppointment(
       visitorName: args.name,
       botName: bot.name,
       serviceName,
+      dateTime: dateTimeStr,
+    });
+  }
+
+  if (bot?.userId) {
+    void fireWebhooks(bot.userId, "appointment.created", {
+      appointmentId: appointment.id,
+      botId,
+      botName: bot.name,
+      name: args.name,
+      email: args.email.trim().toLowerCase(),
+      phone: args.phone ?? null,
+      serviceId: args.serviceId ?? null,
+      serviceName,
+      startTime: appointment.startTime.toISOString(),
+      endTime: appointment.endTime.toISOString(),
+      timezone: config.timezone,
       dateTime: dateTimeStr,
     });
   }

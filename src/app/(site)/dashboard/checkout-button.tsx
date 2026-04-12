@@ -10,7 +10,7 @@ export function CheckoutButton() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const res = await fetch("/api/billing/checkout", { method: "POST" });
       let data = {} as { url?: string; error?: string; code?: string; detail?: string };
       try {
         data = await res.json();
