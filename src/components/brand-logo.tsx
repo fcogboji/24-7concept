@@ -1,33 +1,65 @@
-import Image from "next/image";
-
-const INTRINSIC_W = 1376;
-const INTRINSIC_H = 768;
-
 type BrandLogoProps = {
   variant?: "header" | "compact" | "sidebar" | "auth" | "footer" | "adminBar";
   className?: string;
   priority?: boolean;
 };
 
-const variantClass: Record<NonNullable<BrandLogoProps["variant"]>, string> = {
-  header: "h-16 w-auto sm:h-20 md:h-24",
-  compact: "h-14 w-auto max-w-[min(85vw,20rem)] sm:h-16 sm:max-w-[22rem]",
-  sidebar:
-    "h-16 w-auto max-w-[min(90vw,22rem)] rounded-lg bg-white px-3 py-3 shadow-sm ring-1 ring-black/5 sm:h-20 sm:max-w-[26rem]",
-  auth: "h-20 w-auto sm:h-24",
-  footer: "h-14 w-auto opacity-90 sm:h-16",
-  adminBar: "h-9 w-auto",
+type VariantStyle = {
+  wrap: string;
+  word: string;
 };
 
-export function BrandLogo({ variant = "header", className = "", priority }: BrandLogoProps) {
+const variantStyle: Record<NonNullable<BrandLogoProps["variant"]>, VariantStyle> = {
+  header: {
+    wrap: "inline-flex items-center",
+    word: "text-3xl font-extrabold italic tracking-tight sm:text-4xl md:text-[2.75rem]",
+  },
+  compact: {
+    wrap: "inline-flex items-center",
+    word: "text-2xl font-extrabold italic tracking-tight sm:text-3xl",
+  },
+  sidebar: {
+    wrap:
+      "inline-flex items-center rounded-lg bg-white px-3 py-2.5 shadow-sm ring-1 ring-black/5",
+    word: "text-xl font-extrabold italic tracking-tight sm:text-2xl",
+  },
+  auth: {
+    wrap: "inline-flex items-center",
+    word: "text-4xl font-extrabold italic tracking-tight sm:text-5xl",
+  },
+  footer: {
+    wrap: "inline-flex items-center",
+    word: "text-2xl font-extrabold italic tracking-tight sm:text-3xl",
+  },
+  adminBar: {
+    wrap: "inline-flex items-center",
+    word: "text-base font-extrabold italic tracking-tight",
+  },
+};
+
+const letterColors = [
+  "#E53238", // eBay red
+  "#0064D2", // eBay blue
+  "#F5AF02", // eBay yellow
+  "#86B817", // eBay green
+];
+
+const wordmark = "faztino";
+
+export function BrandLogo({ variant = "header", className = "" }: BrandLogoProps) {
+  const styles = variantStyle[variant];
   return (
-    <Image
-      src="/logo.png"
-      alt="nestbot"
-      width={INTRINSIC_W}
-      height={INTRINSIC_H}
-      priority={priority}
-      className={`${variantClass[variant]}${className ? ` ${className}` : ""}`}
-    />
+    <span
+      className={`${styles.wrap}${className ? ` ${className}` : ""}`}
+      aria-label="Faztino"
+    >
+      <span className={styles.word} aria-hidden="true">
+        {wordmark.split("").map((char, i) => (
+          <span key={i} style={{ color: letterColors[i % letterColors.length] }}>
+            {char}
+          </span>
+        ))}
+      </span>
+    </span>
   );
 }

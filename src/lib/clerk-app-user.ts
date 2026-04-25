@@ -40,7 +40,6 @@ export async function getOrCreateAppUser() {
         email,
         name,
         clerkId: userId,
-        passwordHash: null,
         emailVerifiedAt: new Date(),
       },
       update: {

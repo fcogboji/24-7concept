@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/paystack";
+import { getLogger } from "@/lib/logger";
+
+const log = getLogger("paystack.webhook");
 
 export const runtime = "nodejs";
 
@@ -106,13 +109,14 @@ export async function POST(req: Request) {
     }
 
     if (event.event === "invoice.payment_failed") {
+      // Keep Pro active during Paystack's retry window; downgrade only on subscription.disable.
       await prisma.user.update({
         where: { id: user.id },
-        data: { plan: "free", subscriptionStatus: "past_due" },
+        data: { subscriptionStatus: "past_due" },
       });
     }
   } catch (e) {
-    console.error("[paystack/webhook]", e);
+    log.error("handler failed", e, { eventId, type: event.event });
     await prisma.paystackWebhookEvent.delete({ where: { eventId } }).catch(() => {});
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }

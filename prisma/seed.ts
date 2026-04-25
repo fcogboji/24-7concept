@@ -5,7 +5,7 @@ import { prisma } from "../src/lib/prisma";
 const DEMO_BOT_ID = "demo_site_assistant";
 
 const DEMO_COPY = `
-nestbot is a lightweight assistant for small businesses. It answers common questions on your website so you spend less time repeating the same information.
+faztino is a lightweight assistant for small businesses. It answers common questions on your website so you spend less time repeating the same information.
 
 What it does: visitors open chat, ask about hours, services, shipping, or policies, and get short, accurate replies based on the text we learn from your site.
 
@@ -15,11 +15,11 @@ Plans: a free tier includes fifty assistant replies per calendar month for testi
 
 Privacy: messages are used to provide the service and improve your assistant; we do not sell visitor chats to advertisers.
 
-Contact: hello@nestbot.app — we read every message and usually respond within one business day.
+Contact: hello@faztino.app — we read every message and usually respond within one business day.
 `.trim();
 
 async function main() {
-  const email = "demo@nestbot.app";
+  const email = "demo@faztino.app";
   const openaiKey = process.env.OPENAI_API_KEY;
 
   await prisma.source.deleteMany({ where: { botId: DEMO_BOT_ID } });
@@ -31,7 +31,6 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       email,
-      passwordHash: null,
       name: "Demo workspace",
       emailVerifiedAt: new Date(),
     },
@@ -41,7 +40,7 @@ async function main() {
     data: {
       id: DEMO_BOT_ID,
       userId: user.id,
-      name: "nestbot — homepage demo",
+      name: "faztino — homepage demo",
       websiteUrl: "https://relay.app",
       isDemo: true,
     },

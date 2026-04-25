@@ -49,8 +49,8 @@ async function main() {
     console.error("FAIL: /embed/widget.js body looks unexpected");
     process.exit(1);
   }
-  if (bypass && !embedBody.includes("__NESTBOT_BYPASS")) {
-    console.warn("WARN: /embed/widget.js expected prelude __NESTBOT_BYPASS when bypass env is set");
+  if (bypass && !embedBody.includes("__FAZTINO_BYPASS")) {
+    console.warn("WARN: /embed/widget.js expected prelude __FAZTINO_BYPASS when bypass env is set");
   }
   console.log("OK  GET /embed/widget.js", embed.status, `(${embedBody.length} bytes)`);
 

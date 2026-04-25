@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getOpenAI } from "@/lib/openai";
-import { getRelevantChunks } from "@/lib/retrieve";
+import { getChatModel, getOpenAI, getRoutingModel } from "@/lib/openai";
+import { getRelevantChunksScored } from "@/lib/retrieve";
 import { rateLimitChat } from "@/lib/rate-limit";
 import { canUserSendMessage } from "@/lib/plan";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
 import { bookingTools, handleBookingTool } from "@/lib/booking-tools";
-import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { engagementTools, handleEngagementTool } from "@/lib/engagement-tools";
+import { getLogger } from "@/lib/logger";
+import type { ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources/chat/completions";
+
+const log = getLogger("chat");
 
 const MAX_MESSAGE_LENGTH = 12_000;
 
@@ -100,12 +104,17 @@ export async function POST(req: NextRequest) {
 
     const bookingEnabled = bot.bookingConfig?.enabled === true;
 
-    const chunks = await getRelevantChunks(botId, message);
-    const ragContext = chunks.length ? chunks.join("\n\n") : null;
+    const scoredChunks = await getRelevantChunksScored(botId, message);
+    const topScore = scoredChunks[0]?.score ?? 0;
+    const ragContext = scoredChunks.length
+      ? scoredChunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n")
+      : null;
     const businessInfo = bot.businessInfo?.trim() || null;
-    if (!businessInfo && !ragContext && !bookingEnabled) {
+    const hasAnyKnowledge = Boolean(businessInfo) || Boolean(ragContext) || bookingEnabled;
+
+    if (!hasAnyKnowledge) {
       const fallback =
-        "I don't have that information right now. Please contact the business directly and they will be happy to help.";
+        "I don't have that information yet. If you'd like, leave your email and someone from the team will get back to you.";
       await prisma.message.createMany({
         data: [
           { botId, role: "user", content: message, sessionId: sessionId || null, pageUrl: pageUrl || null },
@@ -114,42 +123,41 @@ export async function POST(req: NextRequest) {
       });
       return new NextResponse(fallback, {
         status: 200,
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-          ...cors,
-        },
+        headers: { "Content-Type": "text/plain; charset=utf-8", ...cors },
       });
     }
-    const context =
-      businessInfo && ragContext
-        ? `--- Business information ---\n${businessInfo}\n\n--- Additional indexed content ---\n${ragContext}`
-        : businessInfo
-          ? `--- Business information ---\n${businessInfo}`
-          : ragContext
-            ? `--- Indexed content ---\n${ragContext}`
-            : "No indexed content yet. Say you are not sure and ask them to contact the business.";
 
-    let systemPrompt = `You are the customer assistant for ${bot.name}.
-Speak as a representative of ${bot.name}, not as an AI tool or third-party platform.
+    const contextSections: string[] = [];
+    if (businessInfo) contextSections.push(`### Business overview (curated by the owner — highest priority)\n${businessInfo}`);
+    if (ragContext) contextSections.push(`### Indexed website content (from training; quote sparingly)\n${ragContext}`);
+    const context = contextSections.length
+      ? contextSections.join("\n\n")
+      : "(No indexed content yet — only answer about logistics like booking or contact details.)";
 
-Use ONLY the context below. If something is not covered, say you are not sure and suggest they contact the business directly. Do not invent policies, prices, or hours.
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const lowConfidence = !businessInfo && topScore < 0.28;
 
-Keep replies short (2–6 sentences) unless the visitor asks for detail. Sound natural and human — no bullet lists unless they ask for steps.
+    const systemPromptParts: string[] = [
+      `You are the live customer assistant for ${bot.name}. Speak in first person plural ("we", "our team") as a real representative of the business — never refer to yourself as an AI, model, bot, or chatbot. Today is ${todayStr}.`,
+      `\n## Voice and style\n- Warm, concise, plain English. 2-5 short sentences for most replies; expand only when the visitor asks for detail or when confirming a booking.\n- One topic per reply. Ask a follow-up question if the visitor's intent is unclear.\n- Don't open with "Sure!" / "Of course!" / "Great question!" — just answer.\n- No emojis unless the visitor uses them first.\n- Match the visitor's language.`,
+      `\n## Grounding rules (CRITICAL)\n- Use ONLY the context below for any factual claim about ${bot.name} (services, hours, prices, policies, contact details, location).\n- If the context doesn't cover it, say so directly: "I'm not sure about that — let me get that confirmed for you" — then offer the capture_lead tool to collect their email so the team can follow up.\n- Never invent prices, availability, hours, guarantees, or policies. Don't speculate about competitors.\n- If the visitor asks something off-topic (general knowledge, jokes, coding, other companies), gently redirect to what you can help with.`,
+      `\n## When to use the engagement tools\n- capture_lead: when the visitor asks something you can't answer, expresses interest in being contacted, or shares a problem that needs human follow-up. Always confirm before saving and only collect what they offer.\n- escalate_to_human: when the visitor explicitly asks for a human, has a complaint, or the situation is sensitive (refund, complaint, account issue).`,
+      `\n## Context\n${context}`,
+    ];
 
-Context:
-${context}`;
+    if (lowConfidence) {
+      systemPromptParts.push(
+        `\n## Low-confidence notice\nThe retrieved context is weak for this question. Bias toward "I'm not sure" and the capture_lead tool rather than guessing.`,
+      );
+    }
 
     if (bookingEnabled) {
-      const todayStr = new Date().toISOString().slice(0, 10);
-      systemPrompt += `
-
-You can help visitors book appointments. Use the available tools to:
-1. Show services (list_services) when asked what can be booked
-2. Check time slots (check_availability) for a specific date
-3. Book appointments (create_appointment) after confirming all details with the visitor
-
-Always confirm the date, time, service, name, and email with the visitor BEFORE creating an appointment. Today's date is ${todayStr}. Business timezone: ${bot.bookingConfig!.timezone}.`;
+      systemPromptParts.push(
+        `\n## Booking\nYou can book appointments for visitors:\n1. list_services when asked what can be booked.\n2. check_availability(date) for a specific YYYY-MM-DD date.\n3. create_appointment(...) — ONLY after explicitly confirming date, time, service, name, and email with the visitor in the same conversation.\nBusiness timezone: ${bot.bookingConfig!.timezone}.`,
+      );
     }
+
+    const systemPrompt = systemPromptParts.join("\n");
 
     // Save the user message immediately so it's never lost.
     await prisma.message.create({
@@ -176,80 +184,59 @@ Always confirm the date, time, service, name, and email with the visitor BEFORE 
     }
 
     const openai = getOpenAI();
-    const toolCtx = { botId, sessionId };
+    const chatModel = getChatModel();
+    const routingModel = getRoutingModel();
+    const toolCtx = { botId, sessionId, pageUrl };
 
-    // If booking is enabled, use a tool-use loop (non-streaming until final response)
-    if (bookingEnabled) {
-      const messages: ChatCompletionMessageParam[] = [
-        { role: "system", content: systemPrompt },
-        ...historyMessages,
-        { role: "user", content: message },
-      ];
+    const tools: ChatCompletionTool[] = [
+      ...engagementTools,
+      ...(bookingEnabled ? bookingTools : []),
+    ];
 
-      let finalText = "";
-      const MAX_TOOL_ROUNDS = 5;
-
-      for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages,
-          tools: bookingTools,
-        });
-
-        const choice = completion.choices[0];
-        const assistantMsg = choice.message;
-        messages.push(assistantMsg);
-
-        if (!assistantMsg.tool_calls?.length) {
-          finalText = assistantMsg.content ?? "";
-          break;
-        }
-
-        // Execute each tool call
-        for (const tc of assistantMsg.tool_calls) {
-          if (tc.type !== "function") continue;
-          let args: Record<string, unknown> = {};
-          try {
-            args = JSON.parse(tc.function.arguments || "{}");
-          } catch { /* empty */ }
-
-          const result = await handleBookingTool(tc.function.name, args, toolCtx);
-          messages.push({
-            role: "tool",
-            tool_call_id: tc.id,
-            content: result,
-          });
-        }
-
-        // If last round, force a non-tool response
-        if (round === MAX_TOOL_ROUNDS - 1) {
-          const final = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages,
-          });
-          finalText = final.choices[0]?.message?.content ?? "";
-        }
+    const handleToolCall = async (name: string, args: Record<string, unknown>): Promise<string> => {
+      if (bookingEnabled && (name === "list_services" || name === "check_availability" || name === "create_appointment")) {
+        return handleBookingTool(name, args, toolCtx);
       }
+      return handleEngagementTool(name, args, toolCtx);
+    };
 
-      await prisma.message.create({
-        data: { botId, role: "assistant", content: finalText || "(empty)", sessionId: sessionId || null, pageUrl: pageUrl || null },
+    const messages: ChatCompletionMessageParam[] = [
+      { role: "system", content: systemPrompt },
+      ...historyMessages,
+      { role: "user", content: message },
+    ];
+
+    const MAX_TOOL_ROUNDS = 5;
+    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      const completion = await openai.chat.completions.create({
+        model: routingModel,
+        messages,
+        tools,
       });
 
-      return new NextResponse(finalText, {
-        status: 200,
-        headers: { "Content-Type": "text/plain; charset=utf-8", ...cors },
-      });
+      const assistantMsg = completion.choices[0].message;
+      messages.push(assistantMsg);
+
+      if (!assistantMsg.tool_calls?.length) break;
+
+      for (const tc of assistantMsg.tool_calls) {
+        if (tc.type !== "function") continue;
+        let args: Record<string, unknown> = {};
+        try {
+          args = JSON.parse(tc.function.arguments || "{}");
+        } catch {
+          /* empty args */
+        }
+        const result = await handleToolCall(tc.function.name, args);
+        messages.push({ role: "tool", tool_call_id: tc.id, content: result });
+      }
     }
 
-    // Standard streaming path (no booking)
+    // Strip the "tools" so the final pass focuses on writing — and use the higher-quality model for the visitor-facing text.
     const stream = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: chatModel,
       stream: true,
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...historyMessages,
-        { role: "user", content: message },
-      ],
+      messages,
     });
 
     const encoder = new TextEncoder();
@@ -267,7 +254,7 @@ Always confirm the date, time, service, name, and email with the visitor BEFORE 
             data: { botId, role: "assistant", content: fullReply || "(empty)", sessionId: sessionId || null, pageUrl: pageUrl || null },
           });
         } catch (e) {
-          console.error(e);
+          log.error("stream failed", e, { botId });
           controller.enqueue(encoder.encode("\n[Sorry — something went wrong. Please try again.]"));
         } finally {
           controller.close();
@@ -282,7 +269,7 @@ Always confirm the date, time, service, name, and email with the visitor BEFORE 
       },
     });
   } catch (e) {
-    console.error(e);
+    log.error("handler failed", e);
     return NextResponse.json({ error: "Server error" }, { status: 500, headers: cors });
   }
 }

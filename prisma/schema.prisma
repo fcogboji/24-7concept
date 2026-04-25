@@ -13,7 +13,6 @@ model User {
   id                     String    @id @default(cuid())
   clerkId                String?   @unique
   email                  String    @unique
-  passwordHash           String?
   name                   String?
   emailVerifiedAt        DateTime?
   plan                   String    @default("free")
@@ -24,7 +23,6 @@ model User {
   updatedAt              DateTime  @updatedAt
   bots                   Bot[]
   auditLogs              AuditLog[]
-  authTokens             AuthToken[]
   webhooks               Webhook[]
 }
 
@@ -35,22 +33,11 @@ model Webhook {
   events    String
   active    Boolean  @default(true)
   label     String?
+  secret    String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-}
-
-model AuthToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
-  userId    String
-  type      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, type])
 }
 
 model StripeWebhookEvent {

@@ -3,6 +3,9 @@ import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { getStripeSecretKey } from "@/lib/stripe-env";
+import { getLogger } from "@/lib/logger";
+
+const log = getLogger("stripe.webhook");
 
 export const runtime = "nodejs";
 
@@ -105,14 +108,11 @@ export async function POST(req: Request) {
       const customerId =
         typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
       if (customerId) {
-        // Downgrade to free when payment fails — Stripe will retry, and
-        // customer.subscription.updated will restore "pro" if a retry succeeds.
+        // Mark past_due but keep Pro entitlement active during Stripe's dunning retry
+        // window. Final downgrade happens on customer.subscription.deleted or status=unpaid.
         await prisma.user.updateMany({
           where: { stripeCustomerId: customerId },
-          data: {
-            plan: "free",
-            subscriptionStatus: "past_due",
-          },
+          data: { subscriptionStatus: "past_due" },
         });
       }
     }
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
       }
     }
   } catch (e) {
-    console.error(e);
+    log.error("handler failed", e, { eventId: event.id, type: event.type });
     await prisma.stripeWebhookEvent.delete({ where: { eventId: event.id } }).catch(() => {});
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }

@@ -4,8 +4,8 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — nestbot",
-  description: "Terms governing use of nestbot.",
+  title: "Terms of Service — faztino",
+  description: "Terms governing use of faztino.",
 };
 
 export default function TermsPage() {
@@ -30,7 +30,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">1. Agreement</h2>
             <p className="mt-2">
-              By accessing or using nestbot (“Service”), you agree to these Terms. If you use the Service on behalf of a
+              By accessing or using faztino (“Service”), you agree to these Terms. If you use the Service on behalf of a
               company, you represent that you have authority to bind that organisation.
             </p>
           </section>
@@ -38,7 +38,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">2. The Service</h2>
             <p className="mt-2">
-              nestbot provides tools to train an AI assistant on your website content and embed a chat widget. Features
+              faztino provides tools to train an AI assistant on your website content and embed a chat widget. Features
               are described on the site and may change over time. We may suspend or limit the Service for maintenance,
               security, or legal reasons.
             </p>
@@ -137,8 +137,8 @@ export default function TermsPage() {
             <h2 className="text-base font-semibold text-stone-900">12. Contact</h2>
             <p className="mt-2">
               Legal notices:{" "}
-              <a href="mailto:legal@nestbot.app" className="font-medium text-teal-800 underline">
-                legal@nestbot.app
+              <a href="mailto:legal@faztino.app" className="font-medium text-teal-800 underline">
+                legal@faztino.app
               </a>
               . Replace with your legal entity before production.
             </p>

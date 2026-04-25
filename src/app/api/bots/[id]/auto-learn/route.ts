@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getOpenAI } from "@/lib/openai";
 import { crawlWebsiteForTraining } from "@/lib/crawler";
 import { rateLimitTrain } from "@/lib/rate-limit";
+import { canUserTrain, FREE_MONTHLY_TRAIN_CAP } from "@/lib/plan";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -40,6 +41,16 @@ export async function POST(_req: Request, context: RouteContext) {
     return NextResponse.json(
       { error: "Rate limit reached. Try again later." },
       { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+    );
+  }
+
+  const planAllows = await canUserTrain(appUser.id);
+  if (!planAllows) {
+    return NextResponse.json(
+      {
+        error: `Free plan allows up to ${FREE_MONTHLY_TRAIN_CAP} trainings per month. Upgrade to Pro for unlimited.`,
+      },
+      { status: 402 },
     );
   }
 

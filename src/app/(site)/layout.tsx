@@ -33,11 +33,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "nestbot — AI support for your website",
+  title: "faztino — AI support for your website",
   description:
     "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
   openGraph: {
-    title: "nestbot — AI support for your website",
+    title: "faztino — AI support for your website",
     description:
       "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
     type: "website",
@@ -47,13 +47,13 @@ export const metadata: Metadata = {
         url: "/robot-chat-replies.png",
         width: 1200,
         height: 900,
-        alt: "nestbot AI assistant with chat replies",
+        alt: "faztino AI assistant with chat replies",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "nestbot — AI support for your website",
+    title: "faztino — AI support for your website",
     description:
       "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
     images: ["/robot-chat-replies.png"],

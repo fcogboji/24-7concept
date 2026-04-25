@@ -12,3 +12,16 @@ export function getOpenAI(): OpenAI {
   }
   return client;
 }
+
+/**
+ * Model used for the customer-facing chat. Default is gpt-4o-mini for cost;
+ * set CHAT_MODEL=gpt-4o (or any supported chat model) for higher quality.
+ */
+export function getChatModel(): string {
+  return process.env.CHAT_MODEL?.trim() || "gpt-4o-mini";
+}
+
+/** Cheaper model for tool routing (function picking) inside the booking loop. */
+export function getRoutingModel(): string {
+  return process.env.CHAT_ROUTING_MODEL?.trim() || "gpt-4o-mini";
+}

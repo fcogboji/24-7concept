@@ -1,4 +1,4 @@
-# nestbot
+# faztino
 
 Next.js app: train an AI assistant on site content, dashboard, Stripe billing, embeddable `widget.js` for visitor chat.
 

@@ -86,6 +86,20 @@ export async function crawlWebsiteRendered(
       locale: "en-US",
     });
 
+    /**
+     * Abort any subresource (or redirect target) that resolves to a private/loopback host.
+     * Without this, a public start URL can redirect into AWS metadata or LAN services.
+     */
+    const allowLocalhost = isLocalTrainingUrlAllowed();
+    await context.route("**/*", (route) => {
+      try {
+        assertUrlSafeForServerFetch(route.request().url(), { allowLocalhost });
+        return route.continue();
+      } catch {
+        return route.abort();
+      }
+    });
+
     while (queue.length && visited.size < pageLimit) {
       const raw = queue.shift()!;
       let url: string;

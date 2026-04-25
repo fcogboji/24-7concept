@@ -3,9 +3,15 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-const SIZE_MSG = "nestbot-size";
+const SIZE_MSG = "faztino-size";
 
 const DEFAULT_SUGGESTIONS = ["What do you do?", "How can I contact you?", "What are your hours?"];
+
+const BRAND_RED = "#E53238";
+const BRAND_BLUE = "#0064D2";
+const BRAND_YELLOW = "#F5AF02";
+const BRAND_GREEN = "#86B817";
+const BRAND_GRADIENT = BRAND_RED;
 
 function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<Response> {
   const merged: RequestInit = { mode: "cors", credentials: "omit", cache: "no-store", ...init };
@@ -244,22 +250,31 @@ function EmbedChatInner() {
                 <div className="h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
               </div>
             </div>
-            {/* Red circle chat icon with notification badge */}
-            <div className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full bg-red-600 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+            {/* Brand-gradient circle chat icon with notification badge */}
+            <div
+              className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+              style={{ background: BRAND_GRADIENT }}
+            >
               {/* Speech bubble with three dots */}
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                 <path
                   d="M6 6h20a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-8l-6 5v-5H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
                   fill="white"
                 />
-                <circle cx="11" cy="14" r="1.8" fill="#dc2626" />
-                <circle cx="16" cy="14" r="1.8" fill="#dc2626" />
-                <circle cx="21" cy="14" r="1.8" fill="#dc2626" />
+                <circle cx="11" cy="14" r="1.8" fill={BRAND_RED} />
+                <circle cx="16" cy="14" r="1.8" fill={BRAND_BLUE} />
+                <circle cx="21" cy="14" r="1.8" fill={BRAND_YELLOW} />
               </svg>
               {/* Animated dot */}
               <div className="absolute -top-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white shadow-sm">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex h-[10px] w-[10px] rounded-full bg-red-400"></span>
+                <span
+                  className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                  style={{ backgroundColor: BRAND_GREEN }}
+                ></span>
+                <span
+                  className="relative inline-flex h-[10px] w-[10px] rounded-full"
+                  style={{ backgroundColor: BRAND_GREEN }}
+                ></span>
               </div>
             </div>
           </button>
@@ -270,25 +285,31 @@ function EmbedChatInner() {
         <div className="flex h-full min-h-0 flex-col">
           <div className="mx-2 mb-2 flex min-h-0 max-h-[min(520px,calc(100dvh-72px))] flex-1 flex-col overflow-hidden rounded-[18px] border border-stone-200 bg-white shadow-[0_24px_60px_rgba(0,0,0,0.15)]">
             {/* Header */}
-            <div className="flex items-center justify-between gap-2 rounded-t-[18px] bg-stone-800 px-4 py-3.5 text-white">
+            <div
+              className="flex items-center justify-between gap-2 rounded-t-[18px] px-4 py-3.5 text-white"
+              style={{ background: BRAND_GRADIENT }}
+            >
               <div className="flex min-w-0 items-center gap-2.5">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={avatarUrl}
                     alt=""
-                    className="h-9 w-9 shrink-0 rounded-full object-cover"
+                    className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/40"
                     onError={() => setAvatarUrl(null)}
                   />
                 ) : (
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white">
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold"
+                    style={{ color: BRAND_RED }}
+                  >
                     {brandInitial}
                   </div>
                 )}
                 <div className="min-w-0">
                   <div className="truncate text-[15px] font-bold">{brand}</div>
-                  <div className="flex items-center gap-1 text-[11px] text-stone-300">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400"></span>
+                  <div className="flex items-center gap-1 text-[11px] text-white/90">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-300"></span>
                     Online · Typically replies instantly
                   </div>
                 </div>
@@ -305,9 +326,10 @@ function EmbedChatInner() {
                   <div
                     className={
                       m.role === "user"
-                        ? "max-w-[88%] whitespace-pre-wrap break-words rounded-[14px] rounded-br-sm bg-red-500 px-[13px] py-2.5 text-sm leading-snug text-white"
+                        ? "max-w-[88%] whitespace-pre-wrap break-words rounded-[14px] rounded-br-sm px-[13px] py-2.5 text-sm leading-snug text-white"
                         : "max-w-[88%] whitespace-pre-wrap break-words rounded-[14px] rounded-bl-sm border border-stone-200 bg-white px-[13px] py-2.5 text-sm leading-snug text-stone-800"
                     }
+                    style={m.role === "user" ? { background: BRAND_GRADIENT } : undefined}
                   >
                     {m.text}
                   </div>
@@ -325,7 +347,7 @@ function EmbedChatInner() {
                     <button
                       key={label}
                       type="button"
-                      className="min-h-9 cursor-pointer rounded-full border border-stone-300 bg-white px-3 py-1.5 text-[13px] text-stone-600 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="min-h-9 cursor-pointer rounded-full border border-stone-300 bg-white px-3 py-1.5 text-[13px] text-stone-600 hover:border-[#0064D2] hover:bg-[#eaf2fc] hover:text-[#0064D2] transition-colors"
                       onClick={() => sendMessage(label)}
                     >
                       {label}
@@ -371,7 +393,8 @@ function EmbedChatInner() {
                     <button
                       type="button"
                       disabled={leadSubmitting || !leadEmail.trim()}
-                      className="cursor-pointer rounded-[10px] border-0 bg-red-500 px-3.5 py-2.5 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-50"
+                      className="cursor-pointer rounded-[10px] border-0 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+                      style={{ background: BRAND_GRADIENT }}
                       onClick={submitLead}
                     >
                       Send
@@ -391,7 +414,7 @@ function EmbedChatInner() {
             <div className="border-t border-stone-200 bg-white px-3 py-3 pb-[max(12px,env(safe-area-inset-bottom,0px))]">
               <div className="flex items-center gap-2">
                 <input
-                  className="min-w-0 flex-1 rounded-xl border border-red-200 px-3.5 py-2.5 text-base text-stone-900 outline-none placeholder:text-stone-400 focus:border-red-400 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)]"
+                  className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3.5 py-2.5 text-base text-stone-900 outline-none placeholder:text-stone-400 focus:border-[#0064D2] focus:shadow-[0_0_0_3px_rgba(0,100,210,0.15)]"
                   type="text"
                   placeholder="Ask anything..."
                   autoComplete="off"
@@ -407,7 +430,8 @@ function EmbedChatInner() {
                 />
                 <button
                   type="button"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center cursor-pointer rounded-xl border-0 bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center cursor-pointer rounded-xl border-0 text-white shadow-sm hover:opacity-95 transition-opacity"
+                  style={{ background: BRAND_GRADIENT }}
                   aria-label="Send message"
                   onClick={() => sendMessage()}
                 >
@@ -415,7 +439,8 @@ function EmbedChatInner() {
                 </button>
               </div>
               <div className="mt-2 text-center text-[11px] text-stone-400">
-                Powered by <span className="font-medium text-stone-500">nestbot</span> <span className="text-red-400">&#10022;</span>
+                Powered by <span className="font-medium text-stone-500">faztino</span>{" "}
+                <span style={{ color: BRAND_RED }}>&#10022;</span>
               </div>
             </div>
           </div>
@@ -424,7 +449,8 @@ function EmbedChatInner() {
           <div className="flex shrink-0 justify-end px-0 pb-2 sm:px-2">
             <button
               type="button"
-              className="flex h-[52px] w-[52px] items-center justify-center cursor-pointer rounded-full border-0 bg-[#0f766e] text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:bg-[#0d6b63] transition-colors"
+              className="flex h-[52px] w-[52px] items-center justify-center cursor-pointer rounded-full border-0 text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:opacity-95 transition-opacity"
+              style={{ background: BRAND_GRADIENT }}
               aria-label="Close chat"
               onClick={() => setOpen(false)}
             >

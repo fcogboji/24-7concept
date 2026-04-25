@@ -14,6 +14,8 @@ import { MarketingHeader } from "@/components/marketing-header";
 
 const teal = "bg-[#0d9488] hover:bg-[#0f7669]";
 
+const brandAccents = ["#E53238", "#0064D2", "#F5AF02"] as const;
+
 const HERO_IMAGES = [
   { src: "/robot-support-call.png", alt: "Assistant ready for conversations" },
   { src: "/robot-typing-laptop.png", alt: "Learning from your website" },
@@ -137,9 +139,12 @@ export default async function HomePage() {
                 title: "See what matters",
                 body: "Conversation volume, leads, and knowledge — same palette as your app.",
               },
-            ].map((item) => (
+            ].map((item, i) => (
               <div key={item.title} className="text-center sm:text-left">
-                <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[#0d9488] sm:mx-0" />
+                <div
+                  className="mx-auto mb-3 h-1 w-10 rounded-full sm:mx-0"
+                  style={{ backgroundColor: brandAccents[i % brandAccents.length] }}
+                />
                 <h3 className="font-semibold text-gray-900">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.body}</p>
               </div>
@@ -230,12 +235,17 @@ export default async function HomePage() {
                   title: "Paste the script",
                   body: "One line in your layout or theme. The widget appears for every visitor.",
                 },
-              ].map((item) => (
+              ].map((item, i) => (
                 <div
                   key={item.step}
                   className="relative rounded-xl border border-gray-100 bg-gray-50/50 p-6 shadow-sm transition hover:border-teal-200/60 hover:shadow-md"
                 >
-                  <span className="text-xs font-bold tabular-nums text-[#0d9488]">{item.step}</span>
+                  <span
+                    className="text-xs font-bold tabular-nums"
+                    style={{ color: brandAccents[i % brandAccents.length] }}
+                  >
+                    {item.step}
+                  </span>
                   <h3 className="mt-3 text-lg font-semibold text-gray-900">{item.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.body}</p>
                 </div>

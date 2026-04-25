@@ -1,5 +1,5 @@
 /**
- * nestbot embed — runs on customer sites with their permission (script tag).
+ * faztino embed — runs on customer sites with their permission (script tag).
  * Loads the chat UI in an iframe (same-origin to your app) so clicks never navigate the host page.
  * Idempotent per botId: safe if the script runs twice (SPA navigations).
  */
@@ -39,7 +39,7 @@
     var botId = script.getAttribute("data-bot-id");
     if (!botId) return;
 
-    var existingHosts = document.querySelectorAll('[data-nestbot-embed="1"]');
+    var existingHosts = document.querySelectorAll('[data-faztino-embed="1"]');
     for (var hi = 0; hi < existingHosts.length; hi++) {
       if (existingHosts[hi].getAttribute("data-bot-id") === botId) return;
     }
@@ -119,7 +119,7 @@
     window.addEventListener("message", function onMsg(e) {
       if (e.origin !== expectedOrigin) return;
       var d = e.data;
-      if (!d || d.type !== "nestbot-size") return;
+      if (!d || d.type !== "faztino-size") return;
       if (typeof d.open === "boolean") panelOpen = d.open;
       applyIframeSize();
     });
@@ -130,8 +130,8 @@
      * (e.g. `[id*="chat"] { display:none }` or mobile media queries).
      */
     var host = document.createElement("div");
-    host.id = "hb-nestbot-host-" + botId.replace(/[^a-zA-Z0-9_-]/g, "_");
-    host.setAttribute("data-nestbot-embed", "1");
+    host.id = "hb-faztino-host-" + botId.replace(/[^a-zA-Z0-9_-]/g, "_");
+    host.setAttribute("data-faztino-embed", "1");
     host.setAttribute("data-bot-id", botId);
     host.style.cssText =
       "position:fixed !important;bottom:0 !important;right:0 !important;left:auto !important;top:auto !important;z-index:2147483647 !important;margin:0 !important;padding:0 !important;border:0 !important;background:transparent !important;pointer-events:none !important;line-height:0 !important;display:block !important;visibility:visible !important;opacity:1 !important;width:auto !important;height:auto !important;overflow:visible !important;";

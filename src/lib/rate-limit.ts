@@ -10,13 +10,24 @@ const genericStore = new Map<string, Entry>();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 30;
 
-function useUpstash(): boolean {
+function isUpstashConfigured(): boolean {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+
+/**
+ * In serverless production each instance has its own in-memory counters,
+ * so the memory fallback effectively multiplies every limit by the number of
+ * warm instances. Refuse the request instead of silently letting it through.
+ */
+function assertDistributedLimiterInProd(): { ok: true } | { ok: false; retryAfter: number } | null {
+  if (process.env.NODE_ENV !== "production") return null;
+  if (isUpstashConfigured()) return null;
+  return { ok: false, retryAfter: 60 };
 }
 
 let redisSingleton: Redis | null = null;
 function getRedis(): Redis | null {
-  if (!useUpstash()) return null;
+  if (!isUpstashConfigured()) return null;
   if (!redisSingleton) {
     redisSingleton = Redis.fromEnv();
   }
@@ -31,7 +42,7 @@ function getChatRatelimit(): Ratelimit | null {
     chatRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(30, "60 s"),
-      prefix: "nestbot:rl:chat",
+      prefix: "faztino:rl:chat",
     });
   }
   return chatRatelimit;
@@ -46,7 +57,7 @@ function getAuth15mRatelimit(): Ratelimit | null {
     auth15mRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(5, "15 m"),
-      prefix: "nestbot:rl:auth15",
+      prefix: "faztino:rl:auth15",
     });
   }
   return auth15mRatelimit;
@@ -61,7 +72,7 @@ function getAuth1hRatelimit(): Ratelimit | null {
     auth1hRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(3, "60 m"),
-      prefix: "nestbot:rl:auth60",
+      prefix: "faztino:rl:auth60",
     });
   }
   return auth1hRatelimit;
@@ -76,7 +87,7 @@ function getBillingStripeRatelimit(): Ratelimit | null {
     billingStripeRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(20, "1 h"),
-      prefix: "nestbot:rl:stripe",
+      prefix: "faztino:rl:stripe",
     });
   }
   return billingStripeRatelimit;
@@ -91,7 +102,7 @@ function getSessionProbeRatelimit(): Ratelimit | null {
     sessionProbeRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(120, "1 m"),
-      prefix: "nestbot:rl:session",
+      prefix: "faztino:rl:session",
     });
   }
   return sessionProbeRatelimit;
@@ -106,7 +117,7 @@ function getTrainRatelimit(): Ratelimit | null {
     trainRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(8, "1 h"),
-      prefix: "nestbot:rl:train",
+      prefix: "faztino:rl:train",
     });
   }
   return trainRatelimit;
@@ -121,7 +132,7 @@ function getBotCreateRatelimit(): Ratelimit | null {
     botCreateRatelimit = new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(25, "1 h"),
-      prefix: "nestbot:rl:botcreate",
+      prefix: "faztino:rl:botcreate",
     });
   }
   return botCreateRatelimit;
@@ -189,6 +200,8 @@ export async function rateLimitChat(
     }
     return { ok: true };
   }
+  const guard = assertDistributedLimiterInProd();
+  if (guard) return guard;
   return memoryRateLimitChat(key);
 }
 
@@ -221,6 +234,8 @@ export async function rateLimitAuth(
     }
   }
 
+  const guard = assertDistributedLimiterInProd();
+  if (guard) return guard;
   return memoryRateLimitAuth(key, max, windowMs);
 }
 
@@ -237,6 +252,8 @@ async function limitOrMemory(
     }
     return { ok: true };
   }
+  const guard = assertDistributedLimiterInProd();
+  if (guard) return guard;
   return memorySlidingWindow(genericStore, key, memoryMax, memoryWindowMs);
 }
 

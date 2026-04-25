@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
+import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
+import { generateWebhookSecret } from "@/lib/webhooks";
 
 const createSchema = z.object({
   url: z.string().url().max(2000),
@@ -12,7 +14,11 @@ const createSchema = z.object({
 export async function GET() {
   const user = await getOrCreateAppUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const hooks = await prisma.webhook.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } });
+  const hooks = await prisma.webhook.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, url: true, label: true, events: true, active: true, createdAt: true },
+  });
   return NextResponse.json({ hooks });
 }
 
@@ -22,13 +28,25 @@ export async function POST(req: NextRequest) {
   const json = await req.json().catch(() => null);
   const parsed = createSchema.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+
+  try {
+    assertUrlSafeForServerFetch(parsed.data.url, { allowLocalhost: isLocalTrainingUrlAllowed() });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Invalid URL" }, { status: 400 });
+  }
+
+  const secret = generateWebhookSecret();
   const hook = await prisma.webhook.create({
     data: {
       userId: user.id,
       url: parsed.data.url,
       label: parsed.data.label ?? null,
       events: parsed.data.events,
+      secret,
     },
   });
-  return NextResponse.json({ hook });
+  return NextResponse.json({
+    hook: { id: hook.id, url: hook.url, label: hook.label, events: hook.events, active: hook.active },
+    secret,
+  });
 }

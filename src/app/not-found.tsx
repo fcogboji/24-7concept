@@ -14,7 +14,7 @@ export default function NotFound() {
         This page is not here
       </h1>
       <p className="mt-2 max-w-md text-stone-600">
-        The link may be wrong, or we moved something. Head back to nestbot and keep going.
+        The link may be wrong, or we moved something. Head back to faztino and keep going.
       </p>
       <Link
         href="/"

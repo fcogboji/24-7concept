@@ -59,8 +59,7 @@ async function resolveAdminContext(): Promise<AdminContext | null> {
   if (user) {
     if (
       metadataGrantsAdmin(user.publicMetadata as Record<string, unknown>) ||
-      metadataGrantsAdmin(user.privateMetadata as Record<string, unknown>) ||
-      metadataGrantsAdmin(user.unsafeMetadata as Record<string, unknown>)
+      metadataGrantsAdmin(user.privateMetadata as Record<string, unknown>)
     ) {
       return {
         clerkUserId: userId,
@@ -74,8 +73,7 @@ async function resolveAdminContext(): Promise<AdminContext | null> {
     const fresh = await client.users.getUser(userId);
     if (
       metadataGrantsAdmin(fresh.publicMetadata as Record<string, unknown>) ||
-      metadataGrantsAdmin(fresh.privateMetadata as Record<string, unknown>) ||
-      metadataGrantsAdmin(fresh.unsafeMetadata as Record<string, unknown>)
+      metadataGrantsAdmin(fresh.privateMetadata as Record<string, unknown>)
     ) {
       return {
         clerkUserId: userId,

@@ -60,7 +60,7 @@ export async function POST(
       <p>Hi${lead.name ? ` ${escapeHtml(lead.name)}` : ""},</p>
       <div style="white-space: pre-wrap;">${escapeHtml(message)}</div>
       <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e5e5;" />
-      <p style="font-size: 13px; color: #888;">This email was sent by ${escapeHtml(lead.bot.name)} via nestbot.</p>
+      <p style="font-size: 13px; color: #888;">This email was sent by ${escapeHtml(lead.bot.name)} via faztino.</p>
     </div>
   `;
 

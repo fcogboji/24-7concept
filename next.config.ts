@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const nextConfig: NextConfig = {
   serverExternalPackages: ["playwright-core", "playwright", "@sparticuz/chromium"],
   async rewrites() {
@@ -92,6 +94,27 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          {
+            key: "Content-Security-Policy",
+            // 'unsafe-inline' is required by Next.js inline runtime/hydration scripts and Tailwind <style> tags.
+            // Clerk + Stripe + Paystack iframes need their hosts in frame-src and connect-src.
+            // Tightening further (nonces / strict-dynamic) is a Phase 2 follow-up.
+            value: [
+              "default-src 'self'",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "frame-ancestors 'self'",
+              "form-action 'self' https://checkout.stripe.com https://checkout.paystack.com",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data: https:",
+              "style-src 'self' 'unsafe-inline'",
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com https://js.paystack.co`,
+              "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com https://api.paystack.co https://*.upstash.io https://*.neon.tech",
+              "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com https://hooks.stripe.com https://checkout.paystack.com",
+              "worker-src 'self' blob:",
+            ].join("; "),
           },
         ],
       },

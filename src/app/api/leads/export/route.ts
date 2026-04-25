@@ -5,10 +5,13 @@ import { rateLimitAuth } from "@/lib/rate-limit";
 
 function escapeCsv(value: string | null | undefined): string {
   if (!value) return "";
-  if (/[",\n\r]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
+  // CSV-injection guard: spreadsheets evaluate cells starting with =, +, -, @, tab, or CR as formulas.
+  const needsFormulaPrefix = /^[=+\-@\t\r]/.test(value);
+  const safe = needsFormulaPrefix ? `'${value}` : value;
+  if (/[",\n\r]/.test(safe)) {
+    return `"${safe.replace(/"/g, '""')}"`;
   }
-  return value;
+  return safe;
 }
 
 export async function GET() {

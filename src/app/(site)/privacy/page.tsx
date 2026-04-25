@@ -4,8 +4,8 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — nestbot",
-  description: "How nestbot collects, uses, and protects personal data.",
+  title: "Privacy Policy — faztino",
+  description: "How faztino collects, uses, and protects personal data.",
 };
 
 export default function PrivacyPage() {
@@ -30,8 +30,8 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">1. Who we are</h2>
             <p className="mt-2">
-              nestbot (“we”, “us”) provides an AI assistant product for websites. This policy explains how we process
-              personal data when you use our website, dashboard, or customer-facing chat widget. If you use nestbot on
+              faztino (“we”, “us”) provides an AI assistant product for websites. This policy explains how we process
+              personal data when you use our website, dashboard, or customer-facing chat widget. If you use faztino on
               someone else’s site, that site’s operator is also responsible for how they use the service.
             </p>
           </section>
@@ -133,9 +133,9 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">11. Contact</h2>
             <p className="mt-2">
-              nestbot — privacy inquiries:{" "}
-              <a href="mailto:privacy@nestbot.app" className="font-medium text-teal-800 underline">
-                privacy@nestbot.app
+              faztino — privacy inquiries:{" "}
+              <a href="mailto:privacy@faztino.app" className="font-medium text-teal-800 underline">
+                privacy@faztino.app
               </a>
               . Replace this address with your company contact before production.
             </p>

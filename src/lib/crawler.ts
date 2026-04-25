@@ -1,6 +1,28 @@
 import * as cheerio from "cheerio";
 import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
 
+const MAX_REDIRECTS = 5;
+
+/**
+ * Manual redirect handling so each hop is re-checked against the SSRF allowlist.
+ * `redirect: "follow"` would let an attacker submit a public URL that 302s into private space.
+ */
+async function safeFetch(initialUrl: string, init: RequestInit, allowLocalhost: boolean): Promise<Response> {
+  let url = initialUrl;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    assertUrlSafeForServerFetch(url, { allowLocalhost });
+    const res = await fetch(url, { ...init, redirect: "manual" });
+    if (res.status >= 300 && res.status < 400) {
+      const loc = res.headers.get("location");
+      if (!loc) return res;
+      url = new URL(loc, url).href;
+      continue;
+    }
+    return res;
+  }
+  throw new Error("Too many redirects");
+}
+
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
@@ -152,11 +174,10 @@ export function extractTextFromHtmlString(html: string): string {
  * Prefer `crawlWebsiteForTraining` from this module for user-facing training.
  */
 export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<CrawlWebsiteResult> {
+  const allowLocalhost = isLocalTrainingUrlAllowed();
   let base: URL;
   try {
-    assertUrlSafeForServerFetch(startUrl, {
-      allowLocalhost: isLocalTrainingUrlAllowed(),
-    });
+    assertUrlSafeForServerFetch(startUrl, { allowLocalhost });
     base = new URL(startUrl);
   } catch (e) {
     throw e instanceof Error ? e : new Error("Invalid URL");
@@ -196,13 +217,14 @@ export async function crawlWebsite(startUrl: string, pageLimit = 8): Promise<Cra
     try {
       const controller = new AbortController();
       const t = setTimeout(() => controller.abort(), 15000);
-      const res = await fetch(url, {
-        headers: {
-          ...BROWSER_FETCH_HEADERS,
+      const res = await safeFetch(
+        url,
+        {
+          headers: { ...BROWSER_FETCH_HEADERS },
+          signal: controller.signal,
         },
-        signal: controller.signal,
-        redirect: "follow",
-      });
+        allowLocalhost,
+      );
       clearTimeout(t);
       const ct = res.headers.get("content-type") ?? "";
       const html = await res.text();

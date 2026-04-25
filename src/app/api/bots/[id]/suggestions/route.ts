@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
+import { rateLimitChat } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-ip";
 
 const DEFAULT_SUGGESTIONS = [
   "What do you do?",
@@ -39,6 +41,15 @@ export async function GET(req: NextRequest, context: RouteContext) {
   if (!cors) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await context.params;
+  const ip = getClientIp(req);
+  const limit = await rateLimitChat(`suggest:${ip}:${id}`);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { ...cors, "Retry-After": String(limit.retryAfter) } },
+    );
+  }
+
   const bot = await prisma.bot.findUnique({
     where: { id },
     select: { businessInfo: true, avatarUrl: true, bookingConfig: { select: { enabled: true } } },

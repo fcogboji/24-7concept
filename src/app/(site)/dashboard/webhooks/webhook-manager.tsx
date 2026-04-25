@@ -18,6 +18,7 @@ export function WebhookManager({ initial }: { initial: Hook[] }) {
   const [label, setLabel] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newSecret, setNewSecret] = useState<string | null>(null);
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
@@ -33,8 +34,9 @@ export function WebhookManager({ initial }: { initial: Hook[] }) {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error ?? "Failed to add webhook");
       }
-      const { hook } = await res.json();
+      const { hook, secret } = await res.json();
       setHooks([hook, ...hooks]);
+      setNewSecret(secret ?? null);
       setUrl("");
       setLabel("");
       router.refresh();
@@ -57,6 +59,33 @@ export function WebhookManager({ initial }: { initial: Hook[] }) {
   return (
     <div className="mt-6 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
       <h2 className="text-sm font-semibold text-gray-900">Your endpoints</h2>
+
+      {newSecret && (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-900">Save this signing secret now — it won&apos;t be shown again.</p>
+          <p className="mt-1 text-xs text-amber-800">
+            Each request will include header <code className="rounded bg-amber-100 px-1 py-0.5">x-faztino-signature: sha256=&lt;hex&gt;</code>{" "}
+            computed as HMAC-SHA256 of the raw body using this secret. Verify it on your endpoint to confirm the request came from faztino.
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <code className="flex-1 truncate rounded bg-white px-2 py-1.5 font-mono text-xs text-gray-900">{newSecret}</code>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard?.writeText(newSecret)}
+              className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs text-amber-900 hover:bg-amber-100"
+            >
+              Copy
+            </button>
+            <button
+              type="button"
+              onClick={() => setNewSecret(null)}
+              className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs text-amber-900 hover:bg-amber-100"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={add} className="mt-4 grid gap-3 sm:grid-cols-[1fr_200px_auto]">
         <input

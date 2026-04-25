@@ -22,7 +22,7 @@ export default async function WebhooksPage() {
       <div className="mt-6 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-gray-900">How it works</h2>
         <p className="mt-1 text-sm text-gray-600">
-          We POST a JSON payload to your URL with header <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">x-nestbot-event</code>.
+          We POST a JSON payload to your URL with header <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">x-faztino-event</code>.
           Supported events: <code className="text-xs">lead.created</code>, <code className="text-xs">appointment.created</code>.
         </p>
         <p className="mt-2 text-sm text-gray-600">
