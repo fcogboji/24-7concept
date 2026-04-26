@@ -74,7 +74,17 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors *; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'",
+            value: [
+              "frame-ancestors *",
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://js.stripe.com https://js.paystack.co",
+              "style-src 'self' 'unsafe-inline'",
+              "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://clerk-telemetry.com https://api.stripe.com https://api.paystack.co",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data: https:",
+              "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://js.stripe.com https://hooks.stripe.com https://checkout.paystack.com",
+              "worker-src 'self' blob:",
+            ].join("; "),
           },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
