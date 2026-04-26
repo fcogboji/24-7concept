@@ -9,8 +9,12 @@ const log = getLogger("stripe.webhook");
 
 export const runtime = "nodejs";
 
-function grantsProFromStripeStatus(status: Stripe.Subscription.Status): boolean {
+function statusGrantsAccess(status: Stripe.Subscription.Status): boolean {
   return status === "active" || status === "trialing";
+}
+
+function planFromMetadata(meta: Stripe.Metadata | null | undefined): "starter" | "pro" {
+  return meta?.plan === "starter" ? "starter" : "pro";
 }
 
 function isUniqueViolation(e: unknown): boolean {
@@ -57,14 +61,23 @@ export async function POST(req: Request) {
       const s = event.data.object as Stripe.Checkout.Session;
       const userId = s.metadata?.userId;
       if (userId && s.subscription) {
+        const subId = typeof s.subscription === "string" ? s.subscription : s.subscription?.id;
+        let initialStatus: Stripe.Subscription.Status = "active";
+        if (subId) {
+          try {
+            const sub = await stripe.subscriptions.retrieve(subId);
+            initialStatus = sub.status;
+          } catch {
+            // fall back to "active"
+          }
+        }
         await prisma.user.update({
           where: { id: userId },
           data: {
-            plan: "pro",
+            plan: planFromMetadata(s.metadata),
             stripeCustomerId: typeof s.customer === "string" ? s.customer : s.customer?.id,
-            stripeSubscriptionId:
-              typeof s.subscription === "string" ? s.subscription : s.subscription?.id,
-            subscriptionStatus: "active",
+            stripeSubscriptionId: subId,
+            subscriptionStatus: initialStatus,
           },
         });
       }
@@ -90,13 +103,14 @@ export async function POST(req: Request) {
       });
 
       if (user) {
-        const pro = grantsProFromStripeStatus(status);
+        const access = statusGrantsAccess(status);
+        const planFromSub = planFromMetadata(sub.metadata);
         await prisma.user.update({
           where: { id: user.id },
           data: {
             stripeCustomerId: customerId,
             subscriptionStatus: status,
-            plan: pro ? "pro" : "free",
+            plan: access ? planFromSub : "free",
             stripeSubscriptionId: status === "canceled" ? null : subId,
           },
         });

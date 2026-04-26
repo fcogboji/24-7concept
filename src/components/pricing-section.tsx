@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   ANNUAL_DISCOUNT,
-  CURRENCY_SYMBOL,
   formatPrice,
   PRICING_TIERS,
   type Currency,
@@ -31,7 +30,10 @@ export function PricingSection({ currency }: { currency: Currency }) {
             Simple pricing
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-gray-600">
-            Prices shown in {CURRENCY_SYMBOL[currency]} {currency}. 14-day free trial on every tier — cancel anytime.
+            Every paid plan starts with a <strong>14-day free trial</strong> — no charge until day 15, cancel anytime.
+            {currency === "NGN"
+              ? " Prices shown in ₦ NGN, billed via Paystack."
+              : " Prices shown in $ USD; cards in other currencies are converted by your bank."}
           </p>
 
           <div className="mt-8 inline-flex items-center rounded-full border border-gray-200 bg-white p-1 shadow-sm">
@@ -67,7 +69,11 @@ export function PricingSection({ currency }: { currency: Currency }) {
           {PRICING_TIERS.map((plan) => {
             const monthly = plan.monthly[currency];
             const displayed = billing === "annual" ? monthly * (1 - ANNUAL_DISCOUNT) : monthly;
-            const href = plan.enterprise ? "/contact" : "/register";
+            const href = plan.enterprise
+              ? "/contact"
+              : plan.id
+                ? `/register?plan=${plan.id}`
+                : "/register";
 
             return (
               <div

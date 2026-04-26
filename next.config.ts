@@ -111,7 +111,7 @@ const nextConfig: NextConfig = {
               "font-src 'self' data: https:",
               "style-src 'self' 'unsafe-inline'",
               `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com https://js.paystack.co`,
-              "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://api.stripe.com https://api.paystack.co https://*.upstash.io https://*.neon.tech",
+              "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk-telemetry.com https://api.stripe.com https://api.paystack.co https://*.upstash.io https://*.neon.tech",
               "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://js.stripe.com https://hooks.stripe.com https://checkout.paystack.com",
               "worker-src 'self' blob:",
             ].join("; "),

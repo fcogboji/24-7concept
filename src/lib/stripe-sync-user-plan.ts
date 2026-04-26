@@ -4,8 +4,12 @@ import { getStripeSecretKey } from "@/lib/stripe-env";
 
 const STRIPE_API_VERSION = "2026-03-25.dahlia" as const;
 
-function grantsProStatus(status: Stripe.Subscription.Status): boolean {
+function statusGrantsAccess(status: Stripe.Subscription.Status): boolean {
   return status === "active" || status === "trialing";
+}
+
+function planFromMetadata(meta: Stripe.Metadata | null | undefined): "starter" | "pro" {
+  return meta?.plan === "starter" ? "starter" : "pro";
 }
 
 /**
@@ -45,11 +49,12 @@ export async function syncUserPlanFromCheckoutSession(
     typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
   if (!customerId) return { ok: false };
 
-  const pro = grantsProStatus(sub.status);
+  const access = statusGrantsAccess(sub.status);
+  const plan = planFromMetadata(session.metadata) || planFromMetadata(sub.metadata);
   await prisma.user.update({
     where: { id: expectedUserId },
     data: {
-      plan: pro ? "pro" : "free",
+      plan: access ? plan : "free",
       stripeCustomerId: customerId,
       stripeSubscriptionId: sub.status === "canceled" ? null : sub.id,
       subscriptionStatus: sub.status,
@@ -91,12 +96,12 @@ export async function syncUserPlanFromStripeByEmail(
     } catch {
       continue;
     }
-    const active = subs.find((s) => grantsProStatus(s.status));
+    const active = subs.find((s) => statusGrantsAccess(s.status));
     if (active) {
       await prisma.user.update({
         where: { id: userId },
         data: {
-          plan: "pro",
+          plan: planFromMetadata(active.metadata),
           stripeCustomerId: c.id,
           stripeSubscriptionId: active.id,
           subscriptionStatus: active.status,

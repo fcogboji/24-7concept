@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
-import { canUserCreateBot, FREE_MAX_ASSISTANTS } from "@/lib/plan";
+import { canUserCreateBot } from "@/lib/plan";
 import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
 import { rateLimitBotCreate } from "@/lib/rate-limit";
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   if (!allowed) {
     return NextResponse.json(
       {
-        error: `Free plan allows up to ${FREE_MAX_ASSISTANTS} assistants. Upgrade to Pro for more.`,
+        error: "Subscribe to Starter or Pro to create assistants. 14-day free trial — cancel anytime.",
       },
       { status: 402 }
     );

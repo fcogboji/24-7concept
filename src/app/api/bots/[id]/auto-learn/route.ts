@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getOpenAI } from "@/lib/openai";
 import { crawlWebsiteForTraining } from "@/lib/crawler";
 import { rateLimitTrain } from "@/lib/rate-limit";
-import { canUserTrain, FREE_MONTHLY_TRAIN_CAP } from "@/lib/plan";
+import { canUserTrain } from "@/lib/plan";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -48,7 +48,7 @@ export async function POST(_req: Request, context: RouteContext) {
   if (!planAllows) {
     return NextResponse.json(
       {
-        error: `Free plan allows up to ${FREE_MONTHLY_TRAIN_CAP} trainings per month. Upgrade to Pro for unlimited.`,
+        error: "Subscribe to Starter or Pro to train assistants. 14-day free trial — cancel anytime.",
       },
       { status: 402 },
     );

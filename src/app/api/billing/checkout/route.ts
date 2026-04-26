@@ -4,6 +4,7 @@ import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { rateLimitStripeBilling } from "@/lib/rate-limit";
 import { createPaystackCheckoutForUser, createStripeCheckoutForUser } from "@/lib/checkout";
 import { isPaystackEnabled } from "@/lib/paystack-env";
+import type { PlanId } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 
@@ -17,7 +18,17 @@ async function detectCountry(): Promise<string | null> {
   );
 }
 
-export async function POST() {
+async function readPlan(req: Request): Promise<PlanId> {
+  try {
+    const body = (await req.json()) as { plan?: unknown };
+    if (body?.plan === "starter" || body?.plan === "pro") return body.plan;
+  } catch {
+    // empty body — fall through
+  }
+  return "pro";
+}
+
+export async function POST(req: Request) {
   const appUser = await getOrCreateAppUser();
   if (!appUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,12 +42,13 @@ export async function POST() {
     );
   }
 
+  const plan = await readPlan(req);
   const country = (await detectCountry())?.toUpperCase() ?? null;
   const useNaira = country === "NG" && isPaystackEnabled();
 
   const result = useNaira
-    ? await createPaystackCheckoutForUser(appUser)
-    : await createStripeCheckoutForUser(appUser);
+    ? await createPaystackCheckoutForUser(appUser, plan)
+    : await createStripeCheckoutForUser(appUser, plan);
 
   if (!result.ok) {
     return NextResponse.json(result.body, { status: result.status });

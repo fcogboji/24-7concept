@@ -1,12 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
-import {
-  countUserMessagesThisMonth,
-  FREE_MAX_ASSISTANTS,
-  FREE_MONTHLY_MESSAGE_CAP,
-  subscriptionGrantsPro,
-} from "@/lib/plan";
+import { subscriptionIsActive } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { syncUserPlanFromCheckoutSession, syncUserPlanFromStripeByEmail } from "@/lib/stripe-sync-user-plan";
 import { redirect } from "next/navigation";
@@ -73,7 +68,7 @@ export default async function DashboardPage({
       where: { id: appUser.id },
       select: { plan: true, subscriptionStatus: true },
     });
-    if (snap && !subscriptionGrantsPro(snap.plan, snap.subscriptionStatus)) {
+    if (snap && !subscriptionIsActive(snap.plan, snap.subscriptionStatus)) {
       const { ok } = await syncUserPlanFromStripeByEmail(appUser.id, appUser.email);
       if (ok) {
         redirect("/dashboard?checkout=success");
@@ -96,11 +91,11 @@ export default async function DashboardPage({
     },
   });
 
-  const effectivePro = user
-    ? subscriptionGrantsPro(user.plan, user.subscriptionStatus)
+  const isSubscribed = user
+    ? subscriptionIsActive(user.plan, user.subscriptionStatus)
     : false;
-  const messagesUsed = await countUserMessagesThisMonth(appUser.id);
-  const showFreeUsage = !effectivePro;
+  const trialing = isSubscribed && user?.subscriptionStatus === "trialing";
+  const planName = user?.plan === "starter" ? "Starter" : user?.plan === "pro" ? "Pro" : null;
 
   const [totalMessages, totalLeads, totalChunks] = await Promise.all([
     prisma.message.count({ where: { bot: { userId: appUser.id } } }),
@@ -112,20 +107,20 @@ export default async function DashboardPage({
     <div>
       {params.checkout === "success" && (
         <p className="mb-6 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
-          Thanks — payment received. If the sidebar still says Free, click <strong>Refresh plan from Stripe</strong> below
+          Thanks — your trial has started. If the sidebar still shows the wrong plan, click <strong>Refresh plan from Stripe</strong> below
           (your database may not have received the webhook yet, e.g. on localhost).
         </p>
       )}
       {params.checkout === "cancel" && (
         <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-          Checkout was cancelled. You can upgrade anytime from this page.
+          Checkout was cancelled. You can start your 14-day free trial anytime from this page.
         </p>
       )}
 
-      {user?.plan === "pro" && !effectivePro && (
+      {(user?.plan === "starter" || user?.plan === "pro") && !isSubscribed && (
         <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           Your subscription needs attention (payment or status). Update your payment method or review your plan in
-          billing — free-tier limits apply until Pro is active again.
+          billing — access is paused until the subscription is active again.
         </p>
       )}
 
@@ -157,21 +152,28 @@ export default async function DashboardPage({
         }
       />
 
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        {!effectivePro && <CheckoutButton />}
-        {!effectivePro && <SyncPlanButton />}
-        {user?.stripeCustomerId && <ManageBillingButton />}
-      </div>
-
-      {showFreeUsage && (
-        <p className="mb-8 text-sm text-gray-600">
-          <span className="font-medium text-gray-900">Free plan:</span> {messagesUsed.toLocaleString()} /{" "}
-          {FREE_MONTHLY_MESSAGE_CAP} assistant messages this month · up to {FREE_MAX_ASSISTANTS} assistants.{" "}
-          <span className="text-gray-500">Pro removes the message cap.</span>
-        </p>
+      {!isSubscribed && (
+        <div className="mb-8 rounded-xl border border-teal-200 bg-teal-50/60 p-5">
+          <h2 className="text-base font-semibold text-teal-900">Start your 14-day free trial</h2>
+          <p className="mt-1 text-sm text-teal-900/80">
+            Pick a plan to use the dashboard. You won&apos;t be charged for 14 days and can cancel anytime.
+          </p>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <CheckoutButton plan="starter" />
+            <CheckoutButton plan="pro" />
+            <SyncPlanButton />
+            {user?.stripeCustomerId && <ManageBillingButton />}
+          </div>
+        </div>
       )}
-      {effectivePro && (
-        <p className="mb-8 text-sm font-medium text-emerald-800">Pro — unlimited assistant messages this month.</p>
+
+      {isSubscribed && (
+        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <p className="text-sm font-medium text-emerald-800">
+            {planName} {trialing ? "trial — full access for 14 days" : "— full access"}.
+          </p>
+          {user?.stripeCustomerId && <ManageBillingButton />}
+        </div>
       )}
 
       <div className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

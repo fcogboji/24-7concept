@@ -24,7 +24,7 @@ export async function getAdminOverviewStats() {
     prisma.bot.count(),
     prisma.message.count(),
     prisma.lead.count(),
-    prisma.user.count({ where: { plan: "pro" } }),
+    prisma.user.count({ where: { plan: { in: ["starter", "pro"] } } }),
     prisma.user.count({ where: { emailVerifiedAt: null } }),
     prisma.user.count({ where: { createdAt: { gte: d7 } } }),
     prisma.user.count({

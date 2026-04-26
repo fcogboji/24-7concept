@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
-import { subscriptionGrantsPro } from "@/lib/plan";
+import { subscriptionIsActive } from "@/lib/plan";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
@@ -14,12 +14,22 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const effectivePro = subscriptionGrantsPro(
+  const active = subscriptionIsActive(
     appUser.plan,
     appUser.subscriptionStatus ?? null
   );
-  const planLabel =
-    appUser.plan === "pro" && !effectivePro ? "Pro (inactive)" : effectivePro ? "Pro plan" : "Free plan";
+  const planLabel = (() => {
+    if (active) {
+      if (appUser.subscriptionStatus === "trialing") {
+        return appUser.plan === "starter" ? "Starter (trial)" : "Pro (trial)";
+      }
+      return appUser.plan === "starter" ? "Starter plan" : "Pro plan";
+    }
+    if (appUser.plan === "starter" || appUser.plan === "pro") {
+      return `${appUser.plan === "starter" ? "Starter" : "Pro"} (inactive)`;
+    }
+    return "No subscription";
+  })();
   const identity = (appUser.name?.trim() || appUser.email || "User").trim();
   const initial = identity.charAt(0).toUpperCase();
 

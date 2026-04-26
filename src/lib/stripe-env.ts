@@ -3,6 +3,8 @@
  * Used by checkout, portal, and webhook routes.
  */
 
+import type { PlanId } from "@/lib/pricing";
+
 function trimmed(name: string): string | undefined {
   const v = process.env[name]?.trim();
   return v || undefined;
@@ -11,6 +13,15 @@ function trimmed(name: string): string | undefined {
 /** Server-side secret: `STRIPE_SECRET_KEY` or Stripe-dashboard-style `STRIPE_API_KEY`. */
 export function getStripeSecretKey(): string | undefined {
   return trimmed("STRIPE_SECRET_KEY") ?? trimmed("STRIPE_API_KEY");
+}
+
+/** Recurring Starter subscription price id (`price_…`). */
+export function getStripeStarterPriceId(): string | undefined {
+  return (
+    trimmed("STRIPE_PRICE_STARTER") ??
+    trimmed("STRIPE_STARTER_PRICE_ID") ??
+    trimmed("NEXT_PUBLIC_STRIPE_PRICE_STARTER")
+  );
 }
 
 /**
@@ -26,13 +37,19 @@ export function getStripeProPriceId(): string | undefined {
   );
 }
 
+export function getStripePriceIdForPlan(plan: PlanId): string | undefined {
+  return plan === "starter" ? getStripeStarterPriceId() : getStripeProPriceId();
+}
+
 export type StripeCheckoutConfigCode = "MISSING_STRIPE_SECRET" | "MISSING_STRIPE_PRICE";
 
-export function getStripeCheckoutConfigIssue():
+export function getStripeCheckoutConfigIssue(
+  plan: PlanId,
+):
   | { ok: true; secretKey: string; priceId: string }
   | { ok: false; code: StripeCheckoutConfigCode } {
   const secretKey = getStripeSecretKey();
-  const priceId = getStripeProPriceId();
+  const priceId = getStripePriceIdForPlan(plan);
   if (!secretKey) return { ok: false, code: "MISSING_STRIPE_SECRET" };
   if (!priceId) return { ok: false, code: "MISSING_STRIPE_PRICE" };
   return { ok: true, secretKey, priceId };

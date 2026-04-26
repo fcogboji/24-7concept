@@ -32,6 +32,13 @@ function extractUserId(meta: PaystackEvent["data"]["metadata"]): string | null {
   return typeof v === "string" ? v : null;
 }
 
+function extractPlan(meta: PaystackEvent["data"]["metadata"]): "starter" | "pro" {
+  if (!meta) return "pro";
+  const obj = typeof meta === "string" ? safeJson(meta) : meta;
+  const v = obj && typeof obj === "object" ? (obj as Record<string, unknown>).plan : undefined;
+  return v === "starter" ? "starter" : "pro";
+}
+
 function safeJson(s: string): Record<string, unknown> | null {
   try {
     const parsed = JSON.parse(s);
@@ -89,7 +96,7 @@ export async function POST(req: Request) {
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          plan: "pro",
+          plan: extractPlan(event.data.metadata),
           stripeCustomerId: customerCode ?? user.stripeCustomerId,
           stripeSubscriptionId: event.data.subscription_code ?? user.stripeSubscriptionId,
           subscriptionStatus: "active",
