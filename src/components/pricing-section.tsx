@@ -70,7 +70,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
             const monthly = plan.monthly[currency];
             const displayed = billing === "annual" ? monthly * (1 - ANNUAL_DISCOUNT) : monthly;
             const href = plan.enterprise
-              ? "/contact"
+              ? "mailto:hello@faztino.com?subject=Enterprise%20plan%20enquiry"
               : plan.id
                 ? `/register?plan=${plan.id}`
                 : "/register";
