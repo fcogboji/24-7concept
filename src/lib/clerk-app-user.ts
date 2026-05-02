@@ -29,9 +29,6 @@ export async function getOrCreateAppUser() {
     [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ").trim() || null;
 
   const existingByEmail = await prisma.user.findUnique({ where: { email } });
-  if (existingByEmail?.clerkId && existingByEmail.clerkId !== userId) {
-    return null;
-  }
 
   try {
     return await prisma.user.upsert({
@@ -43,6 +40,11 @@ export async function getOrCreateAppUser() {
         emailVerifiedAt: new Date(),
       },
       update: {
+        // Claim the row for the currently authenticated Clerk user. A stale
+        // clerkId here usually means the Clerk instance was reset or the
+        // account was re-created with the same email — Clerk already enforces
+        // primary-email uniqueness, so trusting its userId is safe and avoids
+        // a /login ↔ /dashboard redirect loop.
         clerkId: userId,
         ...(name ? { name } : {}),
         ...(existingByEmail && !existingByEmail.emailVerifiedAt

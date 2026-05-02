@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SignIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 import { safeAppRedirectPath } from "@/lib/safe-redirect";
@@ -12,6 +14,14 @@ export default async function LoginPage({
   const params = await searchParams;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const afterSignIn = safeAppRedirectPath(params.callbackUrl, appUrl);
+
+  // If Clerk already has a session, send the user straight to the dashboard
+  // server-side. Letting <SignIn> handle this on the client triggers a
+  // login ↔ dashboard flicker if the dashboard then bounces back to /login.
+  const { userId } = await auth();
+  if (userId) {
+    redirect(afterSignIn);
+  }
 
   return (
     <div
