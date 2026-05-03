@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getChatModel, getOpenAI, getRoutingModel } from "@/lib/openai";
 import { getRelevantChunksScored } from "@/lib/retrieve";
-import { rateLimitChat } from "@/lib/rate-limit";
+import { rateLimitChat, rateLimitChatBotGlobal } from "@/lib/rate-limit";
 import { canUserSendMessage } from "@/lib/plan";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
 import { bookingTools, handleBookingTool } from "@/lib/booking-tools";
@@ -81,11 +81,20 @@ export async function POST(req: NextRequest) {
     }
 
     const ip = clientIp(req);
-    const limit = await rateLimitChat(`${ip}:${botId}`);
-    if (!limit.ok) {
+    const ipLimit = await rateLimitChat(`${ip}:${botId}`);
+    if (!ipLimit.ok) {
       return NextResponse.json(
         { error: "Too many messages. Try again shortly." },
-        { status: 429, headers: { ...cors, "Retry-After": String(limit.retryAfter) } }
+        { status: 429, headers: { ...cors, "Retry-After": String(ipLimit.retryAfter) } }
+      );
+    }
+    // Global cap per bot (across all IPs) so a distributed botnet cannot
+    // drain the workspace's monthly OpenAI quota in a single burst.
+    const botLimit = await rateLimitChatBotGlobal(botId);
+    if (!botLimit.ok) {
+      return NextResponse.json(
+        { error: "This assistant is receiving too many requests right now. Try again shortly." },
+        { status: 429, headers: { ...cors, "Retry-After": String(botLimit.retryAfter) } }
       );
     }
 

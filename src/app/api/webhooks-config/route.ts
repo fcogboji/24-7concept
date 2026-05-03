@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
 import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
-import { generateWebhookSecret } from "@/lib/webhooks";
+import { generateWebhookSecret, wrapSecretForStorage } from "@/lib/webhooks";
 
 const createSchema = z.object({
   url: z.string().url().max(2000),
@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Invalid URL" }, { status: 400 });
   }
 
+  // Generate the plaintext secret to show the customer once; store the
+  // encrypted form so a DB dump cannot impersonate their webhook signatures.
   const secret = generateWebhookSecret();
   const hook = await prisma.webhook.create({
     data: {
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
       url: parsed.data.url,
       label: parsed.data.label ?? null,
       events: parsed.data.events,
-      secret,
+      secret: wrapSecretForStorage(secret),
     },
   });
   return NextResponse.json({

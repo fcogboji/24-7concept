@@ -28,7 +28,28 @@ function redact(value: unknown, depth = 0): unknown {
   return value;
 }
 
-function emit(level: "info" | "warn" | "error", scope: string, msg: string, ctx?: LogContext) {
+function forwardToSentry(level: "warn" | "error", scope: string, msg: string, err: unknown, ctx?: LogContext) {
+  if (!process.env.SENTRY_DSN) return;
+  // Dynamic import so the Sentry SDK is never loaded when DSN is unset.
+  import("@sentry/nextjs")
+    .then((Sentry) => {
+      Sentry.withScope((s) => {
+        s.setTag("scope", scope);
+        s.setLevel(level === "error" ? "error" : "warning");
+        if (ctx) s.setContext("ctx", redact(ctx) as Record<string, unknown>);
+        if (err instanceof Error) {
+          Sentry.captureException(err);
+        } else {
+          Sentry.captureMessage(msg);
+        }
+      });
+    })
+    .catch(() => {
+      // never throw out of a logger
+    });
+}
+
+function emit(level: "info" | "warn" | "error", scope: string, msg: string, ctx?: LogContext, err?: unknown) {
   const entry = {
     level,
     scope,
@@ -46,6 +67,9 @@ function emit(level: "info" | "warn" | "error", scope: string, msg: string, ctx?
     else if (level === "warn") console.warn(`[${scope}] ${msg}`, ctx ?? "");
     else console.log(`[${scope}] ${msg}`, ctx ?? "");
   }
+  if (level === "warn" || level === "error") {
+    forwardToSentry(level, scope, msg, err, ctx);
+  }
 }
 
 export function getLogger(scope: string) {
@@ -59,7 +83,7 @@ export function getLogger(scope: string) {
           : err !== undefined
             ? { error: err }
             : {};
-      emit("error", scope, msg, { ...errCtx, ...(ctx ?? {}) });
+      emit("error", scope, msg, { ...errCtx, ...(ctx ?? {}) }, err);
     },
   };
 }

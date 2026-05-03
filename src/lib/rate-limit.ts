@@ -108,6 +108,26 @@ function getSessionProbeRatelimit(): Ratelimit | null {
   return sessionProbeRatelimit;
 }
 
+/**
+ * Per-bot global cap on /api/chat. The per-IP-per-bot limit alone would let
+ * a botnet across many IPs drain one bot's monthly OpenAI quota in minutes.
+ * 600 req/min per bot is generous for a real site (10 visitors talking
+ * concurrently) while still bounding worst-case spend per bot.
+ */
+let chatBotGlobalRatelimit: Ratelimit | null = null;
+function getChatBotGlobalRatelimit(): Ratelimit | null {
+  const redis = getRedis();
+  if (!redis) return null;
+  if (!chatBotGlobalRatelimit) {
+    chatBotGlobalRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(600, "60 s"),
+      prefix: "faztino:rl:chatbot",
+    });
+  }
+  return chatBotGlobalRatelimit;
+}
+
 /** POST /api/bots/[id]/train — crawl + embeddings (per bot). */
 let trainRatelimit: Ratelimit | null = null;
 function getTrainRatelimit(): Ratelimit | null {
@@ -275,4 +295,9 @@ export async function rateLimitTrain(botId: string) {
 /** Creating new bots per workspace. */
 export async function rateLimitBotCreate(userId: string) {
   return limitOrMemory(getBotCreateRatelimit(), `u:${userId}`, 25, 60 * 60 * 1000);
+}
+
+/** Global per-bot chat cap (across all IPs) — burst protection for OpenAI cost. */
+export async function rateLimitChatBotGlobal(botId: string) {
+  return limitOrMemory(getChatBotGlobalRatelimit(), `b:${botId}`, 600, 60_000);
 }
