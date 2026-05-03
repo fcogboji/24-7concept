@@ -42,21 +42,12 @@ export const metadata: Metadata = {
       "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
     type: "website",
     locale: "en_GB",
-    images: [
-      {
-        url: "/robot-chat-replies.png",
-        width: 1200,
-        height: 900,
-        alt: "faztino AI assistant with chat replies",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "faztino — AI support for your website",
     description:
       "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
-    images: ["/robot-chat-replies.png"],
   },
 };
 
