@@ -39,7 +39,7 @@ export default async function ConversationDetailPage({
   if (messages.length === 0) notFound();
 
   const lead = await prisma.lead.findFirst({
-    where: { sessionId },
+    where: { sessionId, bot: { userId: appUser.id } },
   });
 
   const botName = messages[0].bot.name;

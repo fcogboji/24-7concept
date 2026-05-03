@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/paystack";
+import { getPaystackProPlanCode, getPaystackStarterPlanCode } from "@/lib/paystack-env";
 import { getLogger } from "@/lib/logger";
 
 const log = getLogger("paystack.webhook");
@@ -37,6 +38,36 @@ function extractPlan(meta: PaystackEvent["data"]["metadata"]): "starter" | "pro"
   const obj = typeof meta === "string" ? safeJson(meta) : meta;
   const v = obj && typeof obj === "object" ? (obj as Record<string, unknown>).plan : undefined;
   return v === "starter" ? "starter" : "pro";
+}
+
+/**
+ * Cross-check the plan code Paystack returned against the codes we registered
+ * via env. Returns the validated plan id, or null if Paystack sent a code we
+ * don't recognise (in which case we refuse to grant entitlement). This blocks
+ * a tampered-checkout where metadata says "pro" but the actual subscription
+ * is for an arbitrary or starter plan code.
+ */
+function validatePlanFromEvent(
+  metaPlan: "starter" | "pro",
+  eventPlan: PaystackEvent["data"]["plan"],
+): "starter" | "pro" | null {
+  const planCode =
+    typeof eventPlan === "string"
+      ? eventPlan
+      : eventPlan && typeof eventPlan === "object"
+        ? eventPlan.plan_code
+        : undefined;
+
+  // For one-off charges (charge.success without subscription), the event has
+  // no plan code. Trust metadata in that case — Paystack still authenticated
+  // the body via HMAC.
+  if (!planCode) return metaPlan;
+
+  const starter = getPaystackStarterPlanCode();
+  const pro = getPaystackProPlanCode();
+  if (pro && planCode === pro) return "pro";
+  if (starter && planCode === starter) return "starter";
+  return null;
 }
 
 function safeJson(s: string): Record<string, unknown> | null {
@@ -93,10 +124,21 @@ export async function POST(req: Request) {
     }
 
     if (event.event === "charge.success" || event.event === "subscription.create") {
+      const metaPlan = extractPlan(event.data.metadata);
+      const validatedPlan = validatePlanFromEvent(metaPlan, event.data.plan);
+      if (!validatedPlan) {
+        log.error("rejecting unknown plan_code", undefined, {
+          eventId,
+          type: event.event,
+          metaPlan,
+          eventPlan: event.data.plan,
+        });
+        return NextResponse.json({ received: true });
+      }
       await prisma.user.update({
         where: { id: user.id },
         data: {
-          plan: extractPlan(event.data.metadata),
+          plan: validatedPlan,
           stripeCustomerId: customerCode ?? user.stripeCustomerId,
           stripeSubscriptionId: event.data.subscription_code ?? user.stripeSubscriptionId,
           subscriptionStatus: "active",

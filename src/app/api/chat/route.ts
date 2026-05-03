@@ -90,15 +90,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (!bot.isDemo) {
-      const allowed = await canUserSendMessage(bot.userId);
-      if (!allowed) {
-        return NextResponse.json(
-          {
-            error:
-              "Message limit reached for this workspace. Upgrade to continue, or wait until next month.",
-          },
-          { status: 402, headers: cors }
-        );
+      const decision = await canUserSendMessage(bot.userId);
+      if (!decision.ok) {
+        const errorBody =
+          decision.reason === "quota"
+            ? {
+                error:
+                  "This workspace has reached its monthly message limit. Please upgrade or wait until next month.",
+                used: decision.used,
+                limit: decision.limit,
+              }
+            : {
+                error:
+                  "This workspace's subscription is not active. Please contact the site owner.",
+              };
+        return NextResponse.json(errorBody, { status: 402, headers: cors });
       }
     }
 
@@ -206,12 +212,19 @@ export async function POST(req: NextRequest) {
       { role: "user", content: message },
     ];
 
+    // Cap output length on every OpenAI call so a malicious or malformed
+    // prompt cannot run up an unbounded bill. Tuned for short customer-facing
+    // replies plus a small headroom for tool-call JSON.
+    const MAX_TOOL_ROUND_TOKENS = 600;
+    const MAX_REPLY_TOKENS = 800;
+
     const MAX_TOOL_ROUNDS = 5;
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
       const completion = await openai.chat.completions.create({
         model: routingModel,
         messages,
         tools,
+        max_tokens: MAX_TOOL_ROUND_TOKENS,
       });
 
       const assistantMsg = completion.choices[0].message;
@@ -237,6 +250,7 @@ export async function POST(req: NextRequest) {
       model: chatModel,
       stream: true,
       messages,
+      max_tokens: MAX_REPLY_TOKENS,
     });
 
     const encoder = new TextEncoder();

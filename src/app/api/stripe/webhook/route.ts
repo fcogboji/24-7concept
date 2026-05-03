@@ -103,6 +103,11 @@ export async function POST(req: Request) {
       });
 
       if (user) {
+        // Only promote plan when status grants access. Never downgrade plan
+        // here — transient statuses (incomplete, past_due, unpaid) and event
+        // ordering (created arriving after checkout.session.completed) would
+        // otherwise flap a real customer between Pro and free. Final
+        // downgrade happens on customer.subscription.deleted.
         const access = statusGrantsAccess(status);
         const planFromSub = planFromMetadata(sub.metadata);
         await prisma.user.update({
@@ -110,8 +115,7 @@ export async function POST(req: Request) {
           data: {
             stripeCustomerId: customerId,
             subscriptionStatus: status,
-            plan: access ? planFromSub : "free",
-            stripeSubscriptionId: status === "canceled" ? null : subId,
+            ...(access ? { plan: planFromSub } : {}),
           },
         });
       }

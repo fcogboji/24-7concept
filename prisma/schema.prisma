@@ -24,6 +24,9 @@ model User {
   bots                   Bot[]
   auditLogs              AuditLog[]
   webhooks               Webhook[]
+
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
 }
 
 model Webhook {
@@ -81,7 +84,10 @@ model Bot {
   trainingStartedAt DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict (not Cascade) so an accidental User row delete cannot wipe a
+  // paying customer's bots and all their conversation/lead history. Account
+  // deletion must explicitly purge bots first.
+  user              User      @relation(fields: [userId], references: [id], onDelete: Restrict)
   sources           Source[]
   messages          Message[]
   leads             Lead[]
@@ -105,6 +111,7 @@ model Lead {
   bot       Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
 
   @@index([botId, createdAt])
+  @@index([botId, email])
   @@index([sessionId])
 }
 

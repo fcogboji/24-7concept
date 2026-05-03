@@ -46,7 +46,15 @@ export async function POST(req: Request) {
   }
 
   const allowed = await canUserCreateBot(appUser.id);
-  if (!allowed) {
+  if (!allowed.ok) {
+    if (allowed.reason === "limit") {
+      return NextResponse.json(
+        {
+          error: `Your plan is limited to ${allowed.limit} assistant${allowed.limit === 1 ? "" : "s"}. Upgrade to add more.`,
+        },
+        { status: 402 }
+      );
+    }
     return NextResponse.json(
       {
         error: "Subscribe to Starter or Pro to create assistants. 14-day free trial — cancel anytime.",

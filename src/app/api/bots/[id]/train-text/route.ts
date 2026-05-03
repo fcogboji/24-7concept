@@ -43,6 +43,18 @@ export async function POST(req: Request, context: RouteContext) {
     return NextResponse.json({ error: "OPENAI_API_KEY is not configured" }, { status: 500 });
   }
 
+  // Reject oversized request bodies before parsing so a malicious payload
+  // can't blow up memory or run up embedding costs by sneaking past the
+  // post-parse cap.
+  const MAX_BODY_BYTES = 200_000;
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json(
+      { error: `Request body too large (max ${MAX_BODY_BYTES} bytes).` },
+      { status: 413 }
+    );
+  }
+
   let body: { text?: string };
   try {
     body = (await req.json()) as { text?: string };
@@ -61,6 +73,12 @@ export async function POST(req: Request, context: RouteContext) {
 
   // Cap at a reasonable size to prevent abuse / excessive embedding costs.
   const MAX_TEXT = 100_000;
+  if (text.length > MAX_TEXT) {
+    return NextResponse.json(
+      { error: `Pasted text too long (max ${MAX_TEXT} characters).` },
+      { status: 413 }
+    );
+  }
   const raw = text.slice(0, MAX_TEXT);
 
   // Prevent concurrent training — stale locks older than 5 minutes are ignored.
