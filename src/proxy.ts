@@ -10,6 +10,13 @@ const isPublicRoute = createRouteMatcher([
   "/reset-password(.*)",
   "/verify-email(.*)",
   "/widget.js",
+  // SEO + favicon. Googlebot crawls signed-out, so these must bypass auth or the
+  // search result shows a generic globe icon and the sitemap/robots are unreachable.
+  "/icon(.*)",
+  "/apple-icon(.*)",
+  "/favicon.ico",
+  "/sitemap.xml",
+  "/robots.txt",
   // All embed routes (widget-js, chat, future paths) must stay public for third-party iframes/scripts.
   "/embed(.*)",
   "/api/chat(.*)",
