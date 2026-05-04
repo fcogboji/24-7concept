@@ -30,21 +30,12 @@ const isPublicRoute = createRouteMatcher([
   "/admin/unauthorized(.*)",
 ]);
 
-export default clerkMiddleware(
-  async (auth, req) => {
-    if (isPublicRoute(req)) {
-      return;
-    }
-    await auth.protect();
-  },
-  {
-    // clerk-js v6.8 auto-switches to proxy mode (`<origin>/__clerk/v1/*`) when the
-    // hostname ends with `.vercel.app` — i.e. on every Vercel preview URL. Without
-    // this proxy, those requests 404 and login disappears on previews.
-    // No-op on the apex domain because clerk-js still uses the CNAME there.
-    frontendApiProxy: { enabled: true },
-  },
-);
+export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) {
+    return;
+  }
+  await auth.protect();
+});
 
 export const config = {
   matcher: [
