@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { CheckoutButton } from "./checkout-button";
 import { ManageBillingButton } from "./manage-billing-button";
 import { SyncPlanButton } from "./sync-plan-button";
 import { SubscriptionWallSignOut } from "./subscription-wall-sign-out";
+import { SubscriptionWallAutoSync } from "./subscription-wall-auto-sync";
 
 export function SubscriptionWall({
   identity,
@@ -23,6 +25,10 @@ export function SubscriptionWall({
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-12">
+        {/* useSearchParams must be wrapped in Suspense per Next.js App Router rules. */}
+        <Suspense fallback={null}>
+          <SubscriptionWallAutoSync />
+        </Suspense>
         {reason === "needs-attention" ? (
           <>
             <h1 className="text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
