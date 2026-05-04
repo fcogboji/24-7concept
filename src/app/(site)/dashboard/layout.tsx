@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { SubscriptionWall } from "./subscription-wall";
 
 export default async function DashboardLayout({
   children,
@@ -41,19 +42,35 @@ export default async function DashboardLayout({
     appUser.plan,
     appUser.subscriptionStatus ?? null
   );
-  const planLabel = (() => {
-    if (active) {
-      if (appUser.subscriptionStatus === "trialing") {
-        return appUser.plan === "starter" ? "Starter (trial)" : "Pro (trial)";
-      }
-      return appUser.plan === "starter" ? "Starter plan" : "Pro plan";
-    }
-    if (appUser.plan === "starter" || appUser.plan === "pro") {
-      return `${appUser.plan === "starter" ? "Starter" : "Pro"} (inactive)`;
-    }
-    return "No subscription";
-  })();
   const identity = (appUser.name?.trim() || appUser.email || "User").trim();
+
+  if (!active) {
+    // Hard paywall: no dashboard rendering until the user is on Starter/Pro and
+    // status is active|trialing|past_due. Webhooks (Stripe/Paystack) flip the
+    // status; the SyncPlanButton on the wall is a manual fallback for delays.
+    // Users mid-checkout-redirect briefly see this wall before the webhook
+    // fires — that's intentional and far less risky than letting non-payers in.
+    return (
+      <SubscriptionWall
+        identity={identity}
+        hasStripeCustomerId={Boolean(appUser.stripeCustomerId)}
+        reason={
+          appUser.plan === "starter" || appUser.plan === "pro"
+            ? "needs-attention"
+            : "no-subscription"
+        }
+      />
+    );
+  }
+
+  const planLabel =
+    appUser.subscriptionStatus === "trialing"
+      ? appUser.plan === "starter"
+        ? "Starter (trial)"
+        : "Pro (trial)"
+      : appUser.plan === "starter"
+        ? "Starter plan"
+        : "Pro plan";
   const initial = identity.charAt(0).toUpperCase();
 
   const firstBot = await prisma.bot.findFirst({
