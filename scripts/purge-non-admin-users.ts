@@ -20,6 +20,8 @@
 import { PrismaClient } from "@prisma/client";
 
 const ADMIN_EMAIL = "friday.ogboji100@gmail.com";
+// Additional emails to spare (kept alongside the admin). Lower-case for compare.
+const EXTRA_KEEP_EMAILS = ["demo@faztino.app"];
 
 function dbHostFromUrl(url: string | undefined): string {
   if (!url) return "<no DATABASE_URL set>";
@@ -51,8 +53,18 @@ async function main() {
   }
   console.log("Admin User row:   ", admin.id, "| plan:", admin.plan);
 
+  const keepEmailsLc = new Set(
+    [admin.email, ...EXTRA_KEEP_EMAILS].map((e) => e.toLowerCase()),
+  );
+  const keepRows = await prisma.user.findMany({
+    where: { email: { in: Array.from(keepEmailsLc), mode: "insensitive" } },
+    select: { id: true, email: true },
+  });
+  const keepIds = keepRows.map((r) => r.id);
+  console.log("Also keeping:     ", keepRows.filter((r) => r.id !== admin.id).map((r) => r.email).join(", ") || "—");
+
   const targets = await prisma.user.findMany({
-    where: { id: { not: admin.id } },
+    where: { id: { notIn: keepIds } },
     select: {
       id: true,
       email: true,
