@@ -17,7 +17,7 @@ export function getWidgetCorsHeaders(req: Request): Record<string, string> | nul
     }
     return {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       Vary: "Origin",
     };
@@ -27,7 +27,7 @@ export function getWidgetCorsHeaders(req: Request): Record<string, string> | nul
   if (origin) {
     return {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       Vary: "Origin",
     };
@@ -35,7 +35,7 @@ export function getWidgetCorsHeaders(req: Request): Record<string, string> | nul
 
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 }

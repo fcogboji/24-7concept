@@ -30,17 +30,26 @@ const isPublicRoute = createRouteMatcher([
   "/admin/unauthorized(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isPublicRoute(req)) {
-    return;
-  }
-  await auth.protect();
-});
+export default clerkMiddleware(
+  async (auth, req) => {
+    if (isPublicRoute(req)) {
+      return;
+    }
+    await auth.protect();
+  },
+  {
+    /**
+     * Proxies `/__clerk/*` to Clerk’s Frontend API so clerk-js can load when
+     * direct browser calls are blocked or when using the default dev/proxy setup.
+     */
+    frontendApiProxy: { enabled: true },
+  },
+);
 
 export const config = {
   matcher: [
     /*
-     * Run Clerk middleware on every route EXCEPT:
+     * Run Clerk proxy on every route EXCEPT:
      *  - _next internals & static assets (default Next.js convention)
      *  - /embed/* paths — these load inside cross-origin iframes where
      *    Clerk's dev-browser handshake fails (third-party cookies blocked

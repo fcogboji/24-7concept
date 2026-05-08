@@ -83,6 +83,10 @@
     /**
      * Prevent iframe content from navigating the top-level customer page.
      * Keep only capabilities needed for Next.js app + form interactions inside widget.
+     *
+     * Chromium may warn that allow-scripts + allow-same-origin lets embedded same-origin
+     * documents lift sandbox restrictions. Here the iframe src is only our `/embed/chat`
+     * URL (trusted), and same-origin is required for the embedded app to call our APIs.
      */
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
     iframe.setAttribute("allowtransparency", "true");
