@@ -30,6 +30,11 @@ const isPublicRoute = createRouteMatcher([
   "/admin/unauthorized(.*)",
 ]);
 
+/** Set CLERK_FRONTEND_API_PROXY=0 to skip same-origin `/__clerk` proxy (see .env.example). */
+const useClerkFrontendApiProxy =
+  process.env.CLERK_FRONTEND_API_PROXY !== "0" &&
+  process.env.CLERK_FRONTEND_API_PROXY !== "false";
+
 export default clerkMiddleware(
   async (auth, req) => {
     if (isPublicRoute(req)) {
@@ -38,11 +43,15 @@ export default clerkMiddleware(
     await auth.protect();
   },
   {
-    /**
-     * Proxies `/__clerk/*` to Clerk’s Frontend API so clerk-js can load when
-     * direct browser calls are blocked or when using the default dev/proxy setup.
-     */
-    frontendApiProxy: { enabled: true },
+    ...(useClerkFrontendApiProxy
+      ? {
+          /**
+           * Proxies `/__clerk/*` to Clerk’s Frontend API. Clerk validates `Clerk-Proxy-Url`
+           * against Dashboard → Domains; mismatch yields `host_invalid` (see .env.example).
+           */
+          frontendApiProxy: { enabled: true },
+        }
+      : {}),
   },
 );
 

@@ -53,15 +53,51 @@ export default async function HomePage() {
           <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-16 pt-12 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-16 lg:flex-row lg:items-center lg:gap-8 lg:pb-24 lg:pt-12 xl:gap-12">
             <div className="w-full max-lg:px-6 lg:max-w-none lg:w-[46%] lg:min-w-0 lg:px-0 lg:pr-4">
               <p className="mb-5 inline-flex items-center rounded-full border border-white/40 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                AI assistant for every business
+                For practices, salons & professional firms
               </p>
               <h1 className="font-[family-name:var(--font-fraunces)] text-[2rem] font-semibold leading-[1.12] tracking-tight text-white sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem]">
-                Book appointments, answer questions, capture leads — 24/7.
+                Capture missed customers and turn them into bookings — automatically.
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white">
-                A chatbot trained on your website and content. Qualifies visitors, books meetings straight into
-                your calendar, and pushes every lead into your CRM — while your team focuses on closing.
+              <p className="mt-5 max-w-xl text-lg font-medium leading-snug text-white">
+                Stop missing patient bookings after hours. Stop losing enquiries when the desk is slammed or the phone
+                won&apos;t stop.
               </p>
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90">
+                We install a <strong className="font-semibold text-white">24/7 receptionist</strong> on your website —
+                grounded in what you already publish, careful with tone, and wired to your calendar. Visitors get
+                straight answers and a <strong className="font-semibold text-white">real path to book</strong>, not
+                novelty small-talk or vague AI promises.
+              </p>
+              <ul className="mt-6 max-w-xl space-y-2.5 text-sm leading-relaxed text-white/85 sm:text-[0.9375rem]">
+                <li className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
+                  <span>
+                    <span className="font-semibold text-white">Dental &amp; aesthetic practices</span> — fuller diaries;
+                    patients book when your line would go to voicemail.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
+                  <span>
+                    <span className="font-semibold text-white">Salons &amp; barbers — women&apos;s &amp; men&apos;s</span>{" "}
+                    — fewer missed calls; chair time fills from your site, not only the front desk.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
+                  <span>
+                    <span className="font-semibold text-white">Real estate</span> — more viewings and valuations from
+                    people who browse serious properties after work.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
+                  <span>
+                    <span className="font-semibold text-white">Law firms &amp; solicitors</span> — enquiries captured
+                    with clarity and discretion, not robotic filler.
+                  </span>
+                </li>
+              </ul>
               {/* Solid buttons (no blend) so teal / light styles stay predictable */}
               <div className="relative z-10 mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
@@ -80,7 +116,7 @@ export default async function HomePage() {
               <p
                 className={`mt-5 inline-block max-w-full rounded-lg px-4 py-2.5 text-sm leading-relaxed text-white shadow-md shadow-black/20 ${teal}`}
               >
-                From £79/mo · bookings, leads & CRM sync · 14-day free trial
+                From £79/mo · triaged enquiries &amp; real bookings · 14-day free trial
               </p>
             </div>
 
@@ -105,9 +141,9 @@ export default async function HomePage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">What you get</p>
                 <ul className="space-y-3">
                   {[
-                    "Books appointments straight into your calendar",
-                    "Qualifies visitors (budget, timeline, needs) before you spend a minute",
-                    "Pushes every lead to HubSpot, Pipedrive, Salesforce or any CRM via Zapier",
+                    "Books appointments straight into your calendar — like a second reception desk that never clocks off",
+                    "Filters intent (timeline, service, readiness) before your team spends a minute on the phone",
+                    "Hands off qualified leads to HubSpot, Pipedrive, or Salesforce — via Zapier, Make, or a webhook you control",
                   ].map((t) => (
                     <li key={t} className="flex gap-3 text-sm leading-relaxed text-gray-700">
                       <CheckIcon />
@@ -128,16 +164,16 @@ export default async function HomePage() {
           <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-3 sm:px-6">
             {[
               {
-                title: "Train once",
-                body: "We crawl your site and index passages so replies stay accurate.",
+                title: "Train on your truth",
+                body: "We index what you already publish — fees, services, areas — so guidance stays accurate to your business.",
               },
               {
-                title: "Embed anywhere",
-                body: "Paste one script before the closing body tag — WordPress, Shopify, or custom HTML.",
+                title: "One line of code",
+                body: "Paste before the closing body tag on WordPress, Shopify, or custom HTML; the widget feels part of your site.",
               },
               {
-                title: "See what matters",
-                body: "Conversation volume, leads, and knowledge — same palette as your app.",
+                title: "Outcomes, not vanity metrics",
+                body: "Conversations, leads, and booking signals in one place — not fluff about “AI engagement.”",
               },
             ].map((item, i) => (
               <div key={item.title} className="text-center sm:text-left">
@@ -161,10 +197,11 @@ export default async function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-gray-900 sm:text-3xl md:text-4xl">
-                Built for real customer moments
+                When they&apos;re ready to book, be there
               </h2>
               <p className="mt-4 text-base text-gray-600 sm:text-lg">
-                Present when visitors need you, grounded in what you publish, and clear in every reply.
+                Replies draw from your pages and policies, stay on brand, and read like someone at your front desk — not a
+                generic chatbot reciting templates.
               </p>
             </div>
             <div className="mt-14 grid gap-10 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
@@ -172,20 +209,20 @@ export default async function HomePage() {
                 {
                   img: "/robot-support-call.png",
                   alt: "Assistant ready for customer conversations",
-                  title: "Always on",
-                  body: "Your assistant is there the moment someone opens chat — no queues, no forms first.",
+                  title: "Evenings, lunch hours, peak Saturdays",
+                  body: "The moment someone opens chat — after work, between clients, or when the phone’s engaged — they still get a useful answer and a way to book.",
                 },
                 {
                   img: "/robot-typing-laptop.png",
                   alt: "Learning from website content",
-                  title: "Your content, not generic AI",
-                  body: "Training pulls from the pages you already ship so answers match your offers and policies.",
+                  title: "Your practice, your wording",
+                  body: "Training uses the site and notes you already maintain so answers reflect your services, pricing posture, and compliance boundaries.",
                 },
                 {
                   img: "/robot-chat-replies.png",
                   alt: "Clear chat replies",
-                  title: "Human tone",
-                  body: "Short, helpful messages — streamed so it feels like a teammate typing back.",
+                  title: "Conversations that convert",
+                  body: "Short, purposeful replies — the goal is a confirmed slot or a qualified lead, not endless AI chatter.",
                 },
               ].map((item) => (
                 <figure key={item.title} className="flex flex-col">
@@ -216,7 +253,8 @@ export default async function HomePage() {
               Three steps to go live
             </h2>
             <p className="mt-3 max-w-2xl text-gray-600">
-              No flowcharts — add your URL, train, and paste the script. Most teams ship the same day.
+              No flowcharts — connect your site, train once, paste one line. Most appointment-based businesses go live the
+              same day.
             </p>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[
@@ -260,10 +298,10 @@ export default async function HomePage() {
         <section className="border-t border-gray-100 bg-[#0d9488] py-14 md:py-16">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
             <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-white sm:text-3xl">
-              Ready to ship your assistant?
+              Ready to stop losing bookings to closed doors?
             </h2>
             <p className="mt-3 text-teal-100">
-              Create an account, connect your site, and embed in minutes.
+              Create an account, point us at your site, and switch on receptionist-grade help in minutes.
             </p>
             <Link
               href="/register"
@@ -278,7 +316,9 @@ export default async function HomePage() {
           <div className="flex justify-center">
             <BrandLogo variant="footer" />
           </div>
-          <p className="mt-2 text-sm text-gray-500">Built for teams who ship — not configure.</p>
+          <p className="mt-2 text-sm text-gray-500">
+            Built for people who answer the phone — and everyone who tries you after it stops ringing.
+          </p>
           <div className="mt-6">
             <LegalFooterLinks className="text-gray-400" />
           </div>

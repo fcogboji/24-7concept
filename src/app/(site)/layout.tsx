@@ -33,21 +33,21 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "faztino — AI support for your website",
+  title: "faztino — 24/7 receptionist for bookings & enquiries",
   description:
-    "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
+    "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
   openGraph: {
-    title: "faztino — AI support for your website",
+    title: "faztino — 24/7 receptionist for bookings & enquiries",
     description:
-      "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
+      "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
     type: "website",
     locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "faztino — AI support for your website",
+    title: "faztino — 24/7 receptionist for bookings & enquiries",
     description:
-      "Train an assistant on your site in minutes. One script tag, answers that sound like your team.",
+      "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
   },
 };
 
