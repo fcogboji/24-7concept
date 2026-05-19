@@ -30,10 +30,15 @@ const isPublicRoute = createRouteMatcher([
   "/admin/unauthorized(.*)",
 ]);
 
-/** Set CLERK_FRONTEND_API_PROXY=0 to skip same-origin `/__clerk` proxy (see .env.example). */
+/**
+ * Same-origin `/__clerk` proxy is opt-in only. Default off so production with a Clerk
+ * custom domain (e.g. clerk.faztino.com) talks to Clerk directly — enabling the proxy
+ * without Dashboard proxy URL setup causes `host_invalid` on www.faztino.com.
+ * Set CLERK_FRONTEND_API_PROXY=1 only if you configured the proxy in Clerk Dashboard.
+ */
 const useClerkFrontendApiProxy =
-  process.env.CLERK_FRONTEND_API_PROXY !== "0" &&
-  process.env.CLERK_FRONTEND_API_PROXY !== "false";
+  process.env.CLERK_FRONTEND_API_PROXY === "1" ||
+  process.env.CLERK_FRONTEND_API_PROXY === "true";
 
 export default clerkMiddleware(
   async (auth, req) => {
