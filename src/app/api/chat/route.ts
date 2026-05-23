@@ -5,7 +5,8 @@ import { getRelevantChunksScored } from "@/lib/retrieve";
 import { rateLimitChat, rateLimitChatBotGlobal } from "@/lib/rate-limit";
 import { canUserSendMessage } from "@/lib/plan";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
-import { bookingTools, handleBookingTool } from "@/lib/booking-tools";
+import { bookingTools, handleBookingTool, type BookingToolResult } from "@/lib/booking-tools";
+import { encodeBookingFormForStream, type BookingFormRequest } from "@/lib/chat-form";
 import { engagementTools, handleEngagementTool } from "@/lib/engagement-tools";
 import { getLogger } from "@/lib/logger";
 import type { ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources/chat/completions";
@@ -168,7 +169,7 @@ export async function POST(req: NextRequest) {
 
     if (bookingEnabled) {
       systemPromptParts.push(
-        `\n## Booking\nYou can book appointments for visitors:\n1. list_services when asked what can be booked.\n2. check_availability(date) for a specific YYYY-MM-DD date.\n3. create_appointment(...) — ONLY after explicitly confirming date, time, service, name, and email with the visitor in the same conversation.\nBusiness timezone: ${bot.bookingConfig!.timezone}.`,
+        `\n## Booking\nYou can book appointments for visitors:\n1. list_services when asked what can be booked.\n2. check_availability(date) for a specific YYYY-MM-DD date.\n3. request_booking_details(fields, prompt) — when you need the visitor to provide booking details (name, email, phone, date, time, service). Only include fields you still need; a matching form appears in the chat.\n4. create_appointment(...) — ONLY after you have date, time, name, and email (from the form submission or conversation). Confirm details before booking.\nBusiness timezone: ${bot.bookingConfig!.timezone}.`,
       );
     }
 
@@ -208,9 +209,22 @@ export async function POST(req: NextRequest) {
       ...(bookingEnabled ? bookingTools : []),
     ];
 
+    let pendingForm: BookingFormRequest | null = null;
+
     const handleToolCall = async (name: string, args: Record<string, unknown>): Promise<string> => {
-      if (bookingEnabled && (name === "list_services" || name === "check_availability" || name === "create_appointment")) {
-        return handleBookingTool(name, args, toolCtx);
+      if (
+        bookingEnabled &&
+        (name === "list_services" ||
+          name === "check_availability" ||
+          name === "create_appointment" ||
+          name === "request_booking_details")
+      ) {
+        const result: BookingToolResult = await handleBookingTool(name, args, toolCtx);
+        if (typeof result === "object" && result !== null && "formRequest" in result) {
+          pendingForm = result.formRequest;
+          return result.toolResult;
+        }
+        return result as string;
       }
       return handleEngagementTool(name, args, toolCtx);
     };
@@ -273,9 +287,13 @@ export async function POST(req: NextRequest) {
             fullReply += text;
             controller.enqueue(encoder.encode(text));
           }
+          const storedReply = fullReply || "(empty)";
           await prisma.message.create({
-            data: { botId, role: "assistant", content: fullReply || "(empty)", sessionId: sessionId || null, pageUrl: pageUrl || null },
+            data: { botId, role: "assistant", content: storedReply, sessionId: sessionId || null, pageUrl: pageUrl || null },
           });
+          if (pendingForm) {
+            controller.enqueue(encoder.encode(encodeBookingFormForStream(pendingForm)));
+          }
         } catch (e) {
           log.error("stream failed", e, { botId });
           controller.enqueue(encoder.encode("\n[Sorry — something went wrong. Please try again.]"));

@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { getAppUrlForStripeRedirects } from "@/lib/public-app-url";
-import { getStripeCheckoutConfigIssue } from "@/lib/stripe-env";
+import { getStripeCheckoutConfigIssue, STRIPE_PRICE_ENV_HINT } from "@/lib/stripe-env";
 import { initTransaction } from "@/lib/paystack";
 import { getPaystackPlanCode, isPaystackEnabled } from "@/lib/paystack-env";
 import { PAYSTACK_AMOUNT_NGN, type PlanId } from "@/lib/pricing";
@@ -19,11 +19,11 @@ export async function createStripeCheckoutForUser(
 
   const cfg = getStripeCheckoutConfigIssue(plan);
   if (!cfg.ok) {
-    const envName = plan === "starter" ? "STRIPE_PRICE_STARTER" : "STRIPE_PRICE_PRO";
+    const envHint = STRIPE_PRICE_ENV_HINT[plan];
     const error =
       cfg.code === "MISSING_STRIPE_SECRET"
         ? "Stripe secret key is not set on the server. Add STRIPE_SECRET_KEY (or STRIPE_API_KEY) in your deployment environment and redeploy."
-        : `Stripe ${plan} price id is not set. Add ${envName} with your recurring price id (price_…) from Stripe → Products, in the server environment, then redeploy.`;
+        : `Stripe ${plan} price id is not set. Add ${envHint} with your recurring price id (price_…) from Stripe → Products, in the server environment, then redeploy.`;
     return { ok: false, status: 503, body: { error, code: cfg.code } };
   }
 

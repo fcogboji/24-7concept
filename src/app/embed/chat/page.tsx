@@ -2,6 +2,13 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+  BOOKING_FORM_FIELD_META,
+  formatBookingFormSubmission,
+  splitChatStreamWithForm,
+  type BookingFormFieldId,
+  type BookingFormRequest,
+} from "@/lib/chat-form";
 
 const SIZE_MSG = "faztino-size";
 
@@ -42,13 +49,10 @@ function EmbedChatInner() {
   const [msgs, setMsgs] = useState<{ role: "user" | "bot"; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const [assistantReplies, setAssistantReplies] = useState(0);
-  const [leadDone, setLeadDone] = useState(false);
-  const [leadEmail, setLeadEmail] = useState("");
-  const [leadName, setLeadName] = useState("");
-  const [leadPhone, setLeadPhone] = useState("");
-  const [leadNote, setLeadNote] = useState<{ text: string; ok: boolean } | null>(null);
-  const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [bookingForm, setBookingForm] = useState<BookingFormRequest | null>(null);
+  const [formValues, setFormValues] = useState<Partial<Record<BookingFormFieldId, string>>>({});
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -103,42 +107,28 @@ function EmbedChatInner() {
   }, [msgs, typing]);
 
   const chatUrl = origin ? `${origin}/api/chat` : "";
-  const leadUrl = origin ? `${origin}/api/leads` : "";
 
-  const submitLead = useCallback(() => {
-    const em = leadEmail.trim();
-    if (!em || !botId || !leadUrl) return;
-    setLeadSubmitting(true);
-    fetchWithNetworkRetry(leadUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        botId,
-        email: em,
-        name: leadName.trim() || undefined,
-        phone: leadPhone.trim() || undefined,
-        sessionId,
-        pageUrl: pageUrl || undefined,
-      }),
-    })
-      .then((r) => r.json())
-      .then((j: { ok?: boolean; error?: string }) => {
-        if (j.ok) {
-          setLeadNote({ text: "Thanks — we will be in touch.", ok: true });
-          setLeadDone(true);
-        } else {
-          setLeadNote({ text: j.error || "Could not save.", ok: false });
-        }
-      })
-      .catch(() => setLeadNote({ text: "Something went wrong.", ok: false }))
-      .finally(() => setLeadSubmitting(false));
-  }, [botId, leadEmail, leadName, leadPhone, leadUrl, sessionId, pageUrl]);
+  const applyStreamEnd = useCallback((rawBotText: string) => {
+    const { displayText, form } = splitChatStreamWithForm(rawBotText);
+    setMsgs((prev) => {
+      const copy = [...prev];
+      if (copy.length) copy[copy.length - 1] = { role: "bot", text: displayText };
+      return copy;
+    });
+    if (form) {
+      setBookingForm(form);
+      setFormValues({});
+      setFormError(null);
+    }
+  }, []);
 
   const sendMessage = useCallback(
     (textOverride?: string) => {
       const text = (textOverride ?? input).trim();
       if (!text || !botId || !chatUrl) return;
 
+      setBookingForm(null);
+      setFormError(null);
       setInput("");
 
       setMsgs((prev) => [...prev, { role: "user", text }, { role: "bot", text: "" }]);
@@ -177,18 +167,21 @@ function EmbedChatInner() {
           setTyping(false);
           const reader = res.body.getReader();
           const dec = new TextDecoder();
+          let rawBot = "";
           function read(): Promise<void> {
             return reader.read().then((chunk) => {
               if (chunk.done) {
-                setAssistantReplies((n) => n + 1);
+                applyStreamEnd(rawBot);
                 return;
               }
               const piece = dec.decode(chunk.value, { stream: true });
+              rawBot += piece;
+              const { displayText } = splitChatStreamWithForm(rawBot);
               setMsgs((prev) => {
                 const copy = [...prev];
                 const last = copy[copy.length - 1];
                 if (last?.role === "bot") {
-                  copy[copy.length - 1] = { role: "bot", text: last.text + piece };
+                  copy[copy.length - 1] = { role: "bot", text: displayText };
                 }
                 return copy;
               });
@@ -207,8 +200,26 @@ function EmbedChatInner() {
           });
         });
     },
-    [botId, chatUrl, input, sessionId, pageUrl]
+    [botId, chatUrl, input, sessionId, pageUrl, applyStreamEnd]
   );
+
+  const submitBookingForm = useCallback(() => {
+    if (!bookingForm) return;
+    const missing = bookingForm.fields.filter((f) => {
+      const meta = BOOKING_FORM_FIELD_META[f];
+      return meta.required && !formValues[f]?.trim();
+    });
+    if (missing.length > 0) {
+      setFormError(`Please fill in: ${missing.map((f) => BOOKING_FORM_FIELD_META[f].label).join(", ")}`);
+      return;
+    }
+    setFormError(null);
+    setFormSubmitting(true);
+    const message = formatBookingFormSubmission(formValues);
+    setFormValues({});
+    sendMessage(message);
+    setFormSubmitting(false);
+  }, [bookingForm, formValues, sendMessage]);
 
   if (!botId) {
     return (
@@ -218,7 +229,6 @@ function EmbedChatInner() {
     );
   }
 
-  const showLeadBox = assistantReplies >= 2 && !leadDone;
   const brandInitial = brand.trim().charAt(0).toUpperCase() || "S";
 
   const formatTime = (date: Date) => {
@@ -356,57 +366,45 @@ function EmbedChatInner() {
                 </div>
               )}
 
-              {showLeadBox && (
+              {bookingForm && (
                 <div className="mt-2.5 rounded-[14px] border border-dashed border-stone-300 bg-white p-3">
-                  <p className="mb-2 text-xs leading-snug text-stone-500">Leave your details so we can follow up:</p>
+                  <p className="mb-2 text-xs leading-snug text-stone-600">
+                    {bookingForm.prompt || "Please add your appointment details:"}
+                  </p>
                   <div className="flex flex-col gap-2">
-                    <input
-                      type="text"
-                      className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
-                      placeholder="Your name"
-                      autoComplete="name"
-                      value={leadName}
-                      onChange={(e) => setLeadName(e.target.value)}
-                    />
-                    <input
-                      type="email"
-                      className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
-                      placeholder="you@company.com"
-                      autoComplete="email"
-                      value={leadEmail}
-                      onChange={(e) => setLeadEmail(e.target.value)}
-                    />
-                    <input
-                      type="tel"
-                      className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none"
-                      placeholder="Phone (optional)"
-                      autoComplete="tel"
-                      value={leadPhone}
-                      onChange={(e) => setLeadPhone(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          submitLead();
-                        }
-                      }}
-                    />
+                    {bookingForm.fields.map((fieldId) => {
+                      const meta = BOOKING_FORM_FIELD_META[fieldId];
+                      return (
+                        <label key={fieldId} className="flex flex-col gap-1">
+                          <span className="text-[11px] font-medium text-stone-500">
+                            {meta.label}
+                            {meta.required ? "" : " (optional)"}
+                          </span>
+                          <input
+                            type={meta.inputType}
+                            className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none focus:border-[#0064D2]"
+                            placeholder={meta.placeholder}
+                            autoComplete={meta.autoComplete}
+                            value={formValues[fieldId] ?? ""}
+                            onChange={(e) =>
+                              setFormValues((prev) => ({ ...prev, [fieldId]: e.target.value }))
+                            }
+                          />
+                        </label>
+                      );
+                    })}
                     <button
                       type="button"
-                      disabled={leadSubmitting || !leadEmail.trim()}
+                      disabled={formSubmitting}
                       className="cursor-pointer rounded-[10px] border-0 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
                       style={{ background: BRAND_GRADIENT }}
-                      onClick={submitLead}
+                      onClick={submitBookingForm}
                     >
-                      Send
+                      {formSubmitting ? "Sending…" : "Submit details"}
                     </button>
                   </div>
-                  {leadNote && !leadNote.ok && (
-                    <p className="mt-2 text-xs text-red-700">{leadNote.text}</p>
-                  )}
+                  {formError && <p className="mt-2 text-xs text-red-700">{formError}</p>}
                 </div>
-              )}
-              {leadDone && leadNote?.ok && (
-                <p className="text-xs text-green-700">{leadNote.text}</p>
               )}
             </div>
 

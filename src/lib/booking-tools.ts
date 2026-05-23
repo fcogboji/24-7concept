@@ -4,6 +4,7 @@ import { computeAvailableSlots, businessTimeToUtc } from "@/lib/booking-availabi
 import { sendBookingNotificationToOwner, sendBookingConfirmationToVisitor } from "@/lib/booking-emails";
 import { logAudit } from "@/lib/audit";
 import { fireWebhooks } from "@/lib/webhooks";
+import { normalizeBookingFormFields, type BookingFormRequest } from "@/lib/chat-form";
 
 /* ------------------------------------------------------------------ */
 /*  OpenAI tool definitions                                           */
@@ -30,6 +31,32 @@ export const bookingTools: ChatCompletionTool[] = [
           serviceId: { type: "string" as const, description: "Optional service ID to use its duration" },
         },
         required: ["date"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "request_booking_details",
+      description:
+        "Show the visitor an in-chat form to collect booking details you still need. Call this when you are ready to gather specific fields (name, email, phone, date, time, service) instead of asking them to type each answer separately. Only include fields you still need.",
+      parameters: {
+        type: "object" as const,
+        properties: {
+          fields: {
+            type: "array" as const,
+            items: {
+              type: "string" as const,
+              enum: ["name", "email", "phone", "date", "time", "service"],
+            },
+            description: "Which details to collect in the form",
+          },
+          prompt: {
+            type: "string" as const,
+            description: "Short heading shown above the form (e.g. 'Confirm your appointment details')",
+          },
+        },
+        required: ["fields"],
       },
     },
   },
@@ -64,21 +91,45 @@ interface ToolContext {
   sessionId?: string | null;
 }
 
+export type BookingToolResult =
+  | string
+  | { toolResult: string; formRequest: BookingFormRequest };
+
 export async function handleBookingTool(
   toolName: string,
   args: Record<string, unknown>,
-  ctx: ToolContext
-): Promise<string> {
+  ctx: ToolContext,
+): Promise<BookingToolResult> {
   switch (toolName) {
     case "list_services":
       return handleListServices(ctx.botId);
     case "check_availability":
       return handleCheckAvailability(ctx.botId, args as { date: string; serviceId?: string });
+    case "request_booking_details":
+      return handleRequestBookingDetails(args);
     case "create_appointment":
       return handleCreateAppointment(ctx.botId, args as unknown as CreateAppointmentArgs, ctx.sessionId);
     default:
       return JSON.stringify({ error: "Unknown tool" });
   }
+}
+
+function handleRequestBookingDetails(args: Record<string, unknown>): BookingToolResult {
+  const fields = normalizeBookingFormFields(args.fields);
+  if (fields.length === 0) {
+    return JSON.stringify({
+      error: "At least one field is required (name, email, phone, date, time, or service).",
+    });
+  }
+  const prompt = typeof args.prompt === "string" ? args.prompt.trim() : undefined;
+  const formRequest: BookingFormRequest = { fields, ...(prompt ? { prompt } : {}) };
+  return {
+    toolResult: JSON.stringify({
+      success: true,
+      note: "A form is now shown to the visitor. Wait for their submission before calling create_appointment.",
+    }),
+    formRequest,
+  };
 }
 
 /* -- list_services ------------------------------------------------- */

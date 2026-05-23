@@ -19,8 +19,10 @@ export function getStripeSecretKey(): string | undefined {
 export function getStripeStarterPriceId(): string | undefined {
   return (
     trimmed("STRIPE_PRICE_STARTER") ??
+    trimmed("STRIPE_PRICE_STARTER_MONTHLY") ??
     trimmed("STRIPE_STARTER_PRICE_ID") ??
-    trimmed("NEXT_PUBLIC_STRIPE_PRICE_STARTER")
+    trimmed("NEXT_PUBLIC_STRIPE_PRICE_STARTER") ??
+    trimmed("STRIPE_PRICE_STARTER_YEARLY")
   );
 }
 
@@ -31,11 +33,19 @@ export function getStripeStarterPriceId(): string | undefined {
 export function getStripeProPriceId(): string | undefined {
   return (
     trimmed("STRIPE_PRICE_PRO") ??
+    trimmed("STRIPE_PRICE_PRO_MONTHLY") ??
     trimmed("STRIPE_PRO_PRICE_ID") ??
     trimmed("STRIPE_PRICE_ID") ??
-    trimmed("NEXT_PUBLIC_STRIPE_PRICE_PRO")
+    trimmed("NEXT_PUBLIC_STRIPE_PRICE_PRO") ??
+    trimmed("STRIPE_PRICE_PRO_YEARLY")
   );
 }
+
+/** Env names shown in checkout errors when a plan price id is missing. */
+export const STRIPE_PRICE_ENV_HINT: Record<PlanId, string> = {
+  starter: "STRIPE_PRICE_STARTER (or STRIPE_PRICE_STARTER_MONTHLY)",
+  pro: "STRIPE_PRICE_PRO (or STRIPE_PRICE_PRO_MONTHLY)",
+};
 
 export function getStripePriceIdForPlan(plan: PlanId): string | undefined {
   return plan === "starter" ? getStripeStarterPriceId() : getStripeProPriceId();

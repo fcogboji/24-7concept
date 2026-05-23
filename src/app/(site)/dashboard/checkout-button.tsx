@@ -9,8 +9,8 @@ const LABEL: Record<PlanId, string> = {
 };
 
 const ENV_HINT: Record<PlanId, string> = {
-  starter: "STRIPE_PRICE_STARTER",
-  pro: "STRIPE_PRICE_PRO",
+  starter: "STRIPE_PRICE_STARTER (or STRIPE_PRICE_STARTER_MONTHLY)",
+  pro: "STRIPE_PRICE_PRO (or STRIPE_PRICE_PRO_MONTHLY)",
 };
 
 export function CheckoutButton({ plan = "pro" }: { plan?: PlanId }) {
