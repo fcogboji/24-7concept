@@ -3,11 +3,24 @@ import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import {
+  leadTemperature,
+  leadTemperatureClass,
+  leadTemperatureLabel,
+  suggestedFollowUp,
+  summarizeConversation,
+  whatsappHref,
+} from "@/lib/lead-intelligence";
 
 function statusBadge(status: string) {
   switch (status) {
     case "followed_up":
       return "bg-blue-100 text-blue-800";
+    case "contacted":
+    case "whatsapp_sent":
+      return "bg-indigo-100 text-indigo-800";
+    case "booked":
+      return "bg-purple-100 text-purple-800";
     case "dismissed":
       return "bg-gray-100 text-gray-600";
     default:
@@ -17,7 +30,10 @@ function statusBadge(status: string) {
 
 function statusLabel(status: string) {
   switch (status) {
+    case "contacted": return "Contacted";
+    case "whatsapp_sent": return "WhatsApp sent";
     case "followed_up": return "Followed up";
+    case "booked": return "Booked";
     case "dismissed": return "Dismissed";
     default: return "New";
   }
@@ -33,6 +49,21 @@ export default async function LeadsPage() {
     orderBy: { createdAt: "desc" },
     take: 200,
   });
+  const sessionIds = leads.map((l) => l.sessionId).filter((s): s is string => Boolean(s));
+  const messages = sessionIds.length
+    ? await prisma.message.findMany({
+        where: { sessionId: { in: sessionIds }, bot: { userId: appUser.id } },
+        orderBy: { createdAt: "asc" },
+        select: { sessionId: true, role: true, content: true, createdAt: true },
+      })
+    : [];
+  const messagesBySession = new Map<string, typeof messages>();
+  for (const message of messages) {
+    if (!message.sessionId) continue;
+    const group = messagesBySession.get(message.sessionId) ?? [];
+    group.push(message);
+    messagesBySession.set(message.sessionId, group);
+  }
 
   return (
     <div>
@@ -64,6 +95,12 @@ export default async function LeadsPage() {
         {/* Mobile: card layout */}
         <div className="space-y-3 sm:hidden">
           {leads.map((l) => (
+            (() => {
+              const thread = l.sessionId ? messagesBySession.get(l.sessionId) ?? [] : [];
+              const temp = leadTemperature(l, thread);
+              const followUp = suggestedFollowUp(l, l.bot.name, thread);
+              const wa = whatsappHref(l.phone, followUp);
+              return (
             <div key={l.id} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
@@ -71,10 +108,16 @@ export default async function LeadsPage() {
                   <p className="mt-0.5 break-all text-sm text-gray-700">{l.email}</p>
                   {l.phone && <p className="mt-0.5 text-sm text-gray-600">{l.phone}</p>}
                 </div>
-                <span className={`shrink-0 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(l.status)}`}>
-                  {statusLabel(l.status)}
-                </span>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                    {leadTemperatureLabel(temp)}
+                  </span>
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(l.status)}`}>
+                    {statusLabel(l.status)}
+                  </span>
+                </div>
               </div>
+              <p className="mt-2 text-sm text-gray-600">{summarizeConversation(thread)}</p>
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
                 <span>{l.bot.name}</span>
                 <time dateTime={l.createdAt.toISOString()}>
@@ -82,14 +125,23 @@ export default async function LeadsPage() {
                 </time>
               </div>
               {l.sessionId && (
-                <Link
-                  href={`/dashboard/conversations/${l.sessionId}`}
-                  className="mt-2 inline-block min-h-[44px] leading-[44px] text-sm font-medium text-[#0d9488] hover:underline"
-                >
-                  View chat &rarr;
-                </Link>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Link
+                    href={`/dashboard/conversations/${l.sessionId}`}
+                    className="inline-flex min-h-[44px] items-center text-sm font-medium text-[#0d9488] hover:underline"
+                  >
+                    View chat &rarr;
+                  </Link>
+                  {wa && (
+                    <a href={wa} target="_blank" rel="noreferrer" className="inline-flex min-h-[44px] items-center rounded-full bg-emerald-600 px-3 text-xs font-semibold text-white">
+                      WhatsApp
+                    </a>
+                  )}
+                </div>
               )}
             </div>
+              );
+            })()
           ))}
         </div>
 
@@ -110,12 +162,21 @@ export default async function LeadsPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {leads.map((l) => (
+                (() => {
+                  const thread = l.sessionId ? messagesBySession.get(l.sessionId) ?? [] : [];
+                  const temp = leadTemperature(l, thread);
+                  const followUp = suggestedFollowUp(l, l.bot.name, thread);
+                  const wa = whatsappHref(l.phone, followUp);
+                  return (
                 <tr key={l.id} className="hover:bg-gray-50/80">
                   <td className="px-4 py-3 font-medium text-gray-900">{l.name || "—"}</td>
                   <td className="break-all px-4 py-3 text-gray-700">{l.email}</td>
                   <td className="px-4 py-3 text-gray-600">{l.phone || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{l.bot.name}</td>
                   <td className="px-4 py-3">
+                    <span className={`mr-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                      {leadTemperatureLabel(temp)}
+                    </span>
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(l.status)}`}>
                       {statusLabel(l.status)}
                     </span>
@@ -126,6 +187,12 @@ export default async function LeadsPage() {
                     </time>
                   </td>
                   <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-3">
+                    {wa && (
+                      <a href={wa} target="_blank" rel="noreferrer" className="text-xs font-medium text-emerald-700 hover:underline">
+                        WhatsApp
+                      </a>
+                    )}
                     {l.sessionId && (
                       <Link
                         href={`/dashboard/conversations/${l.sessionId}`}
@@ -134,8 +201,11 @@ export default async function LeadsPage() {
                         View chat
                       </Link>
                     )}
+                    </div>
                   </td>
                 </tr>
+                  );
+                })()
               ))}
             </tbody>
           </table>

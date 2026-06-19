@@ -64,8 +64,8 @@ export const PRICING_TIERS: PricingTier[] = [
     monthly: { USD: 99, NGN: 49000 },
     features: [
       "5,000 replies / month",
-      "Calendar booking + reminders",
-      "CRM sync (HubSpot, Pipedrive, Zapier)",
+      "Built-in booking + email notifications",
+      "Webhook handoff for CRM workflows",
       "Custom branding",
       "Priority support",
     ],

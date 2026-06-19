@@ -14,7 +14,7 @@ export async function getOrCreateAppUser() {
   const { userId } = await auth();
   if (!userId) return null;
 
-  let user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (user) return user;
 
   const clerkUser = await currentUser();

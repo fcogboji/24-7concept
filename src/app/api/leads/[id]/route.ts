@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { rateLimitAuth } from "@/lib/rate-limit";
 
 const patchSchema = z.object({
-  status: z.enum(["new", "followed_up", "dismissed"]).optional(),
+  status: z.enum(["new", "contacted", "whatsapp_sent", "followed_up", "booked", "dismissed"]).optional(),
   name: z.string().max(200).optional(),
   phone: z.string().max(30).optional(),
 });

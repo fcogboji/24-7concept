@@ -4,6 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { LeadActions } from "./lead-actions";
+import {
+  leadSignals,
+  leadTemperature,
+  leadTemperatureClass,
+  leadTemperatureLabel,
+  signalClass,
+  suggestedFollowUp,
+  summarizeConversation,
+  whatsappHref,
+} from "@/lib/lead-intelligence";
 
 export default async function ConversationDetailPage({
   params,
@@ -44,12 +54,17 @@ export default async function ConversationDetailPage({
 
   const botName = messages[0].bot.name;
   const pageUrl = messages.find((m) => m.pageUrl)?.pageUrl;
+  const temp = leadTemperature(lead, messages);
+  const signals = leadSignals(lead, messages);
+  const summary = summarizeConversation(messages);
+  const followUp = suggestedFollowUp(lead, botName, messages);
+  const whatsappUrl = whatsappHref(lead?.phone, followUp);
 
   return (
     <div>
       <DashboardPageHeader
         title={lead?.name || lead?.email || "Anonymous Visitor"}
-        subtitle={`Conversation with ${botName}`}
+        subtitle={`${leadTemperatureLabel(temp)} · Conversation with ${botName}`}
       />
 
       <Link href="/dashboard/conversations" className="mb-6 inline-block text-sm font-medium text-[#0d9488] hover:underline">
@@ -61,7 +76,20 @@ export default async function ConversationDetailPage({
         <div className="mb-6 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-gray-900">Contact Details</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-900">Lead brief</h3>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                  {leadTemperatureLabel(temp)}
+                </span>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-gray-700">{summary}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {signals.map((s) => (
+                  <span key={s.label} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${signalClass(s.tone)}`}>
+                    {s.label}
+                  </span>
+                ))}
+              </div>
               <div className="mt-2 space-y-1 text-sm text-gray-600">
                 {lead.name && <p><span className="font-medium text-gray-800">Name:</span> {lead.name}</p>}
                 <p><span className="font-medium text-gray-800">Email:</span> {lead.email}</p>
@@ -69,7 +97,15 @@ export default async function ConversationDetailPage({
                 {pageUrl && <p><span className="font-medium text-gray-800">Page:</span> <span className="break-all">{pageUrl}</span></p>}
               </div>
             </div>
-            <LeadActions leadId={lead.id} currentStatus={lead.status} leadEmail={lead.email} leadName={lead.name} botName={botName} />
+            <LeadActions
+              leadId={lead.id}
+              currentStatus={lead.status}
+              leadEmail={lead.email}
+              leadPhone={lead.phone}
+              botName={botName}
+              suggestedMessage={followUp}
+              whatsappUrl={whatsappUrl}
+            />
           </div>
         </div>
       )}

@@ -13,6 +13,10 @@
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
+    "check:env": "node scripts/check-launch-env.mjs",
+    "check:launch-env": "node scripts/check-launch-env.mjs --production",
+    "launch:check": "node scripts/final-launch-check.mjs",
+    "launch:check:embed": "node scripts/final-launch-check.mjs --with-embed",
     "verify:embed": "node scripts/verify-embed.mjs"
   },
   "prisma": {

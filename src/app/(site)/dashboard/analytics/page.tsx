@@ -30,7 +30,6 @@ export default async function AnalyticsPage() {
     messages60prev,
     leads60prev,
     appts60prev,
-    leadsBySession30,
     sessions30,
     perBot,
   ] = await Promise.all([
@@ -40,7 +39,6 @@ export default async function AnalyticsPage() {
     prisma.message.count({ where: { ...botFilter, createdAt: { gte: from60, lt: from30 } } }),
     prisma.lead.count({ where: { ...botFilter, createdAt: { gte: from60, lt: from30 } } }),
     prisma.appointment.count({ where: { ...botFilter, createdAt: { gte: from60, lt: from30 } } }),
-    prisma.lead.findMany({ where: { ...botFilter, createdAt: { gte: from30 } }, select: { sessionId: true } }),
     prisma.message.findMany({
       where: { ...botFilter, createdAt: { gte: from30 }, sessionId: { not: null } },
       select: { sessionId: true },

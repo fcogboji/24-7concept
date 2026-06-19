@@ -6,7 +6,7 @@ import ws from "ws";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-function useNeonServerlessDriver(): boolean {
+function shouldUseNeonServerlessDriver(): boolean {
   const url = process.env.DATABASE_URL ?? "";
   if (process.env.PRISMA_NEON === "false") return false;
   if (process.env.PRISMA_NEON === "true") return true;
@@ -22,7 +22,7 @@ function createPrismaClient(): PrismaClient {
   const log =
     process.env.NODE_ENV === "development" ? (["error", "warn"] as const) : (["error"] as const);
 
-  if (useNeonServerlessDriver()) {
+  if (shouldUseNeonServerlessDriver()) {
     neonConfig.webSocketConstructor = ws;
     const pool = new Pool({ connectionString: url });
     const adapter = new PrismaNeon(pool);

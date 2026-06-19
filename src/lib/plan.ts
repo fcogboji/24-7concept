@@ -39,8 +39,8 @@ export function botLimitForPlan(plan: string): number {
  * Numbers are intentionally generous; tighten as real usage data comes in.
  */
 const MONTHLY_MESSAGE_LIMITS: Record<string, number> = {
-  starter: 2_000,
-  pro: 20_000,
+  starter: 500,
+  pro: 5_000,
 };
 
 export function monthlyMessageLimitForPlan(plan: string): number {

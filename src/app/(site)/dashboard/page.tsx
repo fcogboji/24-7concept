@@ -10,6 +10,14 @@ import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-heade
 import { CheckoutButton } from "./checkout-button";
 import { ManageBillingButton } from "./manage-billing-button";
 import { SyncPlanButton } from "./sync-plan-button";
+import {
+  leadTemperature,
+  leadTemperatureClass,
+  leadTemperatureLabel,
+  suggestedFollowUp,
+  summarizeConversation,
+  whatsappHref,
+} from "@/lib/lead-intelligence";
 
 function TrendBadge({ value, positive }: { value: string; positive: boolean }) {
   return (
@@ -102,6 +110,32 @@ export default async function DashboardPage({
     prisma.lead.count({ where: { bot: { userId: appUser.id } } }),
     prisma.source.count({ where: { bot: { userId: appUser.id } } }),
   ]);
+  const now = new Date();
+  const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const recentLeads = await prisma.lead.findMany({
+    where: { bot: { userId: appUser.id }, createdAt: { gte: since24h } },
+    include: { bot: { select: { name: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
+  const recentSessionIds = recentLeads.map((l) => l.sessionId).filter((s): s is string => Boolean(s));
+  const recentMessages = recentSessionIds.length
+    ? await prisma.message.findMany({
+        where: { bot: { userId: appUser.id }, sessionId: { in: recentSessionIds } },
+        select: { sessionId: true, role: true, content: true, createdAt: true },
+        orderBy: { createdAt: "asc" },
+      })
+    : [];
+  const recentMessagesBySession = new Map<string, typeof recentMessages>();
+  for (const message of recentMessages) {
+    if (!message.sessionId) continue;
+    const group = recentMessagesBySession.get(message.sessionId) ?? [];
+    group.push(message);
+    recentMessagesBySession.set(message.sessionId, group);
+  }
+  const hotRecentCount = recentLeads.filter((lead) =>
+    leadTemperature(lead, lead.sessionId ? recentMessagesBySession.get(lead.sessionId) ?? [] : []) === "hot"
+  ).length;
 
   return (
     <div>
@@ -222,6 +256,57 @@ export default async function DashboardPage({
           }
         />
       </div>
+
+      <section className="mb-10 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Today&apos;s follow-up brief</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              {recentLeads.length === 0
+                ? "No new leads in the last 24 hours."
+                : `${recentLeads.length} new lead${recentLeads.length === 1 ? "" : "s"} in 24 hours, ${hotRecentCount} marked hot.`}
+            </p>
+          </div>
+          <Link href="/dashboard/leads" className="text-sm font-semibold text-[#0d9488] hover:underline">
+            Open lead inbox
+          </Link>
+        </div>
+        {recentLeads.length > 0 && (
+          <div className="mt-5 grid gap-3 lg:grid-cols-2">
+            {recentLeads.slice(0, 4).map((lead) => {
+              const thread = lead.sessionId ? recentMessagesBySession.get(lead.sessionId) ?? [] : [];
+              const temp = leadTemperature(lead, thread);
+              const followUp = suggestedFollowUp(lead, lead.bot.name, thread);
+              const wa = whatsappHref(lead.phone, followUp);
+              return (
+                <div key={lead.id} className="rounded-xl border border-gray-100 bg-gray-50/60 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900">{lead.name || lead.email}</p>
+                      <p className="mt-1 text-sm text-gray-600">{summarizeConversation(thread)}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                      {leadTemperatureLabel(temp)}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
+                    {lead.sessionId && (
+                      <Link href={`/dashboard/conversations/${lead.sessionId}`} className="text-[#0d9488] hover:underline">
+                        View chat
+                      </Link>
+                    )}
+                    {wa && (
+                      <a href={wa} target="_blank" rel="noreferrer" className="text-emerald-700 hover:underline">
+                        Reply on WhatsApp
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <div className="mb-10 grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -262,12 +263,13 @@ export function DashboardSidebar({
           aria-haspopup="menu"
         >
           {isLoaded && avatarUrl ? (
-            <img
+            <Image
               src={avatarUrl}
               alt=""
               className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white/35"
               width={44}
               height={44}
+              unoptimized
               referrerPolicy="no-referrer"
             />
           ) : (

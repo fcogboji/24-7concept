@@ -6,22 +6,24 @@ export function LeadActions({
   leadId,
   currentStatus,
   leadEmail,
-  leadName,
+  leadPhone,
   botName,
+  suggestedMessage,
+  whatsappUrl,
 }: {
   leadId: string;
   currentStatus: string;
   leadEmail: string;
-  leadName: string | null;
+  leadPhone: string | null;
   botName: string;
+  suggestedMessage: string;
+  whatsappUrl: string | null;
 }) {
   const [status, setStatus] = useState(currentStatus);
   const [updating, setUpdating] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [subject, setSubject] = useState(`Following up from ${botName}`);
-  const [message, setMessage] = useState(
-    `Hi${leadName ? ` ${leadName}` : ""},\n\nThank you for chatting with us. I wanted to follow up on your inquiry.\n\nPlease let me know if you have any questions.\n\nBest regards`
-  );
+  const [message, setMessage] = useState(`${suggestedMessage}\n\nBest regards`);
   const [sending, setSending] = useState(false);
   const [emailNote, setEmailNote] = useState<{ text: string; ok: boolean } | null>(null);
 
@@ -64,7 +66,10 @@ export function LeadActions({
 
   const statusLabels: Record<string, string> = {
     new: "New",
+    contacted: "Contacted",
+    whatsapp_sent: "WhatsApp sent",
     followed_up: "Followed up",
+    booked: "Booked",
     dismissed: "Dismissed",
   };
 
@@ -81,6 +86,22 @@ export function LeadActions({
             <option key={value} value={value}>{label}</option>
           ))}
         </select>
+
+        {whatsappUrl ? (
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => void updateStatus("whatsapp_sent")}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+          >
+            WhatsApp
+          </a>
+        ) : leadPhone ? (
+          <span className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+            Check phone country code
+          </span>
+        ) : null}
 
         <button
           type="button"
@@ -101,6 +122,13 @@ export function LeadActions({
       {showEmail && (
         <div className="mt-2 w-full rounded-xl border border-gray-200 bg-gray-50 p-4">
           <p className="mb-1 text-xs font-medium text-gray-500">To: {leadEmail}</p>
+          <button
+            type="button"
+            className="mb-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+            onClick={() => setMessage(`${suggestedMessage}\n\nBest regards`)}
+          >
+            Use suggested reply
+          </button>
           <input
             type="text"
             className="mb-2 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#0d9488]"

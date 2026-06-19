@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { isEmailConfigured } from "@/lib/email";
+import { isEmailConfigured, isUsingResendSandboxSender } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { getStripeProPriceId, getStripeSecretKey, getStripeStarterPriceId } from "@/lib/stripe-env";
 
@@ -16,6 +16,7 @@ export default async function AdminSystemPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "(not set)";
   const openai = process.env.OPENAI_API_KEY ? "configured" : "missing";
   const stripe = getStripeSecretKey() ? "configured" : "missing";
+  const stripeWebhook = process.env.STRIPE_WEBHOOK_SECRET ? "configured" : "missing";
   const stripeStarterPrice = getStripeStarterPriceId() ? "configured" : "missing";
   const stripeProPrice = getStripeProPriceId() ? "configured" : "missing";
   const clerkPub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? "set" : "missing";
@@ -31,8 +32,13 @@ export default async function AdminSystemPage() {
   const emailFrom = process.env.EMAIL_FROM ?? "(not set)";
   const resend = process.env.RESEND_API_KEY ? "configured" : "missing";
   const transactionalEmail = isEmailConfigured() ? "ready (Resend + from)" : "incomplete";
-  const upstash = process.env.UPSTASH_REDIS_REST_URL ? "configured (distributed limits)" : "missing (per-instance memory)";
+  const resendSandbox = isUsingResendSandboxSender();
+  const upstash =
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+      ? "configured (distributed limits)"
+      : "missing (production traffic will be refused)";
   const healthDeep = process.env.HEALTH_CHECK_SECRET ? "set (DB check requires token)" : "unset (health is minimal only)";
+  const secretEncryption = process.env.SECRET_ENCRYPTION_KEY ? "configured" : "missing";
   const widgetCors = process.env.WIDGET_ALLOWED_ORIGINS?.trim()
     ? "restricted origins"
     : "open (embed-friendly)";
@@ -55,6 +61,13 @@ export default async function AdminSystemPage() {
           and
           <code className="mx-1 rounded bg-amber-100 px-1">CLERK_SECRET_KEY=sk_live_…</code>
           in Vercel, then redeploy.
+        </div>
+      )}
+      {env === "production" && resendSandbox && (
+        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Resend is using the sandbox sender. Verify a domain in Resend and set
+          <code className="mx-1 rounded bg-amber-100 px-1">EMAIL_FROM</code>
+          to that domain before accepting paying users.
         </div>
       )}
 
@@ -82,6 +95,10 @@ export default async function AdminSystemPage() {
           <dd className="font-mono text-stone-900">{stripe}</dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
+          <dt className="text-stone-500">STRIPE_WEBHOOK_SECRET</dt>
+          <dd className="font-mono text-stone-900">{stripeWebhook}</dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
           <dt className="text-stone-500">STRIPE_PRICE_STARTER</dt>
           <dd className="font-mono text-stone-900">{stripeStarterPrice}</dd>
         </div>
@@ -96,6 +113,10 @@ export default async function AdminSystemPage() {
         <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
           <dt className="text-stone-500">HEALTH_CHECK_SECRET</dt>
           <dd className="font-mono text-stone-900">{healthDeep}</dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
+          <dt className="text-stone-500">SECRET_ENCRYPTION_KEY</dt>
+          <dd className="font-mono text-stone-900">{secretEncryption}</dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-3">
           <dt className="text-stone-500">Widget CORS</dt>

@@ -49,7 +49,7 @@
     if (!apiBase) {
       try {
         apiBase = new URL(script.src).origin;
-      } catch (e) {
+      } catch {
         apiBase = "";
       }
     }
@@ -60,12 +60,12 @@
         if (typeof window !== "undefined" && window.__NESTBOT_BYPASS) {
           return String(window.__NESTBOT_BYPASS);
         }
-      } catch (e) {}
+      } catch {}
       try {
         var scriptUrl = new URL(script.src);
         var b = scriptUrl.searchParams.get("x-vercel-protection-bypass");
         if (b) return b;
-      } catch (e) {}
+      } catch {}
       var attr = script.getAttribute("data-vercel-bypass");
       return attr || "";
     }
@@ -91,6 +91,7 @@
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
     iframe.setAttribute("allowtransparency", "true");
     iframe.allow = "clipboard-read; clipboard-write";
+    iframe.dataset.botId = botId;
 
     /**
      * Must use the host page viewport — iframe innerWidth/innerHeight are ~160×56
@@ -129,6 +130,14 @@
     });
     window.addEventListener("resize", applyIframeSize);
 
+    function openWidget() {
+      panelOpen = true;
+      applyIframeSize();
+      try {
+        iframe.contentWindow.postMessage({ type: "faztino-open" }, expectedOrigin);
+      } catch {}
+    }
+
     /**
      * Shadow DOM isolates the widget from host-site CSS that may hide it on mobile
      * (e.g. `[id*="chat"] { display:none }` or mobile media queries).
@@ -158,9 +167,20 @@
     var target = document.body || mount;
     try {
       target.appendChild(host);
-    } catch (err) {
+    } catch {
       if (document.body) document.body.appendChild(host);
     }
+
+    window.FaztinoWidget = window.FaztinoWidget || {};
+    window.FaztinoWidget.open = function openFaztinoWidget(targetBotId) {
+      if (targetBotId && String(targetBotId) !== botId) return;
+      openWidget();
+    };
+    window.addEventListener("faztino-demo-open", function onDemoOpen(e) {
+      var detail = e && e.detail ? e.detail : {};
+      if (detail.botId && String(detail.botId) !== botId) return;
+      openWidget();
+    });
   }
 
   run();

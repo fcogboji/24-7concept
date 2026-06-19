@@ -14,15 +14,14 @@ export function SubscriptionWallAutoSync() {
   const router = useRouter();
   const params = useSearchParams();
   const fired = useRef(false);
-  const [status, setStatus] = useState<"idle" | "syncing" | "failed">("idle");
+  const justCheckedOut =
+    Boolean(params.get("session_id")) || params.get("checkout") === "success";
+  const [status, setStatus] = useState<"failed" | null>(null);
 
   useEffect(() => {
     if (fired.current) return;
-    const justCheckedOut =
-      params.get("session_id") || params.get("checkout") === "success";
     if (!justCheckedOut) return;
     fired.current = true;
-    setStatus("syncing");
 
     (async () => {
       try {
@@ -37,16 +36,16 @@ export function SubscriptionWallAutoSync() {
         setStatus("failed");
       }
     })();
-  }, [params, router]);
+  }, [justCheckedOut, router]);
 
-  if (status === "idle") return null;
+  if (!justCheckedOut && status !== "failed") return null;
   return (
     <p
       role="status"
       aria-live="polite"
       className="mb-6 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900"
     >
-      {status === "syncing"
+      {status !== "failed"
         ? "Confirming your payment with Stripe…"
         : "We couldn't auto-confirm your payment. Tap “Refresh plan from Stripe” below."}
     </p>

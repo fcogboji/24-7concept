@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { INDUSTRY_TEMPLATES, type IndustryTemplateId } from "@/lib/industry-templates";
 
 export function NewBotForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [industry, setIndustry] = useState<IndustryTemplateId>("general");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -21,6 +23,7 @@ export function NewBotForm() {
         body: JSON.stringify({
           name,
           websiteUrl: websiteUrl.trim() || undefined,
+          industry,
         }),
       });
       const data = (await res.json()) as { bot?: { id: string }; error?: string };
@@ -51,6 +54,26 @@ export function NewBotForm() {
           className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2.5 text-base text-stone-900 shadow-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
           placeholder="e.g. Riley Street Cafe"
         />
+      </div>
+      <div>
+        <label htmlFor="industry" className="block text-sm font-medium text-stone-700">
+          Business type
+        </label>
+        <select
+          id="industry"
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value as IndustryTemplateId)}
+          className="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2.5 text-base text-stone-900 shadow-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+        >
+          {Object.entries(INDUSTRY_TEMPLATES).map(([id, template]) => (
+            <option key={id} value={id}>
+              {template.label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-stone-500">
+          We start with useful guardrails and lead questions for this industry. You can edit them later.
+        </p>
       </div>
       <div>
         <label htmlFor="url" className="block text-sm font-medium text-stone-700">

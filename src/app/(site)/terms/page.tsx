@@ -82,7 +82,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-base font-semibold text-stone-900">6. Fees</h2>
             <p className="mt-2">
-              Paid plans are billed as described at checkout. Payments are processed by our payment provider (Stripe).
+              Paid plans are billed as described at checkout. Payments are processed by our payment providers.
               Taxes may apply. Unless stated otherwise, subscriptions renew until cancelled. You may cancel or update
               payment methods through the billing portal linked from your account where available.
             </p>

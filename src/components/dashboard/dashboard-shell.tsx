@@ -21,13 +21,13 @@ export function DashboardShell({
   initial: string;
   planLabel: string;
 }) {
-  const [navOpen, setNavOpen] = useState(false);
   const pathname = usePathname();
+  const [navState, setNavState] = useState({ open: false, pathname });
+  const navOpen = navState.open && navState.pathname === pathname;
 
   // Close drawer and restore scroll before paint so a stale overlay / overflow:hidden
   // cannot block taps on the new page (mobile client navigations).
   useLayoutEffect(() => {
-    setNavOpen(false);
     document.body.style.overflow = "";
     document.body.style.removeProperty("overflow");
   }, [pathname]);
@@ -45,13 +45,13 @@ export function DashboardShell({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setNavOpen(false);
+      if (e.key === "Escape") setNavState((s) => ({ ...s, open: false }));
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const closeNav = () => setNavOpen(false);
+  const closeNav = () => setNavState((s) => ({ ...s, open: false }));
 
   return (
     <div className="relative min-h-screen bg-gray-50 text-gray-900">
@@ -69,7 +69,7 @@ export function DashboardShell({
           </Link>
           <button
             type="button"
-            onClick={() => setNavOpen(true)}
+            onClick={() => setNavState({ open: true, pathname })}
             className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-gray-800 touch-manipulation"
             aria-label="Open navigation menu"
             aria-expanded={navOpen}

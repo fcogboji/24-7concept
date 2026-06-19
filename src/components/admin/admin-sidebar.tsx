@@ -24,10 +24,10 @@ function isActive(pathname: string, href: string) {
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerState, setDrawerState] = useState({ open: false, pathname });
+  const drawerOpen = drawerState.open && drawerState.pathname === pathname;
 
   useLayoutEffect(() => {
-    setDrawerOpen(false);
     document.body.style.overflow = "";
     document.body.style.removeProperty("overflow");
   }, [pathname]);
@@ -45,13 +45,13 @@ export function AdminSidebar() {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setDrawerOpen(false);
+      if (e.key === "Escape") setDrawerState((s) => ({ ...s, open: false }));
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const closeDrawer = () => setDrawerOpen(false);
+  const closeDrawer = () => setDrawerState((s) => ({ ...s, open: false }));
 
   const sidebarContent = (
     <>
@@ -111,7 +111,7 @@ export function AdminSidebar() {
         </Link>
         <button
           type="button"
-          onClick={() => setDrawerOpen(true)}
+          onClick={() => setDrawerState({ open: true, pathname })}
           className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-stone-300 touch-manipulation"
           aria-label="Open navigation menu"
           aria-expanded={drawerOpen}

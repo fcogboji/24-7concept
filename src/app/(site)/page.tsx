@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { DemoWidget } from "@/components/demo-widget";
 import { PricingSection } from "@/components/pricing-section";
 import { currencyForCountry } from "@/lib/pricing";
+import { isPaystackEnabled } from "@/lib/paystack-env";
 import { getPublicAppUrl } from "@/lib/public-app-url";
 import { widgetDemoScriptUrl } from "@/lib/widget-embed-snippet";
 import { HeroRobotMarquee } from "@/components/hero-robot-marquee";
@@ -11,6 +12,7 @@ import { LandingHeroBackground } from "@/components/landing-hero-background";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 import { BrandLogo } from "@/components/brand-logo";
 import { MarketingHeader } from "@/components/marketing-header";
+import { DemoOpenButton } from "@/components/demo-open-button";
 
 const teal = "bg-[#0d9488] hover:bg-[#0f7669]";
 
@@ -39,7 +41,7 @@ export default async function HomePage() {
     h.get("cf-ipcountry") ??
     h.get("x-country") ??
     null;
-  const currency = currencyForCountry(country);
+  const currency = isPaystackEnabled() ? currencyForCountry(country) : "USD";
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-50 text-gray-900">
@@ -53,48 +55,47 @@ export default async function HomePage() {
           <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-10 px-4 pb-16 pt-12 sm:gap-12 sm:px-6 sm:pb-20 sm:pt-16 lg:flex-row lg:items-center lg:gap-8 lg:pb-24 lg:pt-12 xl:gap-12">
             <div className="w-full max-lg:px-6 lg:max-w-none lg:w-[46%] lg:min-w-0 lg:px-0 lg:pr-4">
               <p className="mb-5 inline-flex items-center rounded-full border border-white/40 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                For practices, salons & professional firms
+                For appointment-led local businesses
               </p>
               <h1 className="font-[family-name:var(--font-fraunces)] text-[2rem] font-semibold leading-[1.12] tracking-tight text-white sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem]">
-                Capture missed customers and turn them into bookings — automatically.
+                Turn website visitors into leads and booking requests while your team is busy.
               </h1>
               <p className="mt-5 max-w-xl text-lg font-medium leading-snug text-white">
-                Stop missing patient bookings after hours. Stop losing enquiries when the desk is slammed or the phone
-                won&apos;t stop.
+                Faztino answers common questions from your own website, captures contact details, and helps visitors ask
+                for appointments before they disappear.
               </p>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90">
-                We install a <strong className="font-semibold text-white">24/7 receptionist</strong> on your website —
-                grounded in what you already publish, careful with tone, and wired to your calendar. Visitors get
-                straight answers and a <strong className="font-semibold text-white">real path to book</strong>, not
-                novelty small-talk or vague AI promises.
+                Add a <strong className="font-semibold text-white">trained website assistant</strong> in one script. It
+                uses your public pages and business notes, keeps conversations on topic, and gives every serious visitor
+                a clear next step: ask, leave details, or request a booking.
               </p>
               <ul className="mt-6 max-w-xl space-y-2.5 text-sm leading-relaxed text-white/85 sm:text-[0.9375rem]">
                 <li className="flex gap-2">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
                   <span>
-                    <span className="font-semibold text-white">Dental &amp; aesthetic practices</span> — fuller diaries;
-                    patients book when your line would go to voicemail.
+                    <span className="font-semibold text-white">Dental &amp; aesthetic practices</span> — capture patient
+                    intent when the phone is engaged or the desk is closed.
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
                   <span>
                     <span className="font-semibold text-white">Salons &amp; barbers — women&apos;s &amp; men&apos;s</span>{" "}
-                    — fewer missed calls; chair time fills from your site, not only the front desk.
+                    — collect service, timing, and contact details from visitors browsing after hours.
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
                   <span>
-                    <span className="font-semibold text-white">Real estate</span> — more viewings and valuations from
-                    people who browse serious properties after work.
+                    <span className="font-semibold text-white">Real estate</span> — qualify viewing and valuation
+                    enquiries from people browsing serious properties after work.
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-300" aria-hidden />
                   <span>
-                    <span className="font-semibold text-white">Law firms &amp; solicitors</span> — enquiries captured
-                    with clarity and discretion, not robotic filler.
+                    <span className="font-semibold text-white">Law firms &amp; solicitors</span> — capture enquiry
+                    context clearly before a human follows up.
                   </span>
                 </li>
               </ul>
@@ -106,17 +107,14 @@ export default async function HomePage() {
                 >
                   Create your assistant
                 </Link>
-                <a
-                  href="#demo-section"
+                <DemoOpenButton
                   className={`inline-flex min-h-[48px] items-center justify-center rounded-full px-7 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-black/25 transition ${teal}`}
-                >
-                  View live demo
-                </a>
+                />
               </div>
               <p
                 className={`mt-5 inline-block max-w-full rounded-lg px-4 py-2.5 text-sm leading-relaxed text-white shadow-md shadow-black/20 ${teal}`}
               >
-                From £79/mo · triaged enquiries &amp; real bookings · 14-day free trial
+                From $39/mo · website-trained replies · lead capture · booking requests
               </p>
             </div>
 
@@ -141,9 +139,9 @@ export default async function HomePage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">What you get</p>
                 <ul className="space-y-3">
                   {[
-                    "Books appointments straight into your calendar — like a second reception desk that never clocks off",
-                    "Filters intent (timeline, service, readiness) before your team spends a minute on the phone",
-                    "Hands off qualified leads to HubSpot, Pipedrive, or Salesforce — via Zapier, Make, or a webhook you control",
+                    "Answers from your website content instead of guessing from generic AI knowledge",
+                    "Captures name, email, phone, page source, and conversation history in your dashboard",
+                    "Creates booking requests and sends email notifications when visitors are ready to act",
                   ].map((t) => (
                     <li key={t} className="flex gap-3 text-sm leading-relaxed text-gray-700">
                       <CheckIcon />
@@ -151,9 +149,21 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/80 px-4 py-3 text-center text-xs text-gray-500">
-                  Open the chat bubble (bottom-right) to try the demo on this page.
-                </div>
+                <DemoOpenButton className="w-full rounded-xl border border-dashed border-gray-200 bg-gray-50/80 px-4 py-3 text-center text-xs font-semibold text-gray-600 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-900" />
+              </div>
+            </div>
+            <div className="mx-auto mt-6 max-w-lg rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Live lead preview</p>
+                <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-800">Hot lead</span>
+              </div>
+              <p className="mt-4 font-semibold text-gray-900">New booking request captured</p>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                Visitor asked about Saturday availability, left a phone number, and viewed your whitening service page.
+              </p>
+              <div className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900">
+                Suggested WhatsApp reply ready: “Hi Sarah, thanks for asking about whitening. Are you still looking for
+                a Saturday appointment?”
               </div>
             </div>
           </div>
@@ -173,7 +183,7 @@ export default async function HomePage() {
               },
               {
                 title: "Outcomes, not vanity metrics",
-                body: "Conversations, leads, and booking signals in one place — not fluff about “AI engagement.”",
+                body: "Conversations, leads, appointments, and follow-up signals in one place — not vanity chatbot metrics.",
               },
             ].map((item, i) => (
               <div key={item.title} className="text-center sm:text-left">
@@ -197,11 +207,11 @@ export default async function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-gray-900 sm:text-3xl md:text-4xl">
-                When they&apos;re ready to book, be there
+                Catch the moment before they leave
               </h2>
               <p className="mt-4 text-base text-gray-600 sm:text-lg">
-                Replies draw from your pages and policies, stay on brand, and read like someone at your front desk — not a
-                generic chatbot reciting templates.
+                Visitors rarely come back later. Faztino gives them a useful answer now, then turns interest into a lead
+                or booking request your team can actually follow up.
               </p>
             </div>
             <div className="mt-14 grid gap-10 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
@@ -209,20 +219,20 @@ export default async function HomePage() {
                 {
                   img: "/robot-support-call.png",
                   alt: "Assistant ready for customer conversations",
-                  title: "Evenings, lunch hours, peak Saturdays",
-                  body: "The moment someone opens chat — after work, between clients, or when the phone’s engaged — they still get a useful answer and a way to book.",
+                  title: "After hours and peak hours",
+                  body: "When someone opens chat after work, during lunch, or while your line is engaged, they still get a helpful answer and a way to leave details.",
                 },
                 {
                   img: "/robot-typing-laptop.png",
                   alt: "Learning from website content",
-                  title: "Your practice, your wording",
-                  body: "Training uses the site and notes you already maintain so answers reflect your services, pricing posture, and compliance boundaries.",
+                  title: "Your site, your answers",
+                  body: "Training uses the pages and notes you already maintain, so replies reflect your services, prices, areas, tone, and boundaries.",
                 },
                 {
                   img: "/robot-chat-replies.png",
                   alt: "Clear chat replies",
-                  title: "Conversations that convert",
-                  body: "Short, purposeful replies — the goal is a confirmed slot or a qualified lead, not endless AI chatter.",
+                  title: "Conversations with a next step",
+                  body: "Short, purposeful replies guide visitors toward leaving contact details, requesting a service, or booking a time.",
                 },
               ].map((item) => (
                 <figure key={item.title} className="flex flex-col">
@@ -253,25 +263,25 @@ export default async function HomePage() {
               Three steps to go live
             </h2>
             <p className="mt-3 max-w-2xl text-gray-600">
-              No flowcharts — connect your site, train once, paste one line. Most appointment-based businesses go live the
-              same day.
+              No complicated setup. Create an assistant, train it on your site, then paste one line of code into your
+              website.
             </p>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {[
                 {
                   step: "01",
-                  title: "Add your site",
-                  body: "We read public pages on your domain — nothing to upload by hand for the first pass.",
+                  title: "Point it at your website",
+                  body: "Faztino reads public pages on your domain and lets you add business notes for details your site does not cover.",
                 },
                 {
                   step: "02",
-                  title: "Train & index",
-                  body: "Content is chunked and embedded so questions match the closest passages.",
+                  title: "Train the answers",
+                  body: "Your content is indexed so visitor questions are matched with the closest relevant information before the assistant replies.",
                 },
                 {
                   step: "03",
-                  title: "Paste the script",
-                  body: "One line in your layout or theme. The widget appears for every visitor.",
+                  title: "Go live with one script",
+                  body: "Paste the embed code into your site. Conversations, leads, and appointment requests appear in your dashboard.",
                 },
               ].map((item, i) => (
                 <div
@@ -298,10 +308,10 @@ export default async function HomePage() {
         <section className="border-t border-gray-100 bg-[#0d9488] py-14 md:py-16">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
             <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-white sm:text-3xl">
-              Ready to stop losing bookings to closed doors?
+              Ready to capture the visitors you already paid to attract?
             </h2>
             <p className="mt-3 text-teal-100">
-              Create an account, point us at your site, and switch on receptionist-grade help in minutes.
+              Create an account, train your assistant, and give every visitor a clear path to ask, enquire, or book.
             </p>
             <Link
               href="/register"
@@ -317,7 +327,7 @@ export default async function HomePage() {
             <BrandLogo variant="footer" />
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            Built for people who answer the phone — and everyone who tries you after it stops ringing.
+            Built for busy teams, missed calls, after-hours visitors, and the leads that should not slip away.
           </p>
           <div className="mt-6">
             <LegalFooterLinks className="text-gray-400" />

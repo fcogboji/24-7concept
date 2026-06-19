@@ -3,6 +3,12 @@ import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import {
+  leadTemperature,
+  leadTemperatureClass,
+  leadTemperatureLabel,
+  summarizeConversation,
+} from "@/lib/lead-intelligence";
 
 function clip(s: string, n: number) {
   const t = s.trim();
@@ -91,14 +97,18 @@ export default async function ConversationsPage() {
 
   // Get first user message as summary
   function getSessionSummary(group: SessionGroup): string {
-    const firstUserMsg = group.messages.find((m) => m.role === "user");
-    return firstUserMsg ? clip(firstUserMsg.content, 120) : "No messages";
+    return clip(summarizeConversation(group.messages), 160);
   }
 
   function statusBadge(status: string) {
     switch (status) {
       case "followed_up":
         return "bg-blue-100 text-blue-800";
+      case "contacted":
+      case "whatsapp_sent":
+        return "bg-indigo-100 text-indigo-800";
+      case "booked":
+        return "bg-purple-100 text-purple-800";
       case "dismissed":
         return "bg-gray-100 text-gray-600";
       default:
@@ -108,7 +118,10 @@ export default async function ConversationsPage() {
 
   function statusLabel(status: string) {
     switch (status) {
+      case "contacted": return "Contacted";
+      case "whatsapp_sent": return "WhatsApp sent";
       case "followed_up": return "Followed up";
+      case "booked": return "Booked";
       case "dismissed": return "Dismissed";
       default: return "New";
     }
@@ -134,6 +147,7 @@ export default async function ConversationsPage() {
           {sessions.map((s, idx) => {
             const msgCount = s.messages.length;
             const userMsgCount = s.messages.filter((m) => m.role === "user").length;
+            const temp = leadTemperature(s.lead, s.messages);
             return (
               <Link
                 key={s.sessionId || idx}
@@ -151,9 +165,14 @@ export default async function ConversationsPage() {
                         <span className="font-medium text-gray-500">Anonymous visitor</span>
                       )}
                       {s.lead && (
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(s.lead.status)}`}>
-                          {statusLabel(s.lead.status)}
-                        </span>
+                        <>
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                            {leadTemperatureLabel(temp)}
+                          </span>
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(s.lead.status)}`}>
+                            {statusLabel(s.lead.status)}
+                          </span>
+                        </>
                       )}
                     </div>
 

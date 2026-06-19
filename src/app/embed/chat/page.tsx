@@ -13,6 +13,7 @@ import {
 const SIZE_MSG = "faztino-size";
 
 const DEFAULT_SUGGESTIONS = ["What do you do?", "How can I contact you?", "What are your hours?"];
+const WELCOME_MSG = "Hi there! Welcome to faztino. How can I help you today?";
 
 const BRAND_RED = "#E53238";
 const BRAND_BLUE = "#0064D2";
@@ -63,6 +64,13 @@ function EmbedChatInner() {
 
   const msgsRef = useRef<HTMLDivElement>(null);
 
+  const openChat = useCallback(() => {
+    setOpen(true);
+    setMsgs((prev) =>
+      prev.length === 0 ? [{ role: "bot", text: `\u{1F44B} ${WELCOME_MSG.replace("faztino", brand)}` }] : prev
+    );
+  }, [brand]);
+
   useEffect(() => {
     setOrigin(typeof window !== "undefined" ? window.location.origin : "");
   }, []);
@@ -101,6 +109,17 @@ function EmbedChatInner() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [postSize]);
+
+  useEffect(() => {
+    function onMessage(event: MessageEvent) {
+      const data = event.data as { type?: string } | null;
+      if (!data || data.type !== "faztino-open") return;
+      openChat();
+    }
+
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [openChat]);
 
   useEffect(() => {
     msgsRef.current?.scrollTo({ top: msgsRef.current.scrollHeight, behavior: "smooth" });
@@ -200,7 +219,7 @@ function EmbedChatInner() {
           });
         });
     },
-    [botId, chatUrl, input, sessionId, pageUrl, applyStreamEnd]
+    [botId, chatUrl, input, sessionId, pageUrl, visitorTimezone, applyStreamEnd]
   );
 
   const submitBookingForm = useCallback(() => {
@@ -243,14 +262,7 @@ function EmbedChatInner() {
             type="button"
             className="flex cursor-pointer flex-col items-end border-0 bg-transparent p-0 pr-2 transition hover:-translate-y-px"
             aria-label="Open chat"
-            onClick={() => {
-              setOpen(true);
-              setMsgs((prev) =>
-                prev.length === 0
-                  ? [{ role: "bot", text: `\u{1F44B} Hi there! Welcome to ${brand}. How can I help you today?` }]
-                  : prev
-              );
-            }}
+            onClick={openChat}
           >
             {/* Speech bubble */}
             <div className="relative mb-2 rounded-[18px] bg-white px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.12)]">

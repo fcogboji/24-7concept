@@ -6,10 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { canUserCreateBot } from "@/lib/plan";
 import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
 import { rateLimitBotCreate } from "@/lib/rate-limit";
+import { templateForIndustry } from "@/lib/industry-templates";
 
 const createSchema = z.object({
   name: z.string().min(1).max(120),
   websiteUrl: z.string().url().optional().or(z.literal("")),
+  industry: z.string().max(80).optional(),
 });
 
 export async function GET() {
@@ -90,6 +92,7 @@ export async function POST(req: Request) {
       userId: appUser.id,
       name: parsed.data.name,
       websiteUrl: url,
+      businessInfo: templateForIndustry(parsed.data.industry).businessInfo,
     },
   });
 

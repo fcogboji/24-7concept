@@ -20,7 +20,7 @@ export function getVercelProtectionBypassSecret(): string | null {
  * a server-injected bypass prelude. `bypassSecret` is kept for callers that still pass
  * it; the URL is clean (no secret in query) when using the dynamic route.
  */
-export function widgetScriptUrl(appUrl: string, _bypassSecret?: string | null): string {
+export function widgetScriptUrl(appUrl: string): string {
   const origin = appUrl.replace(/\/$/, "");
   return `${origin}/embed/widget.js`;
 }
@@ -52,7 +52,7 @@ export function buildWidgetEmbedSnippet(input: {
   bypassSecret?: string | null;
 }): string {
   const base = input.appUrl.replace(/\/$/, "");
-  const src = widgetScriptUrl(base, input.bypassSecret ?? getVercelProtectionBypassSecret());
+  const src = widgetScriptUrl(base);
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
   return `<script src="${esc(src)}" defer data-api-base="${esc(base)}" data-bot-id="${esc(input.botId)}" data-brand="${esc(input.botName)}"></script>`;
 }

@@ -21,7 +21,7 @@ export function DemoWidget({ scriptSrc }: { scriptSrc: string }) {
     return () => {
       s.remove();
     };
-  }, []);
+  }, [scriptSrc]);
 
   return null;
 }

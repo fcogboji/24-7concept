@@ -1,4 +1,11 @@
 import "./globals.css";
+import type { Metadata } from "next";
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
+};
 
 /**
  * Minimal root shell. Main marketing + dashboard live under `app/(site)/` with Clerk + fonts.

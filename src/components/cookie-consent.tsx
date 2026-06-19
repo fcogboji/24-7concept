@@ -10,24 +10,21 @@ export type ConsentValue = "accepted" | "essential";
 
 export function CookieConsent() {
   const pathname = usePathname();
-  const [visible, setVisible] = useState(false);
+  const [consent, setConsent] = useState<ConsentValue | null | undefined>(undefined);
 
   useEffect(() => {
-    if (pathname?.startsWith("/admin")) {
-      setVisible(false);
-      return;
-    }
-    try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      if (v !== "accepted" && v !== "essential") {
-        setVisible(true);
-      } else {
-        setVisible(false);
+    const timer = window.setTimeout(() => {
+      try {
+        const v = localStorage.getItem(STORAGE_KEY);
+        setConsent(v === "accepted" || v === "essential" ? v : null);
+      } catch {
+        setConsent(null);
       }
-    } catch {
-      setVisible(true);
-    }
-  }, [pathname]);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const visible = !pathname?.startsWith("/admin") && consent === null;
 
   useEffect(() => {
     const cls = "cookie-banner-open";
@@ -42,7 +39,7 @@ export function CookieConsent() {
     } catch {
       /* ignore */
     }
-    setVisible(false);
+    setConsent(choice);
   }
 
   if (!visible) return null;
