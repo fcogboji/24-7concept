@@ -25,7 +25,10 @@ const isPublicRoute = createRouteMatcher([
   "/api/health(.*)",
   "/api/session(.*)",
   "/api/embed(.*)",
+  // Payment webhooks are server-to-server: they carry no Clerk session and must bypass
+  // auth. Both verify their provider signature before trusting anything in the body.
   "/api/stripe/webhook(.*)",
+  "/api/paystack/webhook(.*)",
   "/admin/sign-in(.*)",
   "/admin/unauthorized(.*)",
 ]);
