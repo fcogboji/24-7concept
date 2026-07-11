@@ -9,6 +9,7 @@ import { BrandLogo } from "@/components/brand-logo";
 const nav = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/visitors", label: "Visitors" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/bots", label: "Assistants" },
   { href: "/admin/messages", label: "Messages" },
