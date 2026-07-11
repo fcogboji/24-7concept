@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "How faztino collects, uses, and protects personal data.",
 };
 
+const LAST_UPDATED = "11 July 2026";
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-[#fafaf9] text-stone-900">
@@ -24,7 +26,10 @@ export default function PrivacyPage() {
         <h1 className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold text-stone-900">
           Privacy Policy
         </h1>
-        <p className="mt-2 text-sm text-stone-500">Last updated: {new Date().toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}</p>
+        {/* Must be a real revision date. Rendering new Date() claimed the policy was
+            revised every day it was viewed, which is misleading and erases the audit
+            trail. Bump this by hand whenever the policy changes. */}
+        <p className="mt-2 text-sm text-stone-500">Last updated: {LAST_UPDATED}</p>
 
         <div className="prose prose-stone mt-8 max-w-none space-y-6 text-sm leading-relaxed text-stone-700">
           <section>
@@ -52,8 +57,22 @@ export default function PrivacyPage() {
                 (including rate limiting and security).
               </li>
               <li>
-                <strong>Billing:</strong> if you subscribe, Stripe or our payment provider handles card data; we
-                receive identifiers and subscription status.
+                <strong>Visitor analytics:</strong> when someone chats with an assistant on a customer’s website, we
+                record the conversation session together with a coarse country (derived from the network request, not
+                from a location service), a device class (mobile, tablet, desktop), a browser and operating system name,
+                the page the chat began on, and the <em>host</em> of the referring site (for example “google.com”). We
+                do <strong>not</strong> store the referring web address itself, because it can contain personal
+                information in its query string.
+              </li>
+              <li>
+                <strong>Visitor IP addresses are not stored.</strong> We keep only a one-way, secret-keyed hash of the
+                IP so that repeat visits can be counted. The hash cannot be reversed to recover the address, and we
+                cannot use it to identify anyone. We do not set cookies on visitors for analytics, and we do not sell or
+                share visitor data with advertisers.
+              </li>
+              <li>
+                <strong>Billing:</strong> if you subscribe, our payment providers (Stripe and Paystack) handle card
+                data; we receive identifiers and subscription status. We never see or store your card details.
               </li>
             </ul>
           </section>
@@ -87,8 +106,8 @@ export default function PrivacyPage() {
             <h2 className="text-base font-semibold text-stone-900">5. Processors & sub-processors</h2>
             <p className="mt-2">
               We use infrastructure and service providers (e.g. hosting, database, email provider, OpenAI for AI
-              processing, Clerk for authentication, Stripe for payments). They process data in line with our
-              instructions and contracts.
+              processing, Clerk for authentication, Stripe and Paystack for payments). They process data in line with
+              our instructions and contracts.
             </p>
           </section>
 
@@ -105,6 +124,11 @@ export default function PrivacyPage() {
             <p className="mt-2">
               We keep data only as long as needed for the purposes above or as required by law. You may delete your
               account or request deletion (subject to legal exceptions) by contacting us.
+            </p>
+            <p className="mt-2">
+              <strong>Visitor analytics</strong> records (country, device, browser, referring host, hashed IP) are
+              deleted automatically <strong>90 days</strong> after the visit. Deleting an assistant deletes its
+              conversation and visitor records with it.
             </p>
           </section>
 

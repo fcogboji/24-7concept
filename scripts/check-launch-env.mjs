@@ -57,6 +57,9 @@ const required = [
   "UPSTASH_REDIS_REST_TOKEN",
   "HEALTH_CHECK_SECRET",
   "SECRET_ENCRYPTION_KEY",
+  // Without it the visitor-retention cron refuses to run, and we would silently
+  // break the 90-day deletion the privacy policy promises.
+  "CRON_SECRET",
 ];
 
 for (const key of required) {

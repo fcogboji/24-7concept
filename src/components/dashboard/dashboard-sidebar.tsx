@@ -134,6 +134,7 @@ export function DashboardSidebar({
     { href: "/dashboard/leads", label: "Leads", icon: "leads" },
     { href: "/dashboard/appointments", label: "Appointments", icon: "calendar" },
     { href: "/dashboard/analytics", label: "Analytics", icon: "dashboard" },
+    { href: "/dashboard/visitors", label: "Visitors", icon: "dashboard" },
     { href: "/dashboard/webhooks", label: "Webhooks", icon: "code" },
   ];
 

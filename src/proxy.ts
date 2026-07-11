@@ -29,6 +29,8 @@ const isPublicRoute = createRouteMatcher([
   // auth. Both verify their provider signature before trusting anything in the body.
   "/api/stripe/webhook(.*)",
   "/api/paystack/webhook(.*)",
+  // Scheduled jobs carry no Clerk session either; they authenticate with CRON_SECRET.
+  "/api/cron(.*)",
   "/admin/sign-in(.*)",
   "/admin/unauthorized(.*)",
 ]);
