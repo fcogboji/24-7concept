@@ -61,6 +61,12 @@ function EmbedChatInner() {
 
   const pageUrl = typeof window !== "undefined" ? (window.parent !== window ? document.referrer : window.location.href) : "";
   const visitorTimezone = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "UTC";
+  // widget.js reads the host page's document.referrer and passes it in: this iframe is
+  // cross-origin, so it cannot see where the visitor came from on its own.
+  const referrer =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("ref") || ""
+      : "";
 
   const msgsRef = useRef<HTMLDivElement>(null);
 
@@ -156,7 +162,7 @@ function EmbedChatInner() {
       fetchWithNetworkRetry(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ botId, message: text, sessionId, pageUrl: pageUrl || undefined, visitorTimezone }),
+        body: JSON.stringify({ botId, message: text, sessionId, pageUrl: pageUrl || undefined, referrer: referrer || undefined, visitorTimezone }),
       })
         .then((res) => {
           const ct = res.headers.get("content-type") || "";
@@ -219,7 +225,7 @@ function EmbedChatInner() {
           });
         });
     },
-    [botId, chatUrl, input, sessionId, pageUrl, visitorTimezone, applyStreamEnd]
+    [botId, chatUrl, input, sessionId, pageUrl, referrer, visitorTimezone, applyStreamEnd]
   );
 
   const submitBookingForm = useCallback(() => {

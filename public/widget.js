@@ -76,6 +76,18 @@
     var bypass = protectionBypass();
     if (bypass) u.searchParams.set("x-vercel-protection-bypass", bypass);
 
+    /*
+     * Where the visitor came from before landing on this page. Only this script,
+     * running on the host page, can see it: the iframe is cross-origin, and the
+     * Referer the server receives is the iframe's own URL. Pass the origin only —
+     * a full referring URL can carry PII in its query string.
+     */
+    try {
+      if (document.referrer) {
+        u.searchParams.set("ref", new URL(document.referrer).origin);
+      }
+    } catch {}
+
     var iframe = document.createElement("iframe");
     iframe.src = u.toString();
     iframe.title = "Chat";

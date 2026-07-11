@@ -93,8 +93,37 @@ model Bot {
   leads             Lead[]
   bookingConfig     BookingConfig?
   appointments      Appointment[]
+  visitorSessions   VisitorSession[]
 
   @@index([userId])
+}
+
+/// One row per widget conversation. Deliberately stores coarse, non-identifying
+/// signals only: a country, a device class, a referring host. The visitor's IP is
+/// never stored — only a salted HMAC of it, so repeat visits can be recognised
+/// without the raw address ever being at rest or recoverable from a DB dump.
+model VisitorSession {
+  id           String   @id @default(cuid())
+  botId        String
+  sessionId    String
+  /// Salted HMAC-SHA256 of the IP. Not reversible; not an identifier we can resolve.
+  ipHash       String?
+  country      String?
+  region       String?
+  device       String?
+  browser      String?
+  os           String?
+  /// Host only ("google.com"), never the full referring URL, which can carry PII in its query.
+  referrerHost String?
+  landingPage  String?
+  messageCount Int      @default(0)
+  firstSeenAt  DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+  bot          Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@unique([botId, sessionId])
+  @@index([botId, firstSeenAt])
+  @@index([country])
 }
 
 model Lead {

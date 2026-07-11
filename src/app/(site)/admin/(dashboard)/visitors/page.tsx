@@ -5,6 +5,47 @@ type PageRow = { pageUrl: string | null; sessions: bigint; messages: bigint };
 type TotalsRow = { sessions: bigint; messages: bigint; bots: bigint };
 type ConvRow = { converted: bigint };
 
+/** A ranked breakdown (country / device / browser / referrer). */
+function Breakdown({
+  title,
+  hint,
+  rows,
+  emptyLabel,
+}: {
+  title: string;
+  hint?: string;
+  rows: { label: string; count: number }[];
+  emptyLabel: string;
+}) {
+  const max = Math.max(1, ...rows.map((r) => r.count));
+  return (
+    <div className="rounded-xl border border-stone-200 bg-white p-4">
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-stone-500">{title}</h3>
+      {hint && <p className="mt-1 text-xs text-stone-500">{hint}</p>}
+      {rows.length === 0 ? (
+        <p className="mt-3 text-sm text-stone-500">{emptyLabel}</p>
+      ) : (
+        <ul className="mt-3 space-y-2">
+          {rows.map((r) => (
+            <li key={r.label} className="flex items-center gap-3 text-sm">
+              <span className="w-24 shrink-0 truncate text-stone-700" title={r.label}>
+                {r.label}
+              </span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200">
+                <div
+                  className="h-full rounded-full bg-teal-600"
+                  style={{ width: `${Math.max(8, (r.count / max) * 100)}%` }}
+                />
+              </div>
+              <span className="w-8 text-right font-medium tabular-nums text-stone-900">{r.count}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /**
  * A sessionId is a browser session the widget minted, not a person: the same human on
  * two devices counts twice, and a cleared store starts a new one. Everything here is
@@ -46,6 +87,53 @@ export default async function AdminVisitorsPage() {
     `,
   ]);
 
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const [byCountry, byDevice, byBrowser, byReferrer, returning] = await Promise.all([
+    prisma.visitorSession.groupBy({
+      by: ["country"],
+      where: { firstSeenAt: { gte: since }, country: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { country: "desc" } },
+      take: 8,
+    }),
+    prisma.visitorSession.groupBy({
+      by: ["device"],
+      where: { firstSeenAt: { gte: since }, device: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { device: "desc" } },
+      take: 5,
+    }),
+    prisma.visitorSession.groupBy({
+      by: ["browser"],
+      where: { firstSeenAt: { gte: since }, browser: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { browser: "desc" } },
+      take: 6,
+    }),
+    prisma.visitorSession.groupBy({
+      by: ["referrerHost"],
+      where: { firstSeenAt: { gte: since }, referrerHost: { not: null } },
+      _count: { _all: true },
+      orderBy: { _count: { referrerHost: "desc" } },
+      take: 8,
+    }),
+    // A repeat visitor is one ipHash behind more than one session.
+    prisma.$queryRaw<{ c: bigint }[]>`
+      SELECT COUNT(*)::bigint AS c FROM (
+        SELECT "ipHash" FROM "VisitorSession"
+        WHERE "firstSeenAt" >= ${since} AND "ipHash" IS NOT NULL
+        GROUP BY "ipHash" HAVING COUNT(*) > 1
+      ) x
+    `,
+  ]);
+
+  const toRows = (rows: { _count: { _all: number } }[], key: string) =>
+    rows.map((r) => ({
+      label: String((r as unknown as Record<string, unknown>)[key] ?? "unknown"),
+      count: r._count._all,
+    }));
+
+  const repeatVisitors = Number(returning[0]?.c ?? 0);
   const sessions = Number(totals[0]?.sessions ?? 0);
   const messages = Number(totals[0]?.messages ?? 0);
   const activeBots = Number(totals[0]?.bots ?? 0);
@@ -63,6 +151,11 @@ export default async function AdminVisitorsPage() {
     { label: "Messages / session", value: msgsPerSession, hint: "Depth of engagement" },
     { label: "Session → lead", value: convRate, hint: `${converted.toLocaleString()} sessions captured a lead` },
     { label: "Assistants engaged", value: activeBots.toLocaleString(), hint: "Bots with at least one session" },
+    {
+      label: "Repeat visitors",
+      value: repeatVisitors.toLocaleString(),
+      hint: "Same hashed IP across >1 session",
+    },
   ];
 
   return (
@@ -85,6 +178,28 @@ export default async function AdminVisitorsPage() {
             <p className="mt-0.5 text-xs text-stone-500">{t.hint}</p>
           </div>
         ))}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">Acquisition</h2>
+        <p className="mt-1 text-xs text-stone-500">
+          Collected from now on — sessions that predate visitor tracking have no country or device.
+        </p>
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+          <Breakdown
+            title="Country"
+            rows={toRows(byCountry, "country")}
+            emptyLabel="No country data yet."
+          />
+          <Breakdown
+            title="Referrer"
+            hint="Host only — never the full referring URL."
+            rows={toRows(byReferrer, "referrerHost")}
+            emptyLabel="No referrers yet (visitors arrived directly)."
+          />
+          <Breakdown title="Device" rows={toRows(byDevice, "device")} emptyLabel="No device data yet." />
+          <Breakdown title="Browser" rows={toRows(byBrowser, "browser")} emptyLabel="No browser data yet." />
+        </div>
       </section>
 
       <section className="mt-10">

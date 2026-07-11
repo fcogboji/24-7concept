@@ -9,6 +9,7 @@ import { bookingTools, handleBookingTool, type BookingToolResult } from "@/lib/b
 import { encodeBookingFormForStream, type BookingFormRequest } from "@/lib/chat-form";
 import { engagementTools, handleEngagementTool } from "@/lib/engagement-tools";
 import { getLogger } from "@/lib/logger";
+import { collectVisitorSignals, recordVisitorSession } from "@/lib/visitor";
 import type { ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources/chat/completions";
 
 const log = getLogger("chat");
@@ -36,11 +37,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { botId, message, sessionId, pageUrl } = (await req.json()) as {
+    const { botId, message, sessionId, pageUrl, referrer } = (await req.json()) as {
       botId?: string;
       message?: string;
       sessionId?: string;
       pageUrl?: string;
+      referrer?: string;
     };
 
     if (!botId || !message?.trim()) {
@@ -197,6 +199,15 @@ export async function POST(req: NextRequest) {
     // Save the user message immediately so it's never lost.
     await prisma.message.create({
       data: { botId, role: "user", content: message, sessionId: sessionId || null, pageUrl: pageUrl || null },
+    });
+
+    // Analytics only, and it swallows its own errors: a visitor's chat must never
+    // fail because we could not write a stats row.
+    await recordVisitorSession({
+      botId,
+      sessionId,
+      pageUrl,
+      signals: collectVisitorSignals(req, referrer),
     });
 
     // Conversation history so the AI remembers prior turns (loaded above, pre-insert).
