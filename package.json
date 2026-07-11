@@ -17,7 +17,8 @@
     "check:launch-env": "node scripts/check-launch-env.mjs --production",
     "launch:check": "node scripts/final-launch-check.mjs",
     "launch:check:embed": "node scripts/final-launch-check.mjs --with-embed",
-    "verify:embed": "node scripts/verify-embed.mjs"
+    "verify:embed": "node scripts/verify-embed.mjs",
+    "test": "node --import tsx --test \"src/**/*.test.ts\""
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

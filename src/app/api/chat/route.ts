@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getChatModel, getOpenAI, getRoutingModel } from "@/lib/openai";
+import { getChatModel, getOpenAI } from "@/lib/openai";
 import { getRelevantChunksScored } from "@/lib/retrieve";
 import { rateLimitChat, rateLimitChatBotGlobal } from "@/lib/rate-limit";
 import { canUserSendMessage } from "@/lib/plan";
@@ -120,7 +120,26 @@ export async function POST(req: NextRequest) {
 
     const bookingEnabled = bot.bookingConfig?.enabled === true;
 
-    const scoredChunks = await getRelevantChunksScored(botId, message);
+    // Load history before the current message is saved, so `prior` is exactly the
+    // preceding turns — no need to slice the just-inserted row back off.
+    const prior = sessionId
+      ? await prisma.message.findMany({
+          where: { botId, sessionId },
+          orderBy: { createdAt: "asc" },
+          take: 50, // limit to last 50 messages to stay within token budget
+        })
+      : [];
+
+    // A follow-up ("how much is that?", "and on weekends?") means nothing on its own,
+    // so embedding it alone retrieves noise. Prepend the recent user turns to give the
+    // query enough standing to match the right chunks.
+    const recentUserTurns = prior
+      .filter((m) => m.role === "user")
+      .slice(-2)
+      .map((m) => m.content);
+    const retrievalQuery = [...recentUserTurns, message].join("\n");
+
+    const scoredChunks = await getRelevantChunksScored(botId, retrievalQuery);
     const topScore = scoredChunks[0]?.score ?? 0;
     const ragContext = scoredChunks.length
       ? scoredChunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n")
@@ -180,28 +199,18 @@ export async function POST(req: NextRequest) {
       data: { botId, role: "user", content: message, sessionId: sessionId || null, pageUrl: pageUrl || null },
     });
 
-    // Load conversation history for this session so the AI remembers prior messages
+    // Conversation history so the AI remembers prior turns (loaded above, pre-insert).
     const historyMessages: ChatCompletionMessageParam[] = [];
-    if (sessionId) {
-      const prior = await prisma.message.findMany({
-        where: { botId, sessionId },
-        orderBy: { createdAt: "asc" },
-        take: 50, // limit to last 50 messages to stay within token budget
-      });
-      // Exclude the message we just saved (last user message) — we add it explicitly below
-      const priorWithoutCurrent = prior.slice(0, -1);
-      for (const m of priorWithoutCurrent) {
-        if (m.role === "user") {
-          historyMessages.push({ role: "user", content: m.content });
-        } else if (m.role === "assistant") {
-          historyMessages.push({ role: "assistant", content: m.content });
-        }
+    for (const m of prior) {
+      if (m.role === "user") {
+        historyMessages.push({ role: "user", content: m.content });
+      } else if (m.role === "assistant") {
+        historyMessages.push({ role: "assistant", content: m.content });
       }
     }
 
     const openai = getOpenAI();
     const chatModel = getChatModel();
-    const routingModel = getRoutingModel();
     const toolCtx = { botId, sessionId, pageUrl };
 
     const tools: ChatCompletionTool[] = [
@@ -238,43 +247,9 @@ export async function POST(req: NextRequest) {
     // Cap output length on every OpenAI call so a malicious or malformed
     // prompt cannot run up an unbounded bill. Tuned for short customer-facing
     // replies plus a small headroom for tool-call JSON.
-    const MAX_TOOL_ROUND_TOKENS = 600;
     const MAX_REPLY_TOKENS = 800;
 
     const MAX_TOOL_ROUNDS = 5;
-    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-      const completion = await openai.chat.completions.create({
-        model: routingModel,
-        messages,
-        tools,
-        max_tokens: MAX_TOOL_ROUND_TOKENS,
-      });
-
-      const assistantMsg = completion.choices[0].message;
-      messages.push(assistantMsg);
-
-      if (!assistantMsg.tool_calls?.length) break;
-
-      for (const tc of assistantMsg.tool_calls) {
-        if (tc.type !== "function") continue;
-        let args: Record<string, unknown> = {};
-        try {
-          args = JSON.parse(tc.function.arguments || "{}");
-        } catch {
-          /* empty args */
-        }
-        const result = await handleToolCall(tc.function.name, args);
-        messages.push({ role: "tool", tool_call_id: tc.id, content: result });
-      }
-    }
-
-    // Strip the "tools" so the final pass focuses on writing — and use the higher-quality model for the visitor-facing text.
-    const stream = await openai.chat.completions.create({
-      model: chatModel,
-      stream: true,
-      messages,
-      max_tokens: MAX_REPLY_TOKENS,
-    });
 
     const encoder = new TextEncoder();
     let fullReply = "";
@@ -282,11 +257,67 @@ export async function POST(req: NextRequest) {
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const part of stream) {
-            const text = part.choices[0]?.delta?.content ?? "";
-            fullReply += text;
-            controller.enqueue(encoder.encode(text));
+          // The tools travel with the streaming call, so a reply that needs no tool
+          // (the common case) reaches the visitor on the first round instead of
+          // waiting for a separate blocking routing pass to finish first.
+          for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+            const stream = await openai.chat.completions.create({
+              model: chatModel,
+              stream: true,
+              messages,
+              tools,
+              max_tokens: MAX_REPLY_TOKENS,
+            });
+
+            // Tool calls arrive split across deltas: `id`/`name` land once, then
+            // `arguments` accumulate as fragments, keyed by index.
+            const calls: { id: string; name: string; args: string }[] = [];
+            let roundText = "";
+
+            for await (const part of stream) {
+              const delta = part.choices[0]?.delta;
+              if (!delta) continue;
+
+              const text = delta.content ?? "";
+              if (text) {
+                roundText += text;
+                fullReply += text;
+                controller.enqueue(encoder.encode(text));
+              }
+
+              for (const tc of delta.tool_calls ?? []) {
+                const slot = (calls[tc.index] ??= { id: "", name: "", args: "" });
+                if (tc.id) slot.id = tc.id;
+                if (tc.function?.name) slot.name = tc.function.name;
+                if (tc.function?.arguments) slot.args += tc.function.arguments;
+              }
+            }
+
+            const toolCalls = calls.filter((c) => c.id && c.name);
+            if (!toolCalls.length) break;
+
+            messages.push({
+              role: "assistant",
+              content: roundText || null,
+              tool_calls: toolCalls.map((c) => ({
+                id: c.id,
+                type: "function" as const,
+                function: { name: c.name, arguments: c.args || "{}" },
+              })),
+            });
+
+            for (const c of toolCalls) {
+              let args: Record<string, unknown> = {};
+              try {
+                args = JSON.parse(c.args || "{}");
+              } catch {
+                /* empty args */
+              }
+              const result = await handleToolCall(c.name, args);
+              messages.push({ role: "tool", tool_call_id: c.id, content: result });
+            }
           }
+
           const storedReply = fullReply || "(empty)";
           await prisma.message.create({
             data: { botId, role: "assistant", content: storedReply, sessionId: sessionId || null, pageUrl: pageUrl || null },

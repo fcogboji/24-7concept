@@ -6,8 +6,6 @@ export type RelevantChunk = { content: string; score: number };
 
 /** Treat anything below this as noise (rough empirical threshold for text-embedding-3-small). */
 const MIN_RELEVANCE = 0.18;
-/** MMR-like dedup: skip a chunk that is very similar to one already chosen. */
-const DEDUP_OVERLAP = 0.92;
 
 function hasHeavyTextOverlap(a: string, b: string): boolean {
   const an = a.replace(/\s+/g, " ").trim().toLowerCase();
@@ -42,11 +40,8 @@ export async function getRelevantChunksScored(
   const picked: RelevantChunk[] = [];
   for (const candidate of scored) {
     if (candidate.score < MIN_RELEVANCE) break;
-    if (
-      picked.some(
-        (p) => p.score - candidate.score < DEDUP_OVERLAP && hasHeavyTextOverlap(p.content, candidate.content),
-      )
-    ) {
+    // Dedup: drop a chunk whose text is already substantially covered by one we kept.
+    if (picked.some((p) => hasHeavyTextOverlap(p.content, candidate.content))) {
       continue;
     }
     picked.push(candidate);

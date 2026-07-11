@@ -20,8 +20,3 @@ export function getOpenAI(): OpenAI {
 export function getChatModel(): string {
   return process.env.CHAT_MODEL?.trim() || "gpt-4o-mini";
 }
-
-/** Cheaper model for tool routing (function picking) inside the booking loop. */
-export function getRoutingModel(): string {
-  return process.env.CHAT_ROUTING_MODEL?.trim() || "gpt-4o-mini";
-}

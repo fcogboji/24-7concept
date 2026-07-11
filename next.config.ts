@@ -3,7 +3,14 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["playwright-core", "playwright", "@sparticuz/chromium"],
+  // @prisma/instrumentation uses dynamic require() that webpack can't statically analyze;
+  // keeping it external silences the "Critical dependency" warning from the Sentry import chain.
+  serverExternalPackages: [
+    "playwright-core",
+    "playwright",
+    "@sparticuz/chromium",
+    "@prisma/instrumentation",
+  ],
   async rewrites() {
     return [
       // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.
