@@ -7,12 +7,11 @@ import { BrandLogo } from "@/components/brand-logo";
 import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 const links = [
-  { href: "#moments", label: "Product" },
   { href: "#how", label: "How it works" },
   { href: "#pricing", label: "Pricing" },
 ] as const;
 
-const accent = "bg-[#0d9488] hover:bg-[#0f7669]";
+const accent = "bg-[#2563eb] hover:bg-[#1d4ed8]";
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
@@ -78,7 +77,7 @@ export function MarketingHeader() {
                   href="/register"
                   className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${accent}`}
                 >
-                  Start free
+                  Start Free Trial
                 </Link>
               </>
             )}
@@ -198,7 +197,7 @@ export function MarketingHeader() {
                   className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${accent}`}
                   onClick={() => setOpen(false)}
                 >
-                  Start free
+                  Start Free Trial
                 </Link>
               </>
             )}

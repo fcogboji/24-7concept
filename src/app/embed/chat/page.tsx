@@ -15,11 +15,9 @@ const SIZE_MSG = "faztino-size";
 const DEFAULT_SUGGESTIONS = ["What do you do?", "How can I contact you?", "What are your hours?"];
 const WELCOME_MSG = "Hi there! Welcome to faztino. How can I help you today?";
 
-const BRAND_RED = "#E53238";
-const BRAND_BLUE = "#0064D2";
-const BRAND_YELLOW = "#F5AF02";
-const BRAND_GREEN = "#86B817";
-const BRAND_GRADIENT = BRAND_RED;
+const BRAND_DARK = "#111111";
+const BRAND_GREEN = "#22c55e";
+const BRAND_GRADIENT = BRAND_DARK;
 
 function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<Response> {
   const merged: RequestInit = { mode: "cors", credentials: "omit", cache: "no-store", ...init };
@@ -278,22 +276,19 @@ function EmbedChatInner() {
                 <div className="h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
               </div>
             </div>
-            {/* Brand-gradient circle chat icon with notification badge */}
-            <div
-              className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
-              style={{ background: BRAND_GRADIENT }}
-            >
-              {/* Speech bubble with three dots */}
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            {/* Black circle chat icon with white speech bubble + three dots */}
+            <div className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full bg-black shadow-[0_10px_30px_rgba(0,0,0,0.28)]">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden>
+                {/* Rounded speech bubble with tail toward bottom-left */}
                 <path
-                  d="M6 6h20a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-8l-6 5v-5H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
+                  d="M16 6.5c6.1 0 11 3.9 11 8.8s-4.9 8.8-11 8.8c-1.3 0-2.6-.2-3.8-.5-1.6 1.2-3.6 2-5.7 2.2 1.2-1.1 2-2.5 2.2-4-2-1.6-3.2-3.8-3.2-6.2 0-4.9 4.9-8.8 11-8.8z"
                   fill="white"
                 />
-                <circle cx="11" cy="14" r="1.8" fill={BRAND_RED} />
-                <circle cx="16" cy="14" r="1.8" fill={BRAND_BLUE} />
-                <circle cx="21" cy="14" r="1.8" fill={BRAND_YELLOW} />
+                <circle cx="11.5" cy="15.3" r="1.7" fill="black" />
+                <circle cx="16" cy="15.3" r="1.7" fill="black" />
+                <circle cx="20.5" cy="15.3" r="1.7" fill="black" />
               </svg>
-              {/* Animated dot */}
+              {/* Animated status dot */}
               <div className="absolute -top-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white shadow-sm">
                 <span
                   className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
@@ -329,7 +324,7 @@ function EmbedChatInner() {
                 ) : (
                   <div
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold"
-                    style={{ color: BRAND_RED }}
+                    style={{ color: BRAND_DARK }}
                   >
                     {brandInitial}
                   </div>
@@ -375,7 +370,7 @@ function EmbedChatInner() {
                     <button
                       key={label}
                       type="button"
-                      className="min-h-9 cursor-pointer rounded-full border border-stone-300 bg-white px-3 py-1.5 text-[13px] text-stone-600 hover:border-[#0064D2] hover:bg-[#eaf2fc] hover:text-[#0064D2] transition-colors"
+                      className="min-h-9 cursor-pointer rounded-full border border-stone-300 bg-white px-3 py-1.5 text-[13px] text-stone-600 hover:border-black hover:bg-stone-100 hover:text-black transition-colors"
                       onClick={() => sendMessage(label)}
                     >
                       {label}
@@ -400,7 +395,7 @@ function EmbedChatInner() {
                           </span>
                           <input
                             type={meta.inputType}
-                            className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none focus:border-[#0064D2]"
+                            className="min-w-0 rounded-[10px] border border-stone-300 px-3 py-2.5 text-base outline-none focus:border-black"
                             placeholder={meta.placeholder}
                             autoComplete={meta.autoComplete}
                             value={formValues[fieldId] ?? ""}
@@ -430,7 +425,7 @@ function EmbedChatInner() {
             <div className="border-t border-stone-200 bg-white px-3 py-3 pb-[max(12px,env(safe-area-inset-bottom,0px))]">
               <div className="flex items-center gap-2">
                 <input
-                  className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3.5 py-2.5 text-base text-stone-900 outline-none placeholder:text-stone-400 focus:border-[#0064D2] focus:shadow-[0_0_0_3px_rgba(0,100,210,0.15)]"
+                  className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3.5 py-2.5 text-base text-stone-900 outline-none placeholder:text-stone-400 focus:border-black focus:shadow-[0_0_0_3px_rgba(0,0,0,0.12)]"
                   type="text"
                   placeholder="Ask anything..."
                   autoComplete="off"
@@ -456,7 +451,7 @@ function EmbedChatInner() {
               </div>
               <div className="mt-2 text-center text-[11px] text-stone-400">
                 Powered by <span className="font-medium text-stone-500">faztino</span>{" "}
-                <span style={{ color: BRAND_RED }}>&#10022;</span>
+                <span style={{ color: BRAND_DARK }}>&#10022;</span>
               </div>
             </div>
           </div>
