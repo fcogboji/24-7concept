@@ -45,8 +45,9 @@ export function SubscriptionWall({
               Pick a plan to access your dashboard
             </h1>
             <p className="mt-3 text-sm text-gray-600">
-              Faztino is paid-only — there&apos;s no free tier. Every plan starts with a 14-day free trial; you
-              won&apos;t be charged today and can cancel anytime.
+              Faztino is paid-only — there&apos;s no free tier. Every plan starts with a 14-day free trial. We&apos;ll
+              ask for your card to begin it, but you won&apos;t be charged until day 15 and can cancel any time before
+              then.
             </p>
           </>
         )}

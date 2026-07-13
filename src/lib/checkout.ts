@@ -1,9 +1,9 @@
 import Stripe from "stripe";
 import { getAppUrlForStripeRedirects } from "@/lib/public-app-url";
 import { getStripeCheckoutConfigIssue, STRIPE_PRICE_ENV_HINT } from "@/lib/stripe-env";
-import { initTransaction } from "@/lib/paystack";
+import { initTransaction, PAYSTACK_TRIAL_AUTH_PURPOSE } from "@/lib/paystack";
 import { getPaystackPlanCode, isPaystackEnabled } from "@/lib/paystack-env";
-import { PAYSTACK_AMOUNT_NGN, type PlanId } from "@/lib/pricing";
+import { PAYSTACK_CARD_AUTH_NGN, TRIAL_PERIOD_DAYS, type PlanId } from "@/lib/pricing";
 
 export type CheckoutResult =
   | { ok: true; url: string }
@@ -39,7 +39,9 @@ export async function createStripeCheckoutForUser(
       cancel_url: `${appUrl}/dashboard?checkout=cancel`,
       metadata: { userId: user.id, plan },
       allow_promotion_codes: true,
-      subscription_data: { trial_period_days: 14, metadata: { plan } },
+      // Card is collected up front; Stripe charges nothing until the trial ends.
+      payment_method_collection: "always",
+      subscription_data: { trial_period_days: TRIAL_PERIOD_DAYS, metadata: { plan } },
     });
 
     if (!checkout.url) {
@@ -89,12 +91,16 @@ export async function createPaystackCheckoutForUser(
   const appUrl = (await getAppUrlForStripeRedirects()).replace(/\/$/, "");
 
   try {
+    // Do NOT pass `plan` here: Paystack would create the subscription and bill
+    // the full amount today. Instead we take a refundable card-authorization
+    // charge, then the webhook creates the subscription with a start_date 14
+    // days out so the first real charge lands on day 15.
     const result = await initTransaction({
       email: user.email,
-      amount: PAYSTACK_AMOUNT_NGN[plan],
-      plan: planCode,
+      amount: PAYSTACK_CARD_AUTH_NGN,
+      channels: ["card"],
       callbackUrl: `${appUrl}/dashboard?paystack=callback`,
-      metadata: { userId: user.id, plan },
+      metadata: { userId: user.id, plan, purpose: PAYSTACK_TRIAL_AUTH_PURPOSE, planCode },
     });
 
     if (!result.status || !result.data?.authorization_url) {

@@ -37,10 +37,14 @@ export function formatPrice(amount: number, currency: Currency): string {
 
 export const ANNUAL_DISCOUNT = 0.25;
 
-export const PAYSTACK_AMOUNT_NGN: Record<PlanId, number> = {
-  starter: 19000,
-  pro: 49000,
-};
+export const TRIAL_PERIOD_DAYS = 14;
+
+/**
+ * Paystack cannot vault a card without charging it, so the trial starts with a
+ * token charge that we refund as soon as the card is authorized. Keep it small
+ * but comfortably above Paystack's minimum card amount.
+ */
+export const PAYSTACK_CARD_AUTH_NGN = 100;
 
 export const PRICING_TIERS: PricingTier[] = [
   {

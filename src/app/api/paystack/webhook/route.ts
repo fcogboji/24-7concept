@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { verifyWebhookSignature } from "@/lib/paystack";
-import { getPaystackProPlanCode, getPaystackStarterPlanCode } from "@/lib/paystack-env";
+import {
+  createSubscription,
+  PAYSTACK_TRIAL_AUTH_PURPOSE,
+  refundTransaction,
+  verifyWebhookSignature,
+} from "@/lib/paystack";
+import { getPaystackPlanCode, getPaystackProPlanCode, getPaystackStarterPlanCode } from "@/lib/paystack-env";
+import { TRIAL_PERIOD_DAYS } from "@/lib/pricing";
 import { getLogger } from "@/lib/logger";
 
 const log = getLogger("paystack.webhook");
@@ -19,6 +25,8 @@ type PaystackEvent = {
     metadata?: Record<string, unknown> | string;
     plan?: { plan_code?: string } | string;
     subscription_code?: string;
+    next_payment_date?: string;
+    authorization?: { authorization_code?: string; reusable?: boolean };
   };
 };
 
@@ -38,6 +46,24 @@ function extractPlan(meta: PaystackEvent["data"]["metadata"]): "starter" | "pro"
   const obj = typeof meta === "string" ? safeJson(meta) : meta;
   const v = obj && typeof obj === "object" ? (obj as Record<string, unknown>).plan : undefined;
   return v === "starter" ? "starter" : "pro";
+}
+
+function extractPurpose(meta: PaystackEvent["data"]["metadata"]): string | null {
+  if (!meta) return null;
+  const obj = typeof meta === "string" ? safeJson(meta) : meta;
+  const v = obj && typeof obj === "object" ? (obj as Record<string, unknown>).purpose : undefined;
+  return typeof v === "string" ? v : null;
+}
+
+/**
+ * A subscription we created with a future `start_date` is still in its trial:
+ * Paystack has authorized the card but will not charge until that date.
+ */
+function statusForSubscription(nextPaymentDate: string | undefined): "trialing" | "active" {
+  if (!nextPaymentDate) return "active";
+  const due = Date.parse(nextPaymentDate);
+  if (Number.isNaN(due)) return "active";
+  return due > Date.now() + 60 * 60 * 1000 ? "trialing" : "active";
 }
 
 /**
@@ -123,6 +149,64 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
+    // The card-authorization charge that opens a trial. Turn the vaulted card
+    // into a subscription that first bills on day 15, then refund the token
+    // charge. Subscribe before refunding so a failed subscribe can be retried
+    // by Paystack without refunding twice.
+    if (event.event === "charge.success" && extractPurpose(event.data.metadata) === PAYSTACK_TRIAL_AUTH_PURPOSE) {
+      const plan = extractPlan(event.data.metadata);
+      const planCode = getPaystackPlanCode(plan);
+      const authorization = event.data.authorization?.authorization_code;
+      const reference = event.data.reference;
+
+      if (!planCode || !authorization || !customerCode) {
+        log.error("trial auth charge missing fields", undefined, {
+          eventId,
+          hasPlanCode: Boolean(planCode),
+          hasAuthorization: Boolean(authorization),
+          hasCustomerCode: Boolean(customerCode),
+        });
+        return NextResponse.json({ received: true });
+      }
+
+      const startDate = new Date(Date.now() + TRIAL_PERIOD_DAYS * 24 * 60 * 60 * 1000);
+      const sub = await createSubscription({
+        customer: customerCode,
+        plan: planCode,
+        authorization,
+        startDate,
+      });
+
+      if (!sub.status || !sub.data?.subscription_code) {
+        // Throwing releases the idempotency row so Paystack's retry can redo this.
+        throw new Error(`Paystack subscription create failed: ${sub.message}`);
+      }
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          plan,
+          stripeCustomerId: customerCode,
+          stripeSubscriptionId: sub.data.subscription_code,
+          subscriptionStatus: "trialing",
+        },
+      });
+
+      if (reference) {
+        const refund = await refundTransaction(reference).catch((e: unknown) => {
+          log.error("card auth refund threw", e, { eventId, reference });
+          return { status: false, message: "refund threw" };
+        });
+        if (!refund.status) {
+          // The trial is already live; a stuck ₦100 is a manual-refund problem,
+          // not a reason to fail the webhook and re-create the subscription.
+          log.error("card auth refund failed", undefined, { eventId, reference, message: refund.message });
+        }
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     if (event.event === "charge.success" || event.event === "subscription.create") {
       const metaPlan = extractPlan(event.data.metadata);
       const validatedPlan = validatePlanFromEvent(metaPlan, event.data.plan);
@@ -141,7 +225,12 @@ export async function POST(req: Request) {
           plan: validatedPlan,
           stripeCustomerId: customerCode ?? user.stripeCustomerId,
           stripeSubscriptionId: event.data.subscription_code ?? user.stripeSubscriptionId,
-          subscriptionStatus: "active",
+          // subscription.create fires for the trial subscription we just made;
+          // its future next_payment_date must not be mistaken for a payment.
+          subscriptionStatus:
+            event.event === "subscription.create"
+              ? statusForSubscription(event.data.next_payment_date)
+              : "active",
         },
       });
     }

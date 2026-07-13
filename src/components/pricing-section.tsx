@@ -30,7 +30,8 @@ export function PricingSection({ currency }: { currency: Currency }) {
             Simple pricing
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-gray-600">
-            Every paid plan starts with a <strong>14-day free trial</strong> — no charge until day 15, cancel anytime.
+            Every paid plan starts with a <strong>14-day free trial</strong>. We take your card details to start the
+            trial but charge nothing until day 15 — cancel any time before then and you pay nothing.
             {currency === "NGN"
               ? " Prices shown in ₦ NGN, billed via Paystack."
               : " Prices shown in $ USD; cards in other currencies are converted by your bank."}
