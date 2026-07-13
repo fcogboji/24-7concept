@@ -32,6 +32,29 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({ log: [...log] });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+function getPrismaClient(): PrismaClient {
+  const existing = globalForPrisma.prisma;
+  if (existing) return existing;
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+  const client = createPrismaClient();
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  return client;
+}
+
+/**
+ * Lazy proxy rather than a client built at import time. `next build` imports
+ * every route module to collect page data, so constructing the client here
+ * would make the build itself require DATABASE_URL — which is why Preview
+ * deployments (prod-only DB credentials) failed to build. The client is now
+ * created on first query instead, and a build needs no database at all.
+ */
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client, prop, client);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+  has(_target, prop) {
+    return prop in getPrismaClient();
+  },
+});
