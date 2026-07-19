@@ -138,7 +138,8 @@ const nextConfig: NextConfig = {
               "base-uri 'self'",
               "object-src 'none'",
               "frame-ancestors 'self'",
-              "form-action 'self' https://checkout.stripe.com https://checkout.paystack.com",
+              // Clerk sign-in forms may post to the Frontend API host (custom domain).
+              "form-action 'self' https://clerk.faztino.com https://*.clerk.accounts.dev https://*.clerk.com https://checkout.stripe.com https://checkout.paystack.com",
               "img-src 'self' data: blob: https:",
               "font-src 'self' data: https:",
               "style-src 'self' 'unsafe-inline'",

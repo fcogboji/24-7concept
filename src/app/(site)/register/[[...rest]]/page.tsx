@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SignUp } from "@clerk/nextjs";
 import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
+import { getPublicAppUrl } from "@/lib/public-app-url";
 import { safeAppRedirectPath } from "@/lib/safe-redirect";
 
 export default async function RegisterPage({
@@ -10,7 +11,7 @@ export default async function RegisterPage({
   searchParams: Promise<{ callbackUrl?: string; redirect_url?: string }>;
 }) {
   const params = await searchParams;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = await getPublicAppUrl();
   const afterSignUp = safeAppRedirectPath(params.redirect_url ?? params.callbackUrl, appUrl);
 
   return (
@@ -33,7 +34,6 @@ export default async function RegisterPage({
               routing="path"
               signInUrl="/login"
               fallbackRedirectUrl={afterSignUp}
-              forceRedirectUrl={afterSignUp}
             />
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { getConfiguredAppOrigin, preferWwwAppOrigin } from "@/lib/app-origin";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -20,6 +21,9 @@ const isPublicRoute = createRouteMatcher([
   // Static asset but named .json, so it isn't caught by the matcher's `js(?!on)`
   // extension exclusion below — must be listed explicitly or Clerk redirects it to /login.
   "/manifest.json",
+  // Never send Frontend API / handshake traffic through auth.protect — that turns
+  // cookie minting into a login redirect (session-token-and-uat-missing loop).
+  "/__clerk(.*)",
   // All embed routes (widget-js, chat, future paths) must stay public for third-party iframes/scripts.
   "/embed(.*)",
   "/api/chat(.*)",
@@ -48,22 +52,46 @@ const useClerkFrontendApiProxy =
   process.env.CLERK_FRONTEND_API_PROXY === "1" ||
   process.env.CLERK_FRONTEND_API_PROXY === "true";
 
+function authorizedParties(): string[] {
+  const parties = new Set<string>([
+    "https://www.faztino.com",
+    "https://faztino.com",
+    getConfiguredAppOrigin(),
+  ]);
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    parties.add(`https://${vercelUrl.replace(/^https?:\/\//i, "")}`);
+  }
+  return [...parties].filter(Boolean);
+}
+
+function requestAppOrigin(req: { headers: Headers; nextUrl: URL }): string {
+  const proto =
+    (req.headers.get("x-forwarded-proto") ?? "").split(",")[0]?.trim() ||
+    req.nextUrl.protocol.replace(":", "") ||
+    "https";
+  const host =
+    (req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "")
+      .split(",")[0]
+      ?.trim() || req.nextUrl.host;
+  return preferWwwAppOrigin(`${proto}://${host}`);
+}
+
 export default clerkMiddleware(
   async (auth, req) => {
     if (isPublicRoute(req)) {
       return;
     }
+    const dest = `${req.nextUrl.pathname}${req.nextUrl.search}`;
     await auth.protect({
-      // Keep users on /login (not Clerk Hosted) and preserve the destination.
-      unauthenticatedUrl: new URL(
-        `/login?redirect_url=${encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)}`,
-        req.url,
-      ).toString(),
+      // Absolute URL on the browser's real host (not an internal Vercel URL).
+      unauthenticatedUrl: `${requestAppOrigin(req)}/login?redirect_url=${encodeURIComponent(dest)}`,
     });
   },
   {
     signInUrl: "/login",
     signUpUrl: "/register",
+    authorizedParties: authorizedParties(),
     ...(useClerkFrontendApiProxy
       ? {
           /**

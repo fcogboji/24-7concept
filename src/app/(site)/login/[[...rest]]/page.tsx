@@ -4,6 +4,7 @@ import { SignIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
+import { getPublicAppUrl } from "@/lib/public-app-url";
 import { safeAppRedirectPath } from "@/lib/safe-redirect";
 
 export default async function LoginPage({
@@ -17,7 +18,7 @@ export default async function LoginPage({
   }>;
 }) {
   const params = await searchParams;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = await getPublicAppUrl();
   // Prefer Clerk's redirect_url (sent when middleware protects /admin or /dashboard).
   const afterSignIn = safeAppRedirectPath(
     params.redirect_url ?? params.callbackUrl,
@@ -56,8 +57,9 @@ export default async function LoginPage({
               path="/login"
               routing="path"
               signUpUrl="/register"
+              // fallback only — forceRedirectUrl can navigate before `__session` is set
+              // and bounce signed-in users back to /login in production.
               fallbackRedirectUrl={afterSignIn}
-              forceRedirectUrl={afterSignIn}
             />
           </div>
         </div>

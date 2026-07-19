@@ -63,7 +63,14 @@ export default function SiteLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider
+      publishableKey={clerkPublishableKey}
+      signInUrl="/login"
+      signUpUrl="/register"
+      afterSignOutUrl="/"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+    >
       <Providers>
         <div className={`${dmSans.variable} ${fraunces.variable} min-h-full font-sans`}>{children}</div>
       </Providers>

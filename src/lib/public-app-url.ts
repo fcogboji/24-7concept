@@ -1,4 +1,7 @@
 import { headers } from "next/headers";
+import { getConfiguredAppOrigin, preferWwwAppOrigin } from "@/lib/app-origin";
+
+export { getConfiguredAppOrigin, preferWwwAppOrigin } from "@/lib/app-origin";
 
 /**
  * Base URL derived from this HTTP request (browser `Origin`, then forwarded Host).
@@ -38,19 +41,17 @@ export async function getAppUrlForStripeRedirects(): Promise<string> {
   const h = await headers();
   const fromRequest = appBaseFromThisRequest(h);
   if (fromRequest) {
-    return fromRequest;
+    return preferWwwAppOrigin(fromRequest);
   }
 
-  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-  return raw || "http://localhost:3000";
+  return getConfiguredAppOrigin();
 }
 
 /**
- * Public origin for embeds, Open Graph, etc.
+ * Public origin for embeds, Open Graph, auth redirects, etc.
  *
- * - Uses `NEXT_PUBLIC_APP_URL` when it is set and not localhost (explicit production config).
- * - Otherwise uses the current request origin (fixes missing/wrong env on Vercel).
- * - Falls back to localhost only when nothing else applies.
+ * - Prefers the request host when it differs from a stale `NEXT_PUBLIC_APP_URL`.
+ * - Always normalizes `faztino.com` → `www.faztino.com` so Clerk cookies stay on one host.
  *
  * For Stripe return URLs, use {@link getAppUrlForStripeRedirects} instead.
  */
@@ -62,24 +63,24 @@ export async function getPublicAppUrl(): Promise<string> {
   const proto = (h.get("x-forwarded-proto") ?? "http").split(",")[0].trim();
   const fromRequest = host ? `${proto}://${host}` : null;
 
-  const envIsProduction = Boolean(raw && !raw.includes("localhost"));
+  const envIsProduction = Boolean(raw && !/localhost|127\.0\.0\.1/i.test(raw));
   if (envIsProduction && fromRequest) {
     try {
       const envHost = new URL(raw!).host;
       const requestHost = new URL(fromRequest).host;
       // Prefer the host this request actually used when env is stale/mismatched.
       if (envHost !== requestHost && !requestHost.includes("localhost")) {
-        return fromRequest;
+        return preferWwwAppOrigin(fromRequest);
       }
     } catch {
       // Fall through to env value below.
     }
   }
   if (envIsProduction) {
-    return raw!;
+    return preferWwwAppOrigin(raw!);
   }
   if (fromRequest) {
-    return fromRequest;
+    return preferWwwAppOrigin(fromRequest);
   }
-  return raw || "http://localhost:3000";
+  return getConfiguredAppOrigin();
 }
