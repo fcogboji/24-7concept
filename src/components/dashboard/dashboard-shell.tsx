@@ -7,6 +7,8 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
 import { DashboardHelpFab } from "@/components/dashboard/dashboard-help-fab";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
+import { PushNotificationManager } from "@/components/push-notification-manager";
 
 export function DashboardShell({
   children,
@@ -128,6 +130,7 @@ export function DashboardShell({
       </div>
 
       <DashboardHelpFab />
+      <PWAInstallPrompt />
     </div>
   );
 }

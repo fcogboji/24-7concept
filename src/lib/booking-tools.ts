@@ -5,6 +5,7 @@ import { sendBookingNotificationToOwner, sendBookingConfirmationToVisitor } from
 import { logAudit } from "@/lib/audit";
 import { fireWebhooks } from "@/lib/webhooks";
 import { normalizeBookingFormFields, type BookingFormRequest } from "@/lib/chat-form";
+import { syncAppointmentToCalendar } from "@/lib/calendar-sync";
 
 /* ------------------------------------------------------------------ */
 /*  OpenAI tool definitions                                           */
@@ -358,6 +359,9 @@ async function handleCreateAppointment(
     resourceId: appointment.id,
     meta: { name: args.name, email: args.email, service: serviceName, date: args.date, time: args.startTime },
   });
+
+  // Sync to calendar if connected
+  void syncAppointmentToCalendar(appointment.id);
 
   return JSON.stringify({
     success: true,

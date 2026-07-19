@@ -28,7 +28,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#fafaf9",
+  themeColor: "#3b82f6",
 };
 
 export const metadata: Metadata = {
@@ -36,6 +36,12 @@ export const metadata: Metadata = {
   title: "faztino — 24/7 receptionist for bookings & enquiries",
   description:
     "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Faztino",
+  },
   openGraph: {
     title: "faztino — 24/7 receptionist for bookings & enquiries",
     description:

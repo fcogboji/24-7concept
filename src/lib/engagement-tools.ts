@@ -5,6 +5,7 @@ import { sendTransactionalEmail } from "@/lib/email";
 import { fireWebhooks } from "@/lib/webhooks";
 import { logAudit } from "@/lib/audit";
 import { getLogger } from "@/lib/logger";
+import { sendNewLeadNotification } from "@/lib/push-notifications";
 
 const log = getLogger("engagement-tools");
 
@@ -126,6 +127,12 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
       leadName: lead.name,
       leadPhone: lead.phone,
       pageUrl: ctx.pageUrl ?? null,
+    });
+
+    // Send push notification for new lead
+    void sendNewLeadNotification(bot.userId, {
+      name: lead.name ?? undefined,
+      email: lead.email,
     });
   }
 

@@ -18,6 +18,7 @@ import {
   summarizeConversation,
   whatsappHref,
 } from "@/lib/lead-intelligence";
+import { PushNotificationManager } from "@/components/push-notification-manager";
 
 function TrendBadge({ value, positive }: { value: string; positive: boolean }) {
   return (
@@ -207,6 +208,12 @@ export default async function DashboardPage({
             {planName} {trialing ? "trial — full access for 14 days" : "— full access"}.
           </p>
           {user?.stripeCustomerId && <ManageBillingButton />}
+        </div>
+      )}
+
+      {isSubscribed && (
+        <div className="mb-6">
+          <PushNotificationManager />
         </div>
       )}
 

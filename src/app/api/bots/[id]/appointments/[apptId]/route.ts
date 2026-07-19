@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { logAudit } from "@/lib/audit";
+import { removeAppointmentFromCalendar, syncAppointmentToCalendar } from "@/lib/calendar-sync";
 
 type RouteContext = { params: Promise<{ id: string; apptId: string }> };
 
@@ -39,6 +40,13 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     resourceId: apptId,
     meta: { previousStatus: appointment.status },
   });
+
+  // Update calendar: remove if cancelled, re-sync if confirmed
+  if (parsed.data.status === "cancelled") {
+    void removeAppointmentFromCalendar(apptId);
+  } else if (parsed.data.status === "confirmed" && appointment.status !== "confirmed") {
+    void syncAppointmentToCalendar(apptId);
+  }
 
   return NextResponse.json({ appointment: updated });
 }
