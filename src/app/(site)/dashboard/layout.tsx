@@ -35,7 +35,7 @@ export default async function DashboardLayout({
         </div>
       );
     }
-    redirect("/login");
+    redirect("/login?redirect_url=/dashboard");
   }
 
   const active = subscriptionIsActive(

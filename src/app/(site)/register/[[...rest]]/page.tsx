@@ -7,11 +7,11 @@ import { safeAppRedirectPath } from "@/lib/safe-redirect";
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; redirect_url?: string }>;
 }) {
   const params = await searchParams;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const afterSignUp = safeAppRedirectPath(params.callbackUrl, appUrl);
+  const afterSignUp = safeAppRedirectPath(params.redirect_url ?? params.callbackUrl, appUrl);
 
   return (
     <div
@@ -33,6 +33,7 @@ export default async function RegisterPage({
               routing="path"
               signInUrl="/login"
               fallbackRedirectUrl={afterSignUp}
+              forceRedirectUrl={afterSignUp}
             />
           </div>
         </div>

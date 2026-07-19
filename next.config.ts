@@ -11,6 +11,21 @@ const nextConfig: NextConfig = {
     "@sparticuz/chromium",
     "@prisma/instrumentation",
   ],
+  async redirects() {
+    return [
+      /**
+       * Clerk session cookies are host-scoped. Mixing apex (faztino.com) and www
+       * breaks /dashboard and /admin (users look "logged in" on public pages then
+       * get bounced to /login). Always use the www host in production.
+       */
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "faztino.com" }],
+        destination: "https://www.faztino.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       // Legacy embeds / cached widget.js may still call NextAuth's path; forward to Clerk-backed session.

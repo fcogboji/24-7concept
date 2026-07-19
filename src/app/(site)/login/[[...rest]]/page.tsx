@@ -9,13 +9,22 @@ import { safeAppRedirectPath } from "@/lib/safe-redirect";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string; reset?: string }>;
+  searchParams: Promise<{
+    callbackUrl?: string;
+    /** Clerk `auth.protect()` and sign-in redirects use this name. */
+    redirect_url?: string;
+    reset?: string;
+  }>;
 }) {
   const params = await searchParams;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const afterSignIn = safeAppRedirectPath(params.callbackUrl, appUrl);
+  // Prefer Clerk's redirect_url (sent when middleware protects /admin or /dashboard).
+  const afterSignIn = safeAppRedirectPath(
+    params.redirect_url ?? params.callbackUrl,
+    appUrl,
+  );
 
-  // If Clerk already has a session, send the user straight to the dashboard
+  // If Clerk already has a session, send the user straight to the destination
   // server-side. Letting <SignIn> handle this on the client triggers a
   // login ↔ dashboard flicker if the dashboard then bounces back to /login.
   const { userId } = await auth();
@@ -48,6 +57,7 @@ export default async function LoginPage({
               routing="path"
               signUpUrl="/register"
               fallbackRedirectUrl={afterSignIn}
+              forceRedirectUrl={afterSignIn}
             />
           </div>
         </div>

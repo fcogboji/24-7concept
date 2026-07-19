@@ -53,9 +53,17 @@ export default clerkMiddleware(
     if (isPublicRoute(req)) {
       return;
     }
-    await auth.protect();
+    await auth.protect({
+      // Keep users on /login (not Clerk Hosted) and preserve the destination.
+      unauthenticatedUrl: new URL(
+        `/login?redirect_url=${encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)}`,
+        req.url,
+      ).toString(),
+    });
   },
   {
+    signInUrl: "/login",
+    signUpUrl: "/register",
     ...(useClerkFrontendApiProxy
       ? {
           /**
