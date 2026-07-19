@@ -17,6 +17,9 @@ const isPublicRoute = createRouteMatcher([
   "/favicon.ico",
   "/sitemap.xml",
   "/robots.txt",
+  // Static asset but named .json, so it isn't caught by the matcher's `js(?!on)`
+  // extension exclusion below — must be listed explicitly or Clerk redirects it to /login.
+  "/manifest.json",
   // All embed routes (widget-js, chat, future paths) must stay public for third-party iframes/scripts.
   "/embed(.*)",
   "/api/chat(.*)",
