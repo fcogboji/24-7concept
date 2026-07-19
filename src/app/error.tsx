@@ -36,13 +36,13 @@ export default function Error({
         <button
           type="button"
           onClick={() => unstable_retry()}
-          className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-sm font-semibold text-white hover:bg-stone-800"
+          className="btn-brand inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white"
         >
           Try again
         </button>
         <Link
           href="/"
-          className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-stone-200 bg-white px-6 py-3 text-sm font-semibold text-stone-900 hover:border-stone-300"
+          className="btn-brand-outline inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-3 text-sm font-semibold"
         >
           Back to home
         </Link>

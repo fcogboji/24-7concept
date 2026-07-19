@@ -400,7 +400,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           type="button"
           onClick={train}
           disabled={training}
-          className="mt-4 min-h-[44px] rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
+          className="btn-brand mt-4 min-h-[44px] rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {training ? "Training…" : "Run training"}
         </button>
@@ -437,7 +437,7 @@ export function BotKnowledgePanel({ bot }: { bot: Bot }) {
           type="button"
           onClick={trainFromText}
           disabled={trainingFromText || training || pastedText.trim().length < 24 || pastedText.length > PASTE_TEXT_MAX}
-          className="mt-4 min-h-[44px] rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60"
+          className="btn-brand mt-4 min-h-[44px] rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {trainingFromText ? "Training..." : "Train from pasted text"}
         </button>

@@ -72,14 +72,14 @@ export function CookieConsent() {
           <button
             type="button"
             onClick={() => save("essential")}
-            className="min-h-12 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50 touch-manipulation"
+            className="btn-brand-outline min-h-12 rounded-full px-4 py-2.5 text-sm font-semibold touch-manipulation"
           >
             Essential only
           </button>
           <button
             type="button"
             onClick={() => save("accepted")}
-            className="min-h-12 rounded-full bg-stone-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-stone-800 touch-manipulation"
+            className="btn-brand min-h-12 rounded-full px-4 py-2.5 text-sm font-semibold text-white touch-manipulation"
           >
             Accept
           </button>

@@ -28,7 +28,7 @@ export default function VerifyEmailPage() {
         </p>
         <Link
           href="/login"
-          className="mt-6 inline-block rounded-full bg-stone-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-stone-800"
+          className="btn-brand mt-6 inline-block rounded-full px-5 py-2.5 text-sm font-semibold text-white"
         >
           Go to sign in
         </Link>

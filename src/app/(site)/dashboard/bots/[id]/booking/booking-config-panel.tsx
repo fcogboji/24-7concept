@@ -333,7 +333,7 @@ export function BookingConfigPanel({
           </div>
           <Link
             href={`/dashboard/bots/${botId}/booking/services`}
-            className="rounded-full bg-[#0d9488] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0b7f6f] transition-colors"
+            className="btn-brand rounded-full px-4 py-2 text-sm font-semibold text-white transition-colors"
           >
             Manage Services
           </Link>
@@ -346,7 +346,7 @@ export function BookingConfigPanel({
           type="button"
           onClick={save}
           disabled={saving}
-          className="rounded-full bg-[#0d9488] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#0b7f6f] disabled:opacity-50 transition-colors"
+          className="btn-brand rounded-full px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition-colors"
         >
           {saving ? "Saving…" : "Save Settings"}
         </button>

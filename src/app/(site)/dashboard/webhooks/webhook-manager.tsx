@@ -106,7 +106,7 @@ export function WebhookManager({ initial }: { initial: Hook[] }) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-[#0d9488] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0f7669] disabled:opacity-50"
+          className="btn-brand rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {saving ? "Saving…" : "Add webhook"}
         </button>

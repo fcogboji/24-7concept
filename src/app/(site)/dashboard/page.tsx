@@ -179,7 +179,7 @@ export default async function DashboardPage({
             </button>
             <Link
               href="/dashboard/bots/new"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669]"
+              className="btn-brand inline-flex min-h-[44px] items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white"
             >
               + New assistant
             </Link>

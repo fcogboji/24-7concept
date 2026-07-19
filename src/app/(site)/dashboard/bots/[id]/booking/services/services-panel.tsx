@@ -174,7 +174,7 @@ export function ServicesPanel({ botId, initial }: { botId: string; initial: Serv
           type="button"
           onClick={addService}
           disabled={adding || !name.trim()}
-          className="mt-3 rounded-full bg-[#0d9488] px-5 py-2 text-sm font-semibold text-white hover:bg-[#0b7f6f] disabled:opacity-50 transition-colors"
+          className="btn-brand mt-3 rounded-full px-5 py-2 text-sm font-semibold text-white disabled:opacity-50 transition-colors"
         >
           {adding ? "Adding…" : "Add Service"}
         </button>

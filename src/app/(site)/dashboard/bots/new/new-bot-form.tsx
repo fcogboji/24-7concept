@@ -92,7 +92,7 @@ export function NewBotForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-full bg-stone-900 py-3 text-sm font-semibold text-white hover:bg-stone-800 disabled:opacity-60"
+        className="btn-brand w-full rounded-full py-3 text-sm font-semibold text-white disabled:opacity-60"
       >
         {loading ? "Creating…" : "Create assistant"}
       </button>

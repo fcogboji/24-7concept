@@ -3,15 +3,13 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BrandLogo } from "@/components/brand-logo";
+import { BrandLogo, BTN_BRAND } from "@/components/brand-logo";
 import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 const links = [
   { href: "#how", label: "How it works" },
   { href: "#pricing", label: "Pricing" },
 ] as const;
-
-const accent = "bg-[#2563eb] hover:bg-[#1d4ed8]";
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
@@ -63,7 +61,7 @@ export function MarketingHeader() {
                 <button
                   type="button"
                   onClick={() => signOut({ redirectUrl: "/" })}
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white ${accent}`}
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white ${BTN_BRAND}`}
                 >
                   Log out
                 </button>
@@ -75,7 +73,7 @@ export function MarketingHeader() {
                 </Link>
                 <Link
                   href="/register"
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${accent}`}
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${BTN_BRAND}`}
                 >
                   Start Free Trial
                 </Link>
@@ -178,7 +176,7 @@ export function MarketingHeader() {
                     setOpen(false);
                     void signOut({ redirectUrl: "/" });
                   }}
-                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${accent}`}
+                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${BTN_BRAND}`}
                 >
                   Log out
                 </button>
@@ -194,7 +192,7 @@ export function MarketingHeader() {
                 </Link>
                 <Link
                   href="/register"
-                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${accent}`}
+                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${BTN_BRAND}`}
                   onClick={() => setOpen(false)}
                 >
                   Start Free Trial

@@ -105,7 +105,7 @@ export function LeadActions({
 
         <button
           type="button"
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-[#0d9488] px-3 py-2 text-sm font-medium text-white hover:bg-[#0f7669] transition-colors"
+          className="btn-brand inline-flex min-h-[44px] items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors"
           onClick={() => setShowEmail(!showEmail)}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -154,7 +154,7 @@ export function LeadActions({
             <button
               type="button"
               disabled={sending || !subject.trim() || !message.trim()}
-              className="rounded-lg bg-[#0d9488] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#0f7669] disabled:opacity-50"
+              className="btn-brand rounded-lg px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
               onClick={sendFollowUp}
             >
               {sending ? "Sending…" : "Send email"}

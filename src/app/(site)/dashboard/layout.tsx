@@ -28,7 +28,7 @@ export default async function DashboardLayout({
           <Link
             href="/login"
             prefetch={false}
-            className="mt-6 inline-flex h-10 items-center rounded-full bg-[#0d9488] px-5 text-sm font-semibold text-white"
+            className="btn-brand mt-6 inline-flex h-10 items-center rounded-full px-5 text-sm font-semibold text-white"
           >
             Back to login
           </Link>

@@ -8,12 +8,18 @@ import {
   PRICING_TIERS,
   type Currency,
 } from "@/lib/pricing";
-
-const blue = "bg-[#2563eb] hover:bg-[#1d4ed8]";
+import { BRAND, BTN_BRAND, BTN_BRAND_OUTLINE } from "@/components/brand-logo";
 
 function CheckIcon() {
   return (
-    <svg className="h-5 w-5 shrink-0 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg
+      className="h-5 w-5 shrink-0"
+      style={{ color: BRAND.teal }}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
     </svg>
   );
@@ -26,7 +32,10 @@ export function PricingSection({ currency }: { currency: Currency }) {
     <section id="pricing" className="border-t border-gray-100 bg-gray-50 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="text-center">
-          <h2 className="font-[family-name:var(--font-fraunces)] text-3xl font-bold tracking-tight text-[#0f1e3d] sm:text-4xl">
+          <h2
+            className="font-[family-name:var(--font-fraunces)] text-3xl font-bold tracking-tight sm:text-4xl"
+            style={{ color: BRAND.navy }}
+          >
             Simple pricing
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-gray-600">
@@ -42,14 +51,17 @@ export function PricingSection({ currency }: { currency: Currency }) {
               type="button"
               onClick={() => setBilling("annual")}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition ${
-                billing === "annual" ? "bg-[#2563eb] text-white shadow" : "text-gray-600 hover:text-gray-900"
+                billing === "annual" ? `text-white ${BTN_BRAND}` : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Annual
               <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  billing === "annual" ? "bg-white/20 text-white" : "bg-blue-50 text-[#1d4ed8]"
-                }`}
+                className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                style={
+                  billing === "annual"
+                    ? { backgroundColor: "rgba(255,255,255,0.25)", color: "#fff" }
+                    : { backgroundColor: `${BRAND.orange}22`, color: BRAND.orange }
+                }
               >
                 Save 25%
               </span>
@@ -58,7 +70,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
               type="button"
               onClick={() => setBilling("monthly")}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
-                billing === "monthly" ? "bg-[#2563eb] text-white shadow" : "text-gray-600 hover:text-gray-900"
+                billing === "monthly" ? `text-white ${BTN_BRAND}` : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Monthly
@@ -81,12 +93,16 @@ export function PricingSection({ currency }: { currency: Currency }) {
                 key={plan.name}
                 className={
                   plan.highlight
-                    ? "relative flex flex-col overflow-hidden rounded-xl border border-[#2563eb]/30 bg-white p-8 shadow-[0_12px_40px_-20px_rgba(37,99,235,0.25)]"
+                    ? "relative flex flex-col overflow-hidden rounded-xl border bg-white p-8 shadow-[0_12px_40px_-20px_rgba(0,160,157,0.35)]"
                     : "flex flex-col rounded-xl border border-gray-100 bg-white p-8 shadow-sm"
                 }
+                style={plan.highlight ? { borderColor: `${BRAND.teal}55` } : undefined}
               >
                 {plan.highlight && (
-                  <span className="absolute right-6 top-6 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-[#1d4ed8]">
+                  <span
+                    className="absolute right-6 top-6 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                    style={{ backgroundColor: `${BRAND.purple}18`, color: BRAND.purple }}
+                  >
                     Popular
                   </span>
                 )}
@@ -125,8 +141,8 @@ export function PricingSection({ currency }: { currency: Currency }) {
                   href={href}
                   className={
                     plan.highlight
-                      ? `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold text-white shadow-sm ${blue}`
-                      : "mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
+                      ? `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold text-white ${BTN_BRAND}`
+                      : `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold ${BTN_BRAND_OUTLINE}`
                   }
                 >
                   {plan.cta}

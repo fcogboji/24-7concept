@@ -28,14 +28,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#3b82f6",
+  themeColor: "#00A09D",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "faztino — 24/7 receptionist for bookings & enquiries",
+  title: "faztino — Convert website visitors into leads & bookings",
   description:
-    "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
+    "AI website assistant for local businesses. Answers questions, captures leads, and books appointments — trained on your site.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -43,17 +43,17 @@ export const metadata: Metadata = {
     title: "Faztino",
   },
   openGraph: {
-    title: "faztino — 24/7 receptionist for bookings & enquiries",
+    title: "faztino — Convert website visitors into leads & bookings",
     description:
-      "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
+      "AI website assistant for local businesses. Answers questions, captures leads, and books appointments — trained on your site.",
     type: "website",
     locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "faztino — 24/7 receptionist for bookings & enquiries",
+    title: "faztino — Convert website visitors into leads & bookings",
     description:
-      "Stop missing appointments after hours. A receptionist-grade assistant for dentists, salons, estate agents, and law firms — trained on your site, books into your calendar.",
+      "AI website assistant for local businesses. Answers questions, captures leads, and books appointments — trained on your site.",
   },
 };
 

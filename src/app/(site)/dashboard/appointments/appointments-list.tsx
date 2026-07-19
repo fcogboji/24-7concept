@@ -69,7 +69,7 @@ export function AppointmentsList({ appointments: initial }: { appointments: Appo
             onClick={() => setFilter(s)}
             className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
               filter === s
-                ? "bg-[#0d9488] text-white"
+                ? "btn-brand text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >

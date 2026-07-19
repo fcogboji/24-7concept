@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { PlanId } from "@/lib/pricing";
+import { BTN_BRAND, BTN_BRAND_OUTLINE } from "@/components/brand-logo";
 
 const LABEL: Record<PlanId, string> = {
   starter: "Upgrade to Starter",
@@ -52,8 +53,8 @@ export function CheckoutButton({ plan = "pro" }: { plan?: PlanId }) {
 
   const isPro = plan === "pro";
   const className = isPro
-    ? "inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#0f7669] disabled:opacity-60 sm:w-auto"
-    : "inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-teal-300 bg-teal-50 px-5 py-2.5 text-sm font-semibold text-teal-900 hover:bg-teal-100 disabled:opacity-60 sm:w-auto";
+    ? `inline-flex min-h-[48px] w-full items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60 sm:w-auto ${BTN_BRAND}`
+    : `inline-flex min-h-[48px] w-full items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold disabled:opacity-60 sm:w-auto ${BTN_BRAND_OUTLINE}`;
 
   return (
     <div className="w-full sm:w-auto">
