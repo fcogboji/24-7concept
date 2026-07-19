@@ -1,7 +1,10 @@
 import { SignIn } from "@clerk/nextjs";
 import { BrandLogo } from "@/components/brand-logo";
+import { getConfiguredAppOrigin } from "@/lib/app-origin";
 
 export default function AdminSignInPage() {
+  const afterAdmin = `${getConfiguredAppOrigin()}/admin`;
+
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-center bg-stone-100 px-4 py-10"
@@ -14,7 +17,12 @@ export default function AdminSignInPage() {
         <BrandLogo variant="auth" />
         <p className="text-sm font-semibold text-stone-600">Admin</p>
       </div>
-      <SignIn path="/admin/sign-in" routing="path" fallbackRedirectUrl="/admin" forceRedirectUrl="/admin" />
+      <SignIn
+        path="/admin/sign-in"
+        routing="path"
+        fallbackRedirectUrl={afterAdmin}
+        forceRedirectUrl={afterAdmin}
+      />
     </div>
   );
 }

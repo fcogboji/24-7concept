@@ -57,9 +57,14 @@ export default async function LoginPage({
               path="/login"
               routing="path"
               signUpUrl="/register"
-              // fallback only — forceRedirectUrl can navigate before `__session` is set
-              // and bounce signed-in users back to /login in production.
-              fallbackRedirectUrl={afterSignIn}
+              // Absolute www URL — Clerk Dashboard still has after_sign_in → apex,
+              // which would set cookies on faztino.com then bounce to www (signed-out).
+              fallbackRedirectUrl={
+                afterSignIn.startsWith("/") ? `${appUrl}${afterSignIn}` : afterSignIn
+              }
+              forceRedirectUrl={
+                afterSignIn.startsWith("/") ? `${appUrl}${afterSignIn}` : afterSignIn
+              }
             />
           </div>
         </div>

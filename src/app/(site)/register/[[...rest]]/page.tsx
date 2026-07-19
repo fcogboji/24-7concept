@@ -33,7 +33,12 @@ export default async function RegisterPage({
               path="/register"
               routing="path"
               signInUrl="/login"
-              fallbackRedirectUrl={afterSignUp}
+              fallbackRedirectUrl={
+                afterSignUp.startsWith("/") ? `${appUrl}${afterSignUp}` : afterSignUp
+              }
+              forceRedirectUrl={
+                afterSignUp.startsWith("/") ? `${appUrl}${afterSignUp}` : afterSignUp
+              }
             />
           </div>
         </div>

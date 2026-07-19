@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { getConfiguredAppOrigin } from "@/lib/app-origin";
 import { Providers } from "../providers";
 
 const dmSans = DM_Sans({
@@ -15,7 +16,7 @@ const fraunces = Fraunces({
   weight: ["500", "600", "700"],
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const appUrl = getConfiguredAppOrigin();
 const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 if (process.env.NODE_ENV === "production" && !clerkPublishableKey?.trim()) {
@@ -62,14 +63,20 @@ export default function SiteLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Absolute www URLs override Clerk Dashboard Paths that still point at apex
+  // (https://faztino.com), which mints host-scoped cookies on the wrong host.
+  const afterAuth = `${appUrl}/dashboard`;
+
   return (
     <ClerkProvider
       publishableKey={clerkPublishableKey}
       signInUrl="/login"
       signUpUrl="/register"
       afterSignOutUrl="/"
-      signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
+      signInFallbackRedirectUrl={afterAuth}
+      signUpFallbackRedirectUrl={afterAuth}
+      signInForceRedirectUrl={afterAuth}
+      signUpForceRedirectUrl={afterAuth}
     >
       <Providers>
         <div className={`${dmSans.variable} ${fraunces.variable} min-h-full font-sans`}>{children}</div>
