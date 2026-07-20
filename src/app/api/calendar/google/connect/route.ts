@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { getGoogleAuthUrl } from "@/lib/google-calendar";
 
 /**
  * Initiate Google Calendar OAuth flow
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
   const appUser = await getOrCreateAppUser();
   if (!appUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

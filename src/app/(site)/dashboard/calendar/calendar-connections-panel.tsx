@@ -41,7 +41,7 @@ export function CalendarConnectionsPanel({ connections: initialConnections }: Pr
       } else {
         alert("Failed to disconnect calendar");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to disconnect calendar");
     } finally {
       setDisconnecting(null);

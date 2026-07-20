@@ -106,7 +106,7 @@ export function PushNotificationManager() {
             <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
           </svg>
           <p className="text-sm font-medium text-green-800">
-            Notifications enabled — you'll get instant alerts for new leads
+            Notifications enabled — you&apos;ll get instant alerts for new leads
           </p>
         </div>
       </div>
@@ -120,7 +120,7 @@ export function PushNotificationManager() {
           <h4 className="font-medium text-blue-900 mb-1">Enable Lead Alerts</h4>
           <p className="text-sm text-blue-800">
             Get instant notifications when visitors submit their contact details or book
-            appointments — even when Faztino isn't open.
+            appointments — even when Faztino isn&apos;t open.
           </p>
         </div>
         <button

@@ -75,12 +75,13 @@ export async function sendPushToUser(
           notificationPayload
         );
         sent++;
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Failed to send push to subscription ${sub.id}:`, error);
         failed++;
 
         // Remove invalid subscriptions (expired, unsubscribed, etc.)
-        if (error.statusCode === 410 || error.statusCode === 404) {
+        const statusCode = (error as { statusCode?: number }).statusCode;
+        if (statusCode === 410 || statusCode === 404) {
           await prisma.pushSubscription.delete({ where: { id: sub.id } });
         }
       }
