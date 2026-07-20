@@ -6,9 +6,11 @@ export function PushNotificationManager() {
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
     if ("Notification" in window) {
+      setIsSupported(true);
       setPermission(Notification.permission);
       checkSubscription();
     }
@@ -83,8 +85,8 @@ export function PushNotificationManager() {
     }
   }
 
-  if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-    return null; // No push support
+  if (!isSupported) {
+    return null; // No push support (or not yet determined on the server)
   }
 
   if (permission === "denied") {
