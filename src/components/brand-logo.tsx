@@ -52,11 +52,17 @@ export const BRAND = {
   sky: "#00A3D3",
   emerald: "#00A04A",
   navy: "#1F2A44",
+  /** Landing CTA green (from brand reference). */
+  forest: "#205B22",
 } as const;
 
 /** Shared CSS classes for multicolour brand buttons (see globals.css). */
 export const BTN_BRAND = "btn-brand";
 export const BTN_BRAND_OUTLINE = "btn-brand-outline";
+
+/** Landing-page CTAs — solid forest green; does not affect logo / feature icons. */
+export const BTN_FOREST = "btn-forest";
+export const BTN_FOREST_OUTLINE = "btn-forest-outline";
 
 /** Inline gradient when a className alone is awkward (e.g. style= props). */
 export const BRAND_MIX_GRADIENT =

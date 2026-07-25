@@ -7,7 +7,7 @@ import { isPaystackEnabled } from "@/lib/paystack-env";
 import { getPublicAppUrl } from "@/lib/public-app-url";
 import { widgetDemoScriptUrl } from "@/lib/widget-embed-snippet";
 import { LegalFooterLinks } from "@/components/legal-footer-links";
-import { BrandLogo, BRAND, BTN_BRAND, BTN_BRAND_OUTLINE } from "@/components/brand-logo";
+import { BrandLogo, BRAND, BTN_FOREST, BTN_FOREST_OUTLINE } from "@/components/brand-logo";
 import { MarketingHeader } from "@/components/marketing-header";
 import { DemoOpenButton } from "@/components/demo-open-button";
 
@@ -251,7 +251,7 @@ export default async function HomePage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href="/register"
-                  className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 py-3 text-center text-sm font-semibold text-white ${BTN_BRAND}`}
+                  className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 py-3 text-center text-sm font-semibold text-white ${BTN_FOREST}`}
                 >
                   Start Free Trial
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -259,7 +259,7 @@ export default async function HomePage() {
                   </svg>
                 </Link>
                 <DemoOpenButton
-                  className={`inline-flex min-h-[52px] items-center justify-center rounded-full px-8 py-3 text-center text-sm font-semibold ${BTN_BRAND_OUTLINE}`}
+                  className={`inline-flex min-h-[52px] items-center justify-center rounded-full px-8 py-3 text-center text-sm font-semibold ${BTN_FOREST_OUTLINE}`}
                 />
               </div>
 
@@ -395,7 +395,7 @@ export default async function HomePage() {
             </p>
             <Link
               href="/register"
-              className={`mt-8 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white ${BTN_BRAND}`}
+              className={`mt-8 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white ${BTN_FOREST}`}
             >
               Start Free Trial
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>

@@ -3,7 +3,7 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BrandLogo, BTN_BRAND } from "@/components/brand-logo";
+import { BrandLogo, BTN_FOREST } from "@/components/brand-logo";
 import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 const links = [
@@ -61,7 +61,7 @@ export function MarketingHeader() {
                 <button
                   type="button"
                   onClick={() => signOut({ redirectUrl: "/" })}
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white ${BTN_BRAND}`}
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white ${BTN_FOREST}`}
                 >
                   Log out
                 </button>
@@ -73,7 +73,7 @@ export function MarketingHeader() {
                 </Link>
                 <Link
                   href="/register"
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${BTN_BRAND}`}
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm ${BTN_FOREST}`}
                 >
                   Start Free Trial
                 </Link>
@@ -176,7 +176,7 @@ export function MarketingHeader() {
                     setOpen(false);
                     void signOut({ redirectUrl: "/" });
                   }}
-                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${BTN_BRAND}`}
+                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${BTN_FOREST}`}
                 >
                   Log out
                 </button>
@@ -192,7 +192,7 @@ export function MarketingHeader() {
                 </Link>
                 <Link
                   href="/register"
-                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${BTN_BRAND}`}
+                  className={`mt-3 rounded-full px-4 py-3.5 text-center text-lg font-semibold text-white ${BTN_FOREST}`}
                   onClick={() => setOpen(false)}
                 >
                   Start Free Trial

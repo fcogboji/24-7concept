@@ -8,7 +8,7 @@ import {
   PRICING_TIERS,
   type Currency,
 } from "@/lib/pricing";
-import { BRAND, BTN_BRAND, BTN_BRAND_OUTLINE } from "@/components/brand-logo";
+import { BRAND, BTN_FOREST, BTN_FOREST_OUTLINE } from "@/components/brand-logo";
 
 function CheckIcon() {
   return (
@@ -51,7 +51,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
               type="button"
               onClick={() => setBilling("annual")}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition ${
-                billing === "annual" ? `text-white ${BTN_BRAND}` : "text-gray-600 hover:text-gray-900"
+                billing === "annual" ? `text-white ${BTN_FOREST}` : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Annual
@@ -70,7 +70,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
               type="button"
               onClick={() => setBilling("monthly")}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
-                billing === "monthly" ? `text-white ${BTN_BRAND}` : "text-gray-600 hover:text-gray-900"
+                billing === "monthly" ? `text-white ${BTN_FOREST}` : "text-gray-600 hover:text-gray-900"
               }`}
             >
               Monthly
@@ -141,8 +141,8 @@ export function PricingSection({ currency }: { currency: Currency }) {
                   href={href}
                   className={
                     plan.highlight
-                      ? `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold text-white ${BTN_BRAND}`
-                      : `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold ${BTN_BRAND_OUTLINE}`
+                      ? `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold text-white ${BTN_FOREST}`
+                      : `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold ${BTN_FOREST_OUTLINE}`
                   }
                 >
                   {plan.cta}

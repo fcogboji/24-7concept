@@ -18,6 +18,8 @@ html.cookie-banner-open [data-nestbot-embed] {
   --brand-sky: #00a3d3;
   --brand-emerald: #00a04a;
   --brand-navy: #1f2a44;
+  --brand-forest: #205b22;
+  --brand-forest-hover: #184a1b;
   --brand-mix: linear-gradient(
     120deg,
     #00a09d 0%,
@@ -92,6 +94,31 @@ body {
 .btn-brand-outline:hover:not(:disabled) {
   filter: brightness(0.98);
   box-shadow: inset 0 0 0 1.5px rgba(113, 75, 103, 0.45);
+}
+
+/* Landing CTAs — solid forest green from brand reference */
+.btn-forest {
+  background-color: var(--brand-forest);
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 24px -10px rgba(32, 91, 34, 0.45);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+.btn-forest:hover:not(:disabled) {
+  background-color: var(--brand-forest-hover);
+}
+.btn-forest:disabled {
+  opacity: 0.6;
+}
+
+.btn-forest-outline {
+  background-color: #fff;
+  color: var(--brand-forest);
+  border: 1.5px solid var(--brand-forest);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-forest-outline:hover:not(:disabled) {
+  background-color: rgba(32, 91, 34, 0.06);
 }
 
 
