@@ -21,10 +21,10 @@ const HERO_POINTS = [
 function CheckCircle({ color = BRAND.emerald }: { color?: string }) {
   return (
     <span
-      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+      className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full sm:h-5 sm:w-5"
       style={{ backgroundColor: `${color}22` }}
     >
-      <svg className="h-3 w-3" style={{ color }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+      <svg className="h-3.5 w-3.5 sm:h-3 sm:w-3" style={{ color }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
       </svg>
     </span>
@@ -117,10 +117,21 @@ const STEPS = [
   },
 ] as const;
 
-/** Static chat mockup shown in the hero phone frame. */
-function ChatMockup() {
+type ChannelKind = "web" | "phone" | "whatsapp";
+
+/** Static chat mockup shown in hero phone frames. */
+function ChatMockup({ channel = "web" }: { channel?: ChannelKind }) {
+  const badge =
+    channel === "web"
+      ? { label: "Website Chat", color: BRAND.teal }
+      : channel === "phone"
+        ? { label: "Phone Call", color: BRAND.orange }
+        : { label: "WhatsApp", color: BRAND.emerald };
+
+  const inputPlaceholder = channel === "phone" ? "Call summary…" : "Type a message…";
+
   return (
-    <div className="relative w-full max-w-[300px]">
+    <div className="relative w-full max-w-[360px] sm:max-w-[320px]">
       {/* Soft multicolour glow behind the phone */}
       <div
         className="pointer-events-none absolute -inset-8 -z-10 rounded-full opacity-60 blur-3xl"
@@ -129,52 +140,98 @@ function ChatMockup() {
         }}
         aria-hidden
       />
-      <div className="overflow-hidden rounded-[2rem] border-[10px] border-[#1F2A44] bg-white shadow-2xl">
-        <div className="flex items-center gap-2.5 px-4 py-3.5 text-white" style={{ backgroundColor: BRAND.navy }}>
+      <div className="flex h-[620px] flex-col overflow-hidden rounded-[2rem] border-[10px] border-[#1F2A44] bg-white shadow-2xl sm:h-[560px]">
+        <div className="flex items-center gap-2.5 px-4 py-4 text-white sm:py-3.5" style={{ backgroundColor: BRAND.navy }}>
           <span
             className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
-            style={{ backgroundColor: BRAND.teal }}
+            style={{ backgroundColor: badge.color }}
           >
             F
           </span>
           <div className="min-w-0">
-            <div className="text-sm font-semibold">Faztino Assistant</div>
-            <div className="flex items-center gap-1 text-[11px] text-white/80">
-              <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BRAND.emerald }} />
-              Online
+            <div className="text-[15px] font-semibold sm:text-sm">Faztino Assistant</div>
+            <div className="flex items-center gap-1 text-xs text-white/80 sm:text-[11px]">
+              <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: badge.color }} />
+              {badge.label}
             </div>
           </div>
         </div>
 
-        <div className="space-y-2.5 bg-gray-50 px-3 py-4">
-          <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-snug text-gray-700 shadow-sm">
-            Hi! How can I help you today?
-          </div>
-          <div
-            className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2 text-[12.5px] leading-snug text-white shadow-sm"
-            style={{ backgroundColor: BRAND.teal }}
-          >
-            Do you offer teeth whitening?
-          </div>
-          <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-snug text-gray-700 shadow-sm">
-            Yes, we offer professional teeth whitening. It takes about 60 minutes.
-          </div>
-          <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-snug text-gray-700 shadow-sm">
-            Would you like to book an appointment?
-          </div>
-          <div
-            className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2 text-[12.5px] leading-snug text-white shadow-sm"
-            style={{ backgroundColor: BRAND.purple }}
-          >
-            Yes, this Friday at 10am works.
-          </div>
-          <div className="max-w-[90%] rounded-2xl rounded-tl-sm bg-white px-3 py-2 text-[12.5px] leading-snug text-gray-700 shadow-sm">
-            Perfect! I&apos;ve booked you for Friday at 10:00 AM. We&apos;ll send you a confirmation shortly.
+        <div className="flex-1 space-y-2.5 bg-gray-50 px-3 py-4 sm:px-3 sm:py-4">
+          {channel === "web" ? (
+            <>
+              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                Hi! How can I help you today?
+              </div>
+              <div
+                className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2.5 text-[13.5px] leading-snug text-white shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]"
+                style={{ backgroundColor: BRAND.teal }}
+              >
+                Do you offer teeth whitening?
+              </div>
+              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                Yes, we offer professional teeth whitening. It takes about 60 minutes.
+              </div>
+              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                Would you like to book an appointment?
+              </div>
+              <div
+                className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm px-3 py-2.5 text-[13.5px] leading-snug text-white shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]"
+                style={{ backgroundColor: BRAND.purple }}
+              >
+                Yes, this Friday at 10am works.
+              </div>
+            </>
+          ) : channel === "phone" ? (
+            <>
+              <div className="max-w-[88%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                Incoming call: “I need a haircut today.”
+              </div>
+              <div
+                className="ml-auto max-w-[86%] rounded-2xl rounded-tr-sm px-3 py-2.5 text-[13.5px] leading-snug text-white shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]"
+                style={{ backgroundColor: BRAND.orange }}
+              >
+                I can help with that. Do you prefer 3:30pm or 5:00pm?
+              </div>
+              <div className="max-w-[70%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                5:00pm works.
+              </div>
+              <div
+                className="ml-auto max-w-[90%] rounded-2xl rounded-tr-sm px-3 py-2.5 text-[13.5px] leading-snug text-white shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]"
+                style={{ backgroundColor: BRAND.purple }}
+              >
+                Great, booked for 5:00pm today. Confirmation sent by SMS.
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="max-w-[82%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                Hi, any slots tomorrow?
+              </div>
+              <div
+                className="ml-auto max-w-[86%] rounded-2xl rounded-tr-sm px-3 py-2.5 text-[13.5px] leading-snug text-white shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]"
+                style={{ backgroundColor: BRAND.emerald }}
+              >
+                Yes, 11:00am and 2:30pm are available.
+              </div>
+              <div className="max-w-[74%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+                Book 2:30pm please.
+              </div>
+              <div
+                className="ml-auto max-w-[88%] rounded-2xl rounded-tr-sm px-3 py-2.5 text-[13.5px] leading-snug text-white shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]"
+                style={{ backgroundColor: BRAND.teal }}
+              >
+                Done! You&apos;re booked for 2:30pm tomorrow.
+              </div>
+            </>
+          )}
+          <div className="max-w-[90%] rounded-2xl rounded-tl-sm bg-white px-3 py-2.5 text-[13.5px] leading-snug text-gray-700 shadow-sm sm:px-3 sm:py-2 sm:text-[12.5px]">
+            All conversations are saved to your dashboard automatically.
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-gray-100 bg-white px-3 py-2.5">
-          <div className="flex-1 rounded-full bg-gray-100 px-3 py-1.5 text-[11px] text-gray-400">Type a message…</div>
+        <div className="flex items-center gap-2 border-t border-gray-100 bg-white px-3 py-3 sm:py-2.5">
+          <div className="flex-1 rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-400 sm:text-[11px]">{inputPlaceholder}</div>
           <span
             className="flex h-7 w-7 items-center justify-center rounded-full text-white"
             style={{ backgroundColor: BRAND.orange }}
@@ -215,10 +272,11 @@ export default async function HomePage() {
             aria-hidden
           />
 
-          <div className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16 lg:grid-cols-2 lg:items-center lg:gap-8 lg:pt-20">
-            <div>
+          <div className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-20 sm:pt-16 lg:pt-20">
+            {/* Text column — centred */}
+            <div className="mx-auto max-w-3xl text-center">
               <span
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold sm:px-3 sm:py-1 sm:text-xs"
                 style={{ backgroundColor: `${BRAND.teal}18`, color: BRAND.teal }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -228,30 +286,30 @@ export default async function HomePage() {
               </span>
 
               <h1
-                className="mt-5 font-[family-name:var(--font-fraunces)] text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem]"
+                className="mt-5 font-[family-name:var(--font-fraunces)] text-[2.65rem] font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.4rem]"
                 style={{ color: BRAND.navy }}
               >
                 Convert Website Visitors Into Leads &amp; Bookings
               </h1>
 
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-gray-600">
+              <p className="mx-auto mt-5 max-w-xl text-xl leading-relaxed text-gray-600 sm:text-lg">
                 Faztino is your trained AI assistant that answers questions, captures leads, and books appointments while
                 you focus on running your business.
               </p>
 
-              <ul className="mt-7 space-y-3">
+              <ul className="mt-7 inline-flex flex-col items-start gap-3 text-left">
                 {HERO_POINTS.map((point, i) => (
-                  <li key={point} className="flex items-start gap-3 text-[15px] text-gray-700">
+                  <li key={point} className="flex items-start gap-3 text-base text-gray-700 sm:text-[15px]">
                     <CheckCircle color={[BRAND.teal, BRAND.purple, BRAND.orange, BRAND.emerald][i % 4]} />
                     {point}
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:flex-wrap">
                 <Link
                   href="/register"
-                  className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 py-3 text-center text-sm font-semibold text-white ${BTN_FOREST}`}
+                  className={`inline-flex min-h-[56px] w-full max-w-[340px] items-center justify-center gap-2 rounded-full px-8 py-3 text-center text-base font-semibold text-white sm:min-h-[52px] sm:w-auto sm:max-w-none sm:text-sm ${BTN_FOREST}`}
                 >
                   Start Free Trial
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -259,11 +317,11 @@ export default async function HomePage() {
                   </svg>
                 </Link>
                 <DemoOpenButton
-                  className={`inline-flex min-h-[52px] items-center justify-center rounded-full px-8 py-3 text-center text-sm font-semibold ${BTN_FOREST_OUTLINE}`}
+                  className={`inline-flex min-h-[56px] w-full max-w-[340px] items-center justify-center rounded-full px-8 py-3 text-center text-base font-semibold sm:min-h-[52px] sm:w-auto sm:max-w-none sm:text-sm ${BTN_FOREST_OUTLINE}`}
                 />
               </div>
 
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium text-gray-500">
+              <div className="mt-6 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs font-medium text-gray-500">
                 <span className="inline-flex items-center gap-1.5">
                   <svg className="h-4 w-4" style={{ color: BRAND.teal }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
                     <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
@@ -286,14 +344,19 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="flex justify-center lg:justify-end" id="demo-section">
-              <ChatMockup />
+            {/* Channel demos */}
+            <div className="mt-14" id="demo-section">
+              <div className="grid gap-6 md:grid-cols-3 md:gap-5">
+                <ChatMockup channel="web" />
+                <ChatMockup channel="phone" />
+                <ChatMockup channel="whatsapp" />
+              </div>
             </div>
           </div>
 
           {/* Trusted by */}
           <div className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
-            <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <p className="text-center text-sm font-semibold uppercase tracking-wider text-gray-400 sm:text-xs">
               Trusted by local businesses
             </p>
             <div className="mx-auto mt-5 grid max-w-3xl gap-4 sm:grid-cols-3">
@@ -303,13 +366,13 @@ export default async function HomePage() {
                   className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-4 shadow-sm"
                 >
                   <span
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11"
                     style={{ backgroundColor: c.bg }}
                   >
                     {c.icon}
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-gray-900">{c.name}</p>
+                    <p className="truncate text-base font-semibold text-gray-900 sm:text-sm">{c.name}</p>
                     <Stars rating={c.rating} />
                   </div>
                 </div>
@@ -321,14 +384,14 @@ export default async function HomePage() {
         {/* More Leads */}
         <section className="border-t border-gray-100 bg-white py-16 md:py-24">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="max-w-2xl">
+            <div className="mx-auto max-w-2xl text-center">
               <h2
-                className="font-[family-name:var(--font-fraunces)] text-3xl font-bold tracking-tight sm:text-4xl"
+                className="font-[family-name:var(--font-fraunces)] text-4xl font-bold tracking-tight sm:text-4xl"
                 style={{ color: BRAND.navy }}
               >
                 More Leads. More Bookings. Less Manual Work.
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-gray-600">
+              <p className="mt-4 text-xl leading-relaxed text-gray-600 sm:text-lg">
                 Faztino handles conversations and books appointments so you never miss a customer.
               </p>
             </div>
@@ -348,8 +411,8 @@ export default async function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-gray-900">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.body}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 sm:text-base">{item.title}</h3>
+                  <p className="mt-2 text-base leading-relaxed text-gray-600 sm:text-sm">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -359,23 +422,25 @@ export default async function HomePage() {
         {/* How it works */}
         <section id="how" className="border-t border-gray-100 bg-gray-50 py-16 md:py-24">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <h2
-              className="font-[family-name:var(--font-fraunces)] text-3xl font-bold tracking-tight sm:text-4xl"
-              style={{ color: BRAND.navy }}
-            >
-              Live in three simple steps
-            </h2>
-            <p className="mt-3 max-w-2xl text-gray-600">
-              No complicated setup. Create your assistant, train it on your site, then paste one line of code.
-            </p>
+            <div className="mx-auto max-w-2xl text-center">
+              <h2
+                className="font-[family-name:var(--font-fraunces)] text-4xl font-bold tracking-tight sm:text-4xl"
+                style={{ color: BRAND.navy }}
+              >
+                Live in three simple steps
+              </h2>
+              <p className="mt-3 text-xl text-gray-600 sm:text-lg">
+                No complicated setup. Create your assistant, train it on your site, then paste one line of code.
+              </p>
+            </div>
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {STEPS.map((item) => (
                 <div key={item.step} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                  <span className="text-sm font-bold" style={{ color: item.color }}>
+                  <span className="text-base font-bold sm:text-sm" style={{ color: item.color }}>
                     {item.step}
                   </span>
-                  <h3 className="mt-3 text-lg font-semibold text-gray-900">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.body}</p>
+                  <h3 className="mt-3 text-xl font-semibold text-gray-900 sm:text-lg">{item.title}</h3>
+                  <p className="mt-2 text-base leading-relaxed text-gray-600 sm:text-sm">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -387,15 +452,15 @@ export default async function HomePage() {
         {/* CTA band */}
         <section className="py-16 md:py-20" style={{ backgroundColor: BRAND.navy }}>
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-            <h2 className="font-[family-name:var(--font-fraunces)] text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 className="font-[family-name:var(--font-fraunces)] text-4xl font-bold tracking-tight text-white sm:text-4xl">
               Never miss another customer
             </h2>
-            <p className="mt-4 text-lg" style={{ color: `${BRAND.sky}cc` }}>
+            <p className="mt-4 text-xl sm:text-lg" style={{ color: `${BRAND.sky}cc` }}>
               Start your free trial today and turn website visitors into leads and bookings — automatically.
             </p>
             <Link
               href="/register"
-              className={`mt-8 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white ${BTN_FOREST}`}
+              className={`mt-8 inline-flex min-h-[56px] w-full max-w-[340px] items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-white sm:min-h-[52px] sm:w-auto sm:max-w-none sm:text-sm ${BTN_FOREST}`}
             >
               Start Free Trial
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>

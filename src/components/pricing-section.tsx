@@ -33,12 +33,12 @@ export function PricingSection({ currency }: { currency: Currency }) {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="text-center">
           <h2
-            className="font-[family-name:var(--font-fraunces)] text-3xl font-bold tracking-tight sm:text-4xl"
+            className="font-[family-name:var(--font-fraunces)] text-4xl font-bold tracking-tight sm:text-4xl"
             style={{ color: BRAND.navy }}
           >
             Simple pricing
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-gray-600">
+          <p className="mx-auto mt-4 max-w-lg text-lg leading-relaxed text-gray-600 sm:text-base">
             Every paid plan starts with a <strong>14-day free trial</strong>. We take your card details to start the
             trial but charge nothing until day 15 — cancel any time before then and you pay nothing.
             {currency === "NGN"
@@ -50,7 +50,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
             <button
               type="button"
               onClick={() => setBilling("annual")}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition ${
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-base font-semibold transition sm:py-2 sm:text-sm ${
                 billing === "annual" ? `text-white ${BTN_FOREST}` : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -69,7 +69,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
             <button
               type="button"
               onClick={() => setBilling("monthly")}
-              className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
+              className={`rounded-full px-5 py-2.5 text-base font-semibold transition sm:py-2 sm:text-sm ${
                 billing === "monthly" ? `text-white ${BTN_FOREST}` : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -106,8 +106,8 @@ export function PricingSection({ currency }: { currency: Currency }) {
                     Popular
                   </span>
                 )}
-                <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
-                <p className="mt-2 min-h-[40px] text-sm text-gray-500">{plan.blurb}</p>
+                <h3 className="text-xl font-semibold text-gray-900 sm:text-lg">{plan.name}</h3>
+                <p className="mt-2 min-h-[40px] text-base text-gray-500 sm:text-sm">{plan.blurb}</p>
 
                 {plan.enterprise ? (
                   <p className="mt-4 flex items-baseline gap-1">
@@ -116,7 +116,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
                 ) : (
                   <>
                     <p className="mt-4 flex items-baseline gap-1">
-                      <span className="text-4xl font-semibold tracking-tight text-gray-900">
+                      <span className="text-5xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
                         {formatPrice(displayed, currency)}
                       </span>
                       <span className="text-gray-500">/mo</span>
@@ -129,7 +129,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
                   </>
                 )}
 
-                <ul className="mt-8 flex-1 space-y-3 text-sm text-gray-700">
+                <ul className="mt-8 flex-1 space-y-3 text-base text-gray-700 sm:text-sm">
                   {plan.features.map((f) => (
                     <li key={f} className="flex gap-2">
                       <CheckIcon />
@@ -141,8 +141,8 @@ export function PricingSection({ currency }: { currency: Currency }) {
                   href={href}
                   className={
                     plan.highlight
-                      ? `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold text-white ${BTN_FOREST}`
-                      : `mt-10 inline-flex min-h-[48px] w-full items-center justify-center rounded-full py-3 text-sm font-semibold ${BTN_FOREST_OUTLINE}`
+                      ? `mt-10 inline-flex min-h-[56px] w-full items-center justify-center rounded-full py-3 text-base font-semibold text-white sm:min-h-[48px] sm:text-sm ${BTN_FOREST}`
+                      : `mt-10 inline-flex min-h-[56px] w-full items-center justify-center rounded-full py-3 text-base font-semibold sm:min-h-[48px] sm:text-sm ${BTN_FOREST_OUTLINE}`
                   }
                 >
                   {plan.cta}
