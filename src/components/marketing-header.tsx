@@ -7,7 +7,9 @@ import { BrandLogo, BTN_FOREST } from "@/components/brand-logo";
 import { useClerkAdminNav } from "@/hooks/use-clerk-admin-nav";
 
 const links = [
+  { href: "#features", label: "Features" },
   { href: "#how", label: "How it works" },
+  { href: "#early-access", label: "Channels" },
   { href: "#pricing", label: "Pricing" },
 ] as const;
 
@@ -38,7 +40,7 @@ export function MarketingHeader() {
             <BrandLogo variant="header" priority />
           </Link>
 
-          <nav className="hidden items-center gap-8 text-sm font-medium text-gray-600 md:flex">
+          <nav className="hidden items-center gap-6 text-sm font-medium text-gray-600 md:flex">
             {links.map((l) => (
               <a
                 key={l.href}

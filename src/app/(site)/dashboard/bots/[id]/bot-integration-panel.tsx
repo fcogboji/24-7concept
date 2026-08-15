@@ -57,8 +57,52 @@ export function BotIntegrationPanel({
     }
   }
 
+  const setupVideoUrl = process.env.NEXT_PUBLIC_SETUP_VIDEO_URL?.trim() || null;
+
   return (
     <div className="space-y-6">
+      <section className="rounded-xl border border-teal-100 bg-teal-50/60 p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">Setup in 3 steps</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Same script for WordPress, Shopify, Wix, Squarespace, Webflow, and custom sites.
+            </p>
+          </div>
+          {setupVideoUrl ? (
+            <a
+              href={setupVideoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-10 shrink-0 items-center rounded-full bg-[#205B22] px-4 py-2 text-sm font-semibold text-white hover:bg-[#174619]"
+            >
+              Watch setup (2 min)
+            </a>
+          ) : (
+            <span className="inline-flex min-h-10 shrink-0 items-center rounded-full border border-dashed border-teal-200 bg-white px-4 py-2 text-xs font-medium text-teal-800/80">
+              Video coming soon
+            </span>
+          )}
+        </div>
+        <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-gray-700">
+          <li>
+            <span className="font-medium text-gray-900">Train</span> — Knowledge → paste your website URL → Train.
+          </li>
+          <li>
+            <span className="font-medium text-gray-900">Copy</span> — use the snippet below (one script for every site type).
+          </li>
+          <li>
+            <span className="font-medium text-gray-900">Paste once</span> — before{" "}
+            <code className="rounded bg-white px-1">&lt;/body&gt;</code>, or in Custom HTML / Footer code / Google Tag
+            Manager (Custom HTML, All Pages). Reload your site and open the chat bubble.
+          </li>
+        </ol>
+        <p className="mt-3 text-xs text-gray-500">
+          WordPress: Headers &amp; Footers plugin or theme footer. Shopify: theme Custom Liquid / footer. GTM: Custom HTML
+          tag.
+        </p>
+      </section>
+
       <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         {!compact && (
           <div className="flex flex-wrap items-center gap-2">
@@ -92,7 +136,7 @@ export function BotIntegrationPanel({
         <p className="mt-4 text-sm text-gray-500">
           The snippet uses <code className="rounded bg-gray-100 px-1">/embed/widget.js</code> so the server can inject the Vercel protection bypass when needed. Legacy{" "}
           <code className="rounded bg-gray-100 px-1">/widget.js</code> still works; keep{" "}
-          <code className="rounded bg-gray-100 px-1">data-api-base</code> pointed at this app. Works with WordPress, Shopify, and most static hosts.
+          <code className="rounded bg-gray-100 px-1">data-api-base</code> pointed at this app.
         </p>
       </section>
 

@@ -10,22 +10,22 @@ datasource db {
 }
 
 model User {
-  id                     String              @id @default(cuid())
-  clerkId                String?             @unique
-  email                  String              @unique
-  name                   String?
-  emailVerifiedAt        DateTime?
-  plan                   String              @default("free")
-  stripeCustomerId       String?
-  stripeSubscriptionId   String?
-  subscriptionStatus     String?
-  createdAt              DateTime            @default(now())
-  updatedAt              DateTime            @updatedAt
-  bots                   Bot[]
-  auditLogs              AuditLog[]
-  webhooks               Webhook[]
-  calendarConnections    CalendarConnection[]
-  pushSubscriptions      PushSubscription[]
+  id                   String               @id @default(cuid())
+  clerkId              String?              @unique
+  email                String               @unique
+  name                 String?
+  emailVerifiedAt      DateTime?
+  plan                 String               @default("free")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  bots                 Bot[]
+  auditLogs            AuditLog[]
+  webhooks             Webhook[]
+  calendarConnections  CalendarConnection[]
+  pushSubscriptions    PushSubscription[]
 
   @@index([stripeCustomerId])
   @@index([stripeSubscriptionId])
@@ -57,6 +57,19 @@ model PaystackWebhookEvent {
   createdAt DateTime @default(now())
 }
 
+/// Public demand signal collected from the marketing-page early-access form.
+/// One email can register interest in more than one future channel.
+model ProductInterest {
+  id        String   @id @default(cuid())
+  email     String
+  feature   String
+  source    String   @default("landing")
+  createdAt DateTime @default(now())
+
+  @@unique([email, feature])
+  @@index([feature, createdAt])
+}
+
 model AuditLog {
   id           String   @id @default(cuid())
   userId       String?
@@ -76,26 +89,28 @@ model AuditLog {
 }
 
 model Bot {
-  id                String    @id @default(cuid())
+  id                String           @id @default(cuid())
   userId            String
   name              String
   websiteUrl        String?
   avatarUrl         String?
-  businessInfo      String?   @db.Text
-  isDemo            Boolean   @default(false)
+  businessInfo      String?          @db.Text
+  isDemo            Boolean          @default(false)
   trainingStartedAt DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
   // Restrict (not Cascade) so an accidental User row delete cannot wipe a
   // paying customer's bots and all their conversation/lead history. Account
   // deletion must explicitly purge bots first.
-  user              User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user              User             @relation(fields: [userId], references: [id], onDelete: Restrict)
   sources           Source[]
   messages          Message[]
   leads             Lead[]
   bookingConfig     BookingConfig?
+  phoneConfig       PhoneConfig?
   appointments      Appointment[]
   visitorSessions   VisitorSession[]
+  callSessions      CallSession[]
 
   @@index([userId])
 }
@@ -187,6 +202,51 @@ model BookingConfig {
   blockedDates    BlockedDate[]
 }
 
+/// Inbound AI phone answering (Vapi + Twilio) settings per bot.
+model PhoneConfig {
+  id                String   @id @default(cuid())
+  botId             String   @unique
+  enabled           Boolean  @default(false)
+  greeting          String?  @db.Text
+  voice             String?
+  forwardingNumber  String?
+  businessHoursOnly Boolean  @default(false)
+  vapiAssistantId   String?
+  vapiPhoneNumberId String?
+  e164Number        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  bot               Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([e164Number])
+  @@index([vapiPhoneNumberId])
+}
+
+/// One inbound (or future outbound) phone call handled by the AI receptionist.
+model CallSession {
+  id            String    @id @default(cuid())
+  botId         String
+  vapiCallId    String    @unique
+  fromNumber    String?
+  toNumber      String?
+  status        String    @default("ringing")
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  durationSec   Int?
+  recordingUrl  String?   @db.Text
+  summary       String?   @db.Text
+  transcript    Json?
+  leadId        String?
+  appointmentId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bot           Bot       @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, startedAt])
+  @@index([botId, status])
+  @@index([fromNumber])
+}
+
 model WeeklyHours {
   id              String        @id @default(cuid())
   bookingConfigId String
@@ -226,26 +286,26 @@ model BlockedDate {
 }
 
 model Appointment {
-  id                  String   @id @default(cuid())
-  botId               String
-  serviceId           String?
-  sessionId           String?
-  name                String
-  email               String
-  phone               String?
-  startTime           DateTime
-  endTime             DateTime
-  timezone            String   @default("UTC")
-  status              String   @default("confirmed")
-  notes               String?  @db.Text
+  id                   String              @id @default(cuid())
+  botId                String
+  serviceId            String?
+  sessionId            String?
+  name                 String
+  email                String
+  phone                String?
+  startTime            DateTime
+  endTime              DateTime
+  timezone             String              @default("UTC")
+  status               String              @default("confirmed")
+  notes                String?             @db.Text
   calendarConnectionId String?
-  calendarEventId     String?
-  calendarSyncedAt    DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  bot                 Bot      @relation(fields: [botId], references: [id], onDelete: Cascade)
-  service             Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  calendarConnection  CalendarConnection? @relation(fields: [calendarConnectionId], references: [id], onDelete: SetNull)
+  calendarEventId      String?
+  calendarSyncedAt     DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  bot                  Bot                 @relation(fields: [botId], references: [id], onDelete: Cascade)
+  service              Service?            @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  calendarConnection   CalendarConnection? @relation(fields: [calendarConnectionId], references: [id], onDelete: SetNull)
 
   @@index([botId, startTime])
   @@index([botId, status])
@@ -257,14 +317,14 @@ model Appointment {
 model CalendarConnection {
   id                String        @id @default(cuid())
   userId            String
-  provider          String        // "google" or "microsoft"
+  provider          String // "google" or "microsoft"
   email             String
   accessToken       String        @db.Text
   refreshToken      String?       @db.Text
   tokenExpiresAt    DateTime?
-  calendarId        String?       // specific calendar to sync with
+  calendarId        String? // specific calendar to sync with
   calendarName      String?
-  webhookChannelId  String?       // for push notifications
+  webhookChannelId  String? // for push notifications
   webhookExpiration DateTime?
   active            Boolean       @default(true)
   createdAt         DateTime      @default(now())
@@ -278,15 +338,15 @@ model CalendarConnection {
 }
 
 model PushSubscription {
-  id         String   @id @default(cuid())
-  userId     String
-  endpoint   String   @db.Text
-  p256dh     String   @db.Text
-  auth       String   @db.Text
-  userAgent  String?  @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, endpoint])
   @@index([userId])

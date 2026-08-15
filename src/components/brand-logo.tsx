@@ -1,3 +1,13 @@
+import {
+  BRAND,
+  BRAND_MARK_SHAPES,
+  BRAND_MARK_VIEWBOX,
+  BRAND_WORDMARK,
+  BRAND_WORDMARK_COLORS,
+} from "@/lib/brand";
+
+export { BRAND };
+
 type BrandLogoProps = {
   variant?: "header" | "compact" | "sidebar" | "auth" | "footer" | "adminBar";
   className?: string;
@@ -44,18 +54,6 @@ const variantStyle: Record<NonNullable<BrandLogoProps["variant"]>, VariantStyle>
   },
 };
 
-/** Odoo-inspired palette used across brand + landing. */
-export const BRAND = {
-  teal: "#00A09D",
-  purple: "#714B67",
-  orange: "#F0A202",
-  sky: "#00A3D3",
-  emerald: "#00A04A",
-  navy: "#1F2A44",
-  /** Landing CTA green (from brand reference). */
-  forest: "#205B22",
-} as const;
-
 /** Shared CSS classes for multicolour brand buttons (see globals.css). */
 export const BTN_BRAND = "btn-brand";
 export const BTN_BRAND_OUTLINE = "btn-brand-outline";
@@ -68,18 +66,6 @@ export const BTN_FOREST_OUTLINE = "btn-forest-outline";
 export const BRAND_MIX_GRADIENT =
   "linear-gradient(120deg, #00A09D 0%, #00A3D3 28%, #714B67 62%, #F0A202 100%)";
 
-const letterColors = [
-  BRAND.teal,
-  BRAND.purple,
-  BRAND.orange,
-  BRAND.sky,
-  BRAND.emerald,
-  BRAND.teal,
-  BRAND.purple,
-];
-
-const wordmark = "faztino";
-
 /**
  * Geometric mark in the Odoo style: overlapping teal / purple / orange shapes
  * that read as a chat bubble + connection (conversation → booking).
@@ -88,23 +74,12 @@ function BrandMark({ className }: { className: string }) {
   return (
     <svg
       className={className}
-      viewBox="0 0 48 48"
+      viewBox={BRAND_MARK_VIEWBOX}
       fill="none"
       role="img"
       aria-hidden="true"
-    >
-      {/* Soft white tile like Odoo app icons */}
-      <rect x="1" y="1" width="46" height="46" rx="11" fill="#ffffff" stroke="#E8E8E8" strokeWidth="1" />
-
-      {/* Teal circle (back-left) */}
-      <circle cx="18" cy="22" r="11" fill={BRAND.teal} fillOpacity="0.92" />
-      {/* Purple circle (front-right) — overlaps teal */}
-      <circle cx="30" cy="22" r="11" fill={BRAND.purple} fillOpacity="0.88" />
-      {/* Orange accent bar / chat tail */}
-      <rect x="14" y="31" width="14" height="5.5" rx="2.75" fill={BRAND.orange} transform="rotate(-18 14 31)" />
-      {/* Small sky highlight for depth */}
-      <circle cx="15.5" cy="16.5" r="3.2" fill={BRAND.sky} fillOpacity="0.85" />
-    </svg>
+      dangerouslySetInnerHTML={{ __html: BRAND_MARK_SHAPES }}
+    />
   );
 }
 
@@ -120,8 +95,8 @@ export function BrandLogo({ variant = "header", className = "" }: BrandLogoProps
         className={`${styles.word} font-[family-name:var(--font-dm-sans)] not-italic`}
         aria-hidden="true"
       >
-        {wordmark.split("").map((char, i) => (
-          <span key={i} style={{ color: letterColors[i % letterColors.length] }}>
+        {BRAND_WORDMARK.split("").map((char, i) => (
+          <span key={i} style={{ color: BRAND_WORDMARK_COLORS[i % BRAND_WORDMARK_COLORS.length] }}>
             {char}
           </span>
         ))}

@@ -23,7 +23,8 @@ export default async function WebhooksPage() {
         <h2 className="text-sm font-semibold text-gray-900">How it works</h2>
         <p className="mt-1 text-sm text-gray-600">
           We POST a JSON payload to your URL with header <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">x-faztino-event</code>.
-          Supported events: <code className="text-xs">lead.created</code>, <code className="text-xs">appointment.created</code>.
+          Supported events: <code className="text-xs">lead.created</code>,{" "}
+          <code className="text-xs">appointment.created</code>, <code className="text-xs">call.completed</code>.
         </p>
         <p className="mt-2 text-sm text-gray-600">
           In Zapier, create a Zap with a <strong>Webhooks by Zapier → Catch Hook</strong> trigger, paste the URL here, and

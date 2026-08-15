@@ -10,7 +10,17 @@ declare global {
   }
 }
 
-export function DemoOpenButton({ className }: { className: string }) {
+export function DemoOpenButton({
+  className,
+  style,
+  icon,
+  children = "View live demo",
+}: {
+  className: string;
+  style?: React.CSSProperties;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
   function openDemo() {
     document.getElementById("demo-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
 
@@ -30,8 +40,9 @@ export function DemoOpenButton({ className }: { className: string }) {
   }
 
   return (
-    <button type="button" onClick={openDemo} className={className}>
-      View live demo
+    <button type="button" onClick={openDemo} className={className} style={style}>
+      {icon}
+      {children}
     </button>
   );
 }

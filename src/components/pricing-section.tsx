@@ -1,20 +1,13 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import {
-  ANNUAL_DISCOUNT,
-  formatPrice,
-  PRICING_TIERS,
-  type Currency,
-} from "@/lib/pricing";
-import { BRAND, BTN_FOREST, BTN_FOREST_OUTLINE } from "@/components/brand-logo";
+import { formatPrice, PRICING_TIERS, type Currency } from "@/lib/pricing";
+import { BTN_FOREST, BTN_FOREST_OUTLINE } from "@/components/brand-logo";
+import { LAND } from "@/lib/brand";
 
 function CheckIcon() {
   return (
     <svg
       className="h-5 w-5 shrink-0"
-      style={{ color: BRAND.teal }}
+      style={{ color: LAND.green }}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -26,15 +19,13 @@ function CheckIcon() {
 }
 
 export function PricingSection({ currency }: { currency: Currency }) {
-  const [billing, setBilling] = useState<"annual" | "monthly">("annual");
-
   return (
-    <section id="pricing" className="border-t border-gray-100 bg-gray-50 py-16 md:py-24">
+    <section id="pricing" className="border-t border-gray-100 py-16 md:py-24" style={{ backgroundColor: LAND.greenFaint }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="text-center">
           <h2
             className="font-[family-name:var(--font-fraunces)] text-4xl font-bold tracking-tight sm:text-4xl"
-            style={{ color: BRAND.navy }}
+            style={{ color: LAND.ink }}
           >
             Simple pricing
           </h2>
@@ -46,42 +37,14 @@ export function PricingSection({ currency }: { currency: Currency }) {
               : " Prices shown in $ USD; cards in other currencies are converted by your bank."}
           </p>
 
-          <div className="mt-8 inline-flex items-center rounded-full border border-gray-200 bg-white p-1 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setBilling("annual")}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-base font-semibold transition sm:py-2 sm:text-sm ${
-                billing === "annual" ? `text-white ${BTN_FOREST}` : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Annual
-              <span
-                className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-                style={
-                  billing === "annual"
-                    ? { backgroundColor: "rgba(255,255,255,0.25)", color: "#fff" }
-                    : { backgroundColor: `${BRAND.orange}22`, color: BRAND.orange }
-                }
-              >
-                Save 25%
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setBilling("monthly")}
-              className={`rounded-full px-5 py-2.5 text-base font-semibold transition sm:py-2 sm:text-sm ${
-                billing === "monthly" ? `text-white ${BTN_FOREST}` : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Monthly
-            </button>
-          </div>
+          <p className="mt-6 text-sm font-semibold" style={{ color: LAND.green }}>
+            Simple monthly billing · cancel anytime
+          </p>
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 md:gap-6 lg:grid-cols-4 lg:gap-5">
           {PRICING_TIERS.map((plan) => {
             const monthly = plan.monthly[currency];
-            const displayed = billing === "annual" ? monthly * (1 - ANNUAL_DISCOUNT) : monthly;
             const href = plan.enterprise
               ? "mailto:hello@faztino.com?subject=Enterprise%20plan%20enquiry"
               : plan.id
@@ -93,15 +56,15 @@ export function PricingSection({ currency }: { currency: Currency }) {
                 key={plan.name}
                 className={
                   plan.highlight
-                    ? "relative flex flex-col overflow-hidden rounded-xl border bg-white p-8 shadow-[0_12px_40px_-20px_rgba(0,160,157,0.35)]"
+                    ? "relative flex flex-col overflow-hidden rounded-xl border bg-white p-8 shadow-[0_12px_40px_-20px_rgba(28,124,74,0.35)]"
                     : "flex flex-col rounded-xl border border-gray-100 bg-white p-8 shadow-sm"
                 }
-                style={plan.highlight ? { borderColor: `${BRAND.teal}55` } : undefined}
+                style={plan.highlight ? { borderColor: `${LAND.green}55` } : undefined}
               >
                 {plan.highlight && (
                   <span
                     className="absolute right-6 top-6 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                    style={{ backgroundColor: `${BRAND.purple}18`, color: BRAND.purple }}
+                    style={{ backgroundColor: LAND.greenSoft, color: LAND.green }}
                   >
                     Popular
                   </span>
@@ -117,15 +80,10 @@ export function PricingSection({ currency }: { currency: Currency }) {
                   <>
                     <p className="mt-4 flex items-baseline gap-1">
                       <span className="text-5xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-                        {formatPrice(displayed, currency)}
+                        {formatPrice(monthly, currency)}
                       </span>
                       <span className="text-gray-500">/mo</span>
                     </p>
-                    {billing === "annual" && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Billed annually · {formatPrice(displayed * 12, currency)}/yr
-                      </p>
-                    )}
                   </>
                 )}
 

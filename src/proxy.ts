@@ -15,6 +15,8 @@ const isPublicRoute = createRouteMatcher([
   // search result shows a generic globe icon and the sitemap/robots are unreachable.
   "/icon(.*)",
   "/apple-icon(.*)",
+  // Link previews: crawlers fetch this signed-out, so auth would serve /login instead.
+  "/opengraph-image(.*)",
   "/favicon.ico",
   "/sitemap.xml",
   "/robots.txt",
@@ -29,6 +31,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/chat(.*)",
   "/api/bots/(.*)/suggestions",
   "/api/leads(.*)",
+  "/api/early-access(.*)",
   "/api/health(.*)",
   "/api/session(.*)",
   "/api/embed(.*)",
@@ -36,6 +39,8 @@ const isPublicRoute = createRouteMatcher([
   // auth. Both verify their provider signature before trusting anything in the body.
   "/api/stripe/webhook(.*)",
   "/api/paystack/webhook(.*)",
+  // Vapi voice tools + end-of-call reports (HMAC verified in route).
+  "/api/vapi/webhook(.*)",
   // Scheduled jobs carry no Clerk session either; they authenticate with CRON_SECRET.
   "/api/cron(.*)",
   "/admin/sign-in(.*)",

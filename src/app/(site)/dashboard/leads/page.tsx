@@ -69,7 +69,7 @@ export default async function LeadsPage() {
     <div>
       <DashboardPageHeader
         title="Leads"
-        subtitle="Contacts captured from your embedded widgets."
+        subtitle="Contacts captured from your website chat and phone receptionist."
         actions={
           leads.length > 0 ? (
             <a
@@ -109,6 +109,11 @@ export default async function LeadsPage() {
                   {l.phone && <p className="mt-0.5 text-sm text-gray-600">{l.phone}</p>}
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
+                  {l.source === "phone" && (
+                    <span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-800">
+                      Phone
+                    </span>
+                  )}
                   <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
                     {leadTemperatureLabel(temp)}
                   </span>
@@ -174,6 +179,11 @@ export default async function LeadsPage() {
                   <td className="px-4 py-3 text-gray-600">{l.phone || "—"}</td>
                   <td className="px-4 py-3 text-gray-600">{l.bot.name}</td>
                   <td className="px-4 py-3">
+                    {l.source === "phone" && (
+                      <span className="mr-1 inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-800">
+                        Phone
+                      </span>
+                    )}
                     <span className={`mr-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
                       {leadTemperatureLabel(temp)}
                     </span>

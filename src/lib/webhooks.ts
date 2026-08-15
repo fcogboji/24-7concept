@@ -5,7 +5,7 @@ import { decryptSecret, encryptSecret } from "@/lib/secret-cipher";
 
 const log = getLogger("webhooks");
 
-export type WebhookEvent = "lead.created" | "appointment.created";
+export type WebhookEvent = "lead.created" | "appointment.created" | "call.completed";
 
 export interface WebhookPayload {
   event: WebhookEvent;

@@ -70,7 +70,7 @@ export const PRICING_TIERS: PricingTier[] = [
       "5,000 replies / month",
       "Built-in booking + email notifications",
       "Webhook handoff for CRM workflows",
-      "Custom branding",
+      "Lead, visitor & conversion analytics",
       "Priority support",
     ],
     cta: "Get started",

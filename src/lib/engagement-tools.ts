@@ -58,6 +58,8 @@ export interface EngagementToolContext {
   botId: string;
   sessionId?: string | null;
   pageUrl?: string | null;
+  /** Lead.source value; defaults to chatbot. Use "phone" for voice calls. */
+  source?: string;
 }
 
 export async function handleEngagementTool(
@@ -94,6 +96,8 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
   });
   if (!bot) return JSON.stringify({ error: "Assistant not found." });
 
+  const leadSource = ctx.source?.trim() || "chatbot";
+
   const existing = await prisma.lead.findFirst({ where: { botId: ctx.botId, email } });
   const lead =
     existing ??
@@ -105,7 +109,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
         phone: args.phone?.trim() || null,
         sessionId: ctx.sessionId || null,
         pageUrl: ctx.pageUrl || null,
-        source: "chatbot",
+        source: leadSource,
       },
     }));
 
@@ -146,7 +150,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
       phone: lead.phone,
       pageUrl: ctx.pageUrl ?? null,
       sessionId: ctx.sessionId ?? null,
-      source: "chatbot",
+      source: leadSource,
       reason: args.reason,
     });
 
@@ -155,7 +159,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
       action: "lead.captured",
       resourceType: "lead",
       resourceId: lead.id,
-      meta: { botId: ctx.botId, source: "chatbot", reason: args.reason },
+      meta: { botId: ctx.botId, source: leadSource, reason: args.reason },
     });
   }
 

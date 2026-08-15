@@ -40,6 +40,7 @@ export default async function BotDetailPage({
     { href: `/dashboard/bots/${bot.id}/appearance`, label: "Widget" },
     { href: `/dashboard/bots/${bot.id}/knowledge`, label: "Knowledge base" },
     { href: `/dashboard/bots/${bot.id}/booking`, label: "Booking" },
+    { href: `/dashboard/bots/${bot.id}/phone`, label: "Phone" },
   ];
 
   return (

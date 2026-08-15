@@ -1,10 +1,9 @@
 import { ImageResponse } from "next/og";
+import { BRAND_WORDMARK, BRAND_WORDMARK_COLORS, brandMarkDataUri } from "@/lib/brand";
 
 export const alt = "Faztino — AI chatbots that capture leads and book appointments 24/7";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-const letterColors = ["#E53238", "#0064D2", "#F5AF02", "#86B817", "#E53238", "#0064D2", "#F5AF02"];
 
 export default function OpenGraphImage() {
   return new ImageResponse(
@@ -21,21 +20,23 @@ export default function OpenGraphImage() {
           padding: "80px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            fontSize: 220,
-            fontWeight: 900,
-            fontStyle: "italic",
-            letterSpacing: "-0.05em",
-            lineHeight: 1,
-          }}
-        >
-          {"faztino".split("").map((char, i) => (
-            <span key={i} style={{ color: letterColors[i] }}>
-              {char}
-            </span>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 36 }}>
+          <img src={brandMarkDataUri()} width={180} height={180} alt="" />
+          <div
+            style={{
+              display: "flex",
+              fontSize: 190,
+              fontWeight: 900,
+              letterSpacing: "-0.04em",
+              lineHeight: 1,
+            }}
+          >
+            {BRAND_WORDMARK.split("").map((char, i) => (
+              <span key={i} style={{ color: BRAND_WORDMARK_COLORS[i % BRAND_WORDMARK_COLORS.length] }}>
+                {char}
+              </span>
+            ))}
+          </div>
         </div>
         <div
           style={{
