@@ -15,6 +15,7 @@ const nav = [
   { href: "/admin/messages", label: "Messages" },
   { href: "/admin/leads", label: "Leads" },
   { href: "/admin/early-access", label: "Early access" },
+  { href: "/admin/landing", label: "Landing page" },
   { href: "/admin/activity", label: "Activity" },
   { href: "/admin/system", label: "System" },
 ] as const;

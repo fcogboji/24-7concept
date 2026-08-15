@@ -13,6 +13,8 @@ import { MarketingHeader } from "@/components/marketing-header";
 import { DemoOpenButton } from "@/components/demo-open-button";
 import { HeroMockup } from "@/components/landing/hero-mockup";
 import { CapabilitiesSection } from "@/components/landing/capabilities-section";
+import { DemoVideoSection } from "@/components/landing/demo-video-section";
+import { getDemoVideo } from "@/lib/site-settings";
 
 /* ---------------------------------- icons --------------------------------- */
 
@@ -246,6 +248,7 @@ export default async function HomePage() {
   const h = await headers();
   const country = h.get("x-vercel-ip-country") ?? h.get("cf-ipcountry") ?? h.get("x-country") ?? null;
   const currency = isPaystackEnabled() ? currencyForCountry(country) : "USD";
+  const { video: demoVideo, label: demoVideoLabel } = await getDemoVideo();
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-gray-900">
@@ -367,6 +370,9 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ------------------------------- demo video ------------------------------- */}
+        {demoVideo && <DemoVideoSection video={demoVideo} label={demoVideoLabel} />}
 
         {/* ------------------------------- feature band ----------------------------- */}
         <section className="bg-white py-14 sm:py-16">

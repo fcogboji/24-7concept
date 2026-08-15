@@ -147,7 +147,8 @@ const nextConfig: NextConfig = {
               // shows "CAPTCHA failed to load" when it is missing from script/frame/connect-src.
               `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://challenges.cloudflare.com https://js.stripe.com https://js.paystack.co`,
               "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://clerk-telemetry.com https://challenges.cloudflare.com https://api.stripe.com https://api.paystack.co https://*.upstash.io https://*.neon.tech",
-              "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://checkout.paystack.com",
+              // Marketing demo video embeds (admin-configurable, host-allowlisted in site-settings.ts).
+              "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://clerk.faztino.com https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://checkout.paystack.com https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.loom.com",
               "worker-src 'self' blob:",
             ].join("; "),
           },

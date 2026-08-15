@@ -57,6 +57,14 @@ model PaystackWebhookEvent {
   createdAt DateTime @default(now())
 }
 
+/// Editable marketing/site content so admins can change the landing page
+/// (e.g. the demo video URL) without a redeploy.
+model SiteSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
 /// Public demand signal collected from the marketing-page early-access form.
 /// One email can register interest in more than one future channel.
 model ProductInterest {
