@@ -23,31 +23,48 @@ export function subscriptionIsActive(plan: string, subscriptionStatus: string | 
   );
 }
 
-const BOT_LIMITS: Record<string, number> = {
-  starter: 1,
-  pro: 10,
-};
+/**
+ * Included monthly usage. Phone minutes are the expensive meter; chat is cheap
+ * so Pro stays generous. High-volume minutes are sold via Enterprise, not
+ * bundled into a cheap flat fee.
+ */
+export const PLAN_ALLOWANCES = {
+  starter: {
+    chatMessages: 500,
+    phoneMinutes: 30,
+    concurrentCalls: 1,
+    bots: 1,
+  },
+  pro: {
+    chatMessages: 5_000,
+    phoneMinutes: 150,
+    concurrentCalls: 3,
+    bots: 10,
+  },
+} as const;
+
+export function allowancesForPlan(plan: string) {
+  if (plan === "starter" || plan === "pro") return PLAN_ALLOWANCES[plan];
+  return { chatMessages: 0, phoneMinutes: 0, concurrentCalls: 0, bots: 0 };
+}
 
 export function botLimitForPlan(plan: string): number {
-  return BOT_LIMITS[plan] ?? 0;
+  return allowancesForPlan(plan).bots;
 }
-
-/**
- * Hard monthly message ceilings per plan. These cap how many *visitor*
- * messages a workspace can absorb before /api/chat starts returning 402,
- * which is the brake against a malicious embed running up the OpenAI bill.
- * Numbers are intentionally generous; tighten as real usage data comes in.
- */
-const MONTHLY_MESSAGE_LIMITS: Record<string, number> = {
-  starter: 500,
-  pro: 5_000,
-};
 
 export function monthlyMessageLimitForPlan(plan: string): number {
-  return MONTHLY_MESSAGE_LIMITS[plan] ?? 0;
+  return allowancesForPlan(plan).chatMessages;
 }
 
-function startOfUtcMonth(now: Date = new Date()): Date {
+export function monthlyPhoneMinutesForPlan(plan: string): number {
+  return allowancesForPlan(plan).phoneMinutes;
+}
+
+export function concurrentCallLimitForPlan(plan: string): number {
+  return allowancesForPlan(plan).concurrentCalls;
+}
+
+export function startOfUtcMonth(now: Date = new Date()): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
 

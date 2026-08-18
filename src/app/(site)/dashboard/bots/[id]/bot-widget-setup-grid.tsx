@@ -1,12 +1,14 @@
 "use client";
 
 import { BotAppearancePanel } from "./bot-appearance-panel";
+import { BotChannelsPanel } from "./bot-channels-panel";
 import { BotIntegrationPanel } from "./bot-integration-panel";
 
 type Bot = {
   id: string;
   name: string;
   isDemo: boolean;
+  whatsappNumber: string | null;
 };
 
 export function BotWidgetSetupGrid({
@@ -26,6 +28,7 @@ export function BotWidgetSetupGrid({
           <p className="mt-1 text-sm text-gray-600">Customize how the bot looks on your site.</p>
         </div>
         <BotAppearancePanel botName={botName} compact />
+        <BotChannelsPanel botId={bot.id} initialWhatsapp={bot.whatsappNumber} />
       </div>
 
       <div className="min-w-0 space-y-4">

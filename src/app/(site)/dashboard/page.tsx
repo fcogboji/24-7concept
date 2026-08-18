@@ -19,6 +19,7 @@ import {
   whatsappHref,
 } from "@/lib/lead-intelligence";
 import { PushNotificationManager } from "@/components/push-notification-manager";
+import { UsageMeters } from "@/components/dashboard/usage-meters";
 
 function TrendBadge({ value, positive }: { value: string; positive: boolean }) {
   return (
@@ -216,6 +217,8 @@ export default async function DashboardPage({
           <PushNotificationManager />
         </div>
       )}
+
+      {isSubscribed && <UsageMeters userId={appUser.id} />}
 
       <div className="mb-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard

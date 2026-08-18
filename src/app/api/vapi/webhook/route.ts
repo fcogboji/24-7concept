@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyVapiSignature } from "@/lib/vapi";
+import { endVapiCall, verifyVapiSignature } from "@/lib/vapi";
 import { runPhoneTool } from "@/lib/phone-tools";
 import { fireWebhooks } from "@/lib/webhooks";
 import { sendTransactionalEmail } from "@/lib/email";
+import { canWorkspaceAcceptCall, maybeNotifyPhoneQuota } from "@/lib/usage";
 import { getLogger } from "@/lib/logger";
 
 const log = getLogger("vapi-webhook");
@@ -84,6 +85,7 @@ async function ensureCallSession(opts: {
   fromNumber?: string | null;
   toNumber?: string | null;
   status?: string;
+  direction?: string | null;
 }) {
   return prisma.callSession.upsert({
     where: { vapiCallId: opts.vapiCallId },
@@ -93,11 +95,13 @@ async function ensureCallSession(opts: {
       fromNumber: opts.fromNumber ?? null,
       toNumber: opts.toNumber ?? null,
       status: opts.status ?? "in_progress",
+      direction: opts.direction === "outbound" ? "outbound" : "inbound",
     },
     update: {
       ...(opts.fromNumber ? { fromNumber: opts.fromNumber } : {}),
       ...(opts.toNumber ? { toNumber: opts.toNumber } : {}),
       ...(opts.status ? { status: opts.status } : {}),
+      ...(opts.direction === "outbound" ? { direction: "outbound" } : {}),
     },
   });
 }
@@ -129,6 +133,7 @@ async function handleToolCalls(message: Json, call: Json): Promise<NextResponse>
     fromNumber,
     toNumber,
     status: "in_progress",
+    direction: pickString(asRecord(call.metadata).direction, asRecord(message.metadata).direction),
   });
 
   const phoneConfig = await prisma.phoneConfig.findUnique({
@@ -254,6 +259,8 @@ async function handleEndOfCall(message: Json, call: Json): Promise<NextResponse>
   });
 
   if (bot) {
+    void maybeNotifyPhoneQuota(bot.userId);
+
     void fireWebhooks(bot.userId, "call.completed", {
       callId: session.id,
       vapiCallId: callId,
@@ -330,7 +337,23 @@ export async function POST(req: NextRequest) {
           status: status === "in-progress" ? "in_progress" : status,
           fromNumber: pickString(asRecord(call.customer).number),
           toNumber: pickString(asRecord(call.phoneNumber).number),
+          direction: pickString(asRecord(call.metadata).direction, asRecord(message.metadata).direction),
         });
+        const live = status === "ringing" || status === "in-progress" || status === "queued";
+        if (live) {
+          const bot = await prisma.bot.findUnique({ where: { id: botId }, select: { userId: true } });
+          if (bot) {
+            const quota = await canWorkspaceAcceptCall(bot.userId, callId);
+            if (!quota.ok) {
+              log.error("ending call — quota", undefined, { botId, callId, reason: quota.reason });
+              await endVapiCall(callId);
+              await prisma.callSession.updateMany({
+                where: { vapiCallId: callId },
+                data: { status: "canceled", endedAt: new Date() },
+              });
+            }
+          }
+        }
       }
       return NextResponse.json({ ok: true });
     }

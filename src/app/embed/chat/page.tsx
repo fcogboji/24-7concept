@@ -10,14 +10,21 @@ import {
   type BookingFormRequest,
 } from "@/lib/chat-form";
 
+import {
+  LauncherMenu,
+  PanelShell,
+  WIDGET_GREEN,
+  type WidgetChannels,
+} from "@/components/embed/widget-views";
+
 const SIZE_MSG = "faztino-size";
 
 const DEFAULT_SUGGESTIONS = ["What do you do?", "How can I contact you?", "What are your hours?"];
-const WELCOME_MSG = "Hi there! Welcome to faztino. How can I help you today?";
+const WELCOME_MSG = "Hi there! How can we help you today?";
+const EMPTY_CHANNELS: WidgetChannels = { whatsapp: null, phone: null };
 
 const BRAND_DARK = "#111111";
 const BRAND_GREEN = "#22c55e";
-const BRAND_GRADIENT = BRAND_DARK;
 
 function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<Response> {
   const merged: RequestInit = { mode: "cors", credentials: "omit", cache: "no-store", ...init };
@@ -44,7 +51,8 @@ function EmbedChatInner() {
   const botId = (sp.get("botId") || "").trim();
   const brand = (sp.get("brand") || "Support").trim() || "Support";
 
-  const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"closed" | "menu" | "chat">("closed");
+  const open = view !== "closed";
   const [msgs, setMsgs] = useState<{ role: "user" | "bot"; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -55,6 +63,7 @@ function EmbedChatInner() {
   const [origin, setOrigin] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [channels, setChannels] = useState<WidgetChannels>(EMPTY_CHANNELS);
   const [sessionId] = useState(generateSessionId);
 
   const pageUrl = typeof window !== "undefined" ? (window.parent !== window ? document.referrer : window.location.href) : "";
@@ -68,12 +77,14 @@ function EmbedChatInner() {
 
   const msgsRef = useRef<HTMLDivElement>(null);
 
+  const openMenu = useCallback(() => {
+    setView("menu");
+  }, []);
+
   const openChat = useCallback(() => {
-    setOpen(true);
-    setMsgs((prev) =>
-      prev.length === 0 ? [{ role: "bot", text: `\u{1F44B} ${WELCOME_MSG.replace("faztino", brand)}` }] : prev
-    );
-  }, [brand]);
+    setView("chat");
+    setMsgs((prev) => (prev.length === 0 ? [{ role: "bot", text: WELCOME_MSG }] : prev));
+  }, []);
 
   useEffect(() => {
     setOrigin(typeof window !== "undefined" ? window.location.origin : "");
@@ -87,12 +98,18 @@ function EmbedChatInner() {
       cache: "no-store",
     })
       .then((r) => r.json())
-      .then((j: { suggestions?: string[]; avatarUrl?: string | null }) => {
+      .then((j: { suggestions?: string[]; avatarUrl?: string | null; channels?: WidgetChannels }) => {
         if (Array.isArray(j.suggestions) && j.suggestions.length > 0) {
           setSuggestions(j.suggestions.slice(0, 3));
         }
         if (j.avatarUrl && /^https?:\/\//i.test(j.avatarUrl)) {
           setAvatarUrl(j.avatarUrl);
+        }
+        if (j.channels) {
+          setChannels({
+            whatsapp: j.channels.whatsapp || null,
+            phone: j.channels.phone || null,
+          });
         }
       })
       .catch(() => {});
@@ -118,12 +135,12 @@ function EmbedChatInner() {
     function onMessage(event: MessageEvent) {
       const data = event.data as { type?: string } | null;
       if (!data || data.type !== "faztino-open") return;
-      openChat();
+      openMenu();
     }
 
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [openChat]);
+  }, [openMenu]);
 
   useEffect(() => {
     msgsRef.current?.scrollTo({ top: msgsRef.current.scrollHeight, behavior: "smooth" });
@@ -226,6 +243,17 @@ function EmbedChatInner() {
     [botId, chatUrl, input, sessionId, pageUrl, referrer, visitorTimezone, applyStreamEnd]
   );
 
+  const openWhatsApp = useCallback(() => {
+    if (!channels.whatsapp) return;
+    const text = encodeURIComponent(`Hi, I have a question for ${brand}`);
+    window.open(`https://wa.me/${channels.whatsapp}?text=${text}`, "_blank", "noopener,noreferrer");
+  }, [channels.whatsapp, brand]);
+
+  const openCall = useCallback(() => {
+    if (!channels.phone) return;
+    window.location.href = `tel:+${channels.phone}`;
+  }, [channels.phone]);
+
   const submitBookingForm = useCallback(() => {
     if (!bookingForm) return;
     const missing = bookingForm.fields.filter((f) => {
@@ -266,11 +294,11 @@ function EmbedChatInner() {
             type="button"
             className="flex cursor-pointer flex-col items-end border-0 bg-transparent p-0 pr-2 transition hover:-translate-y-px"
             aria-label="Open chat"
-            onClick={openChat}
+            onClick={openMenu}
           >
             {/* Speech bubble */}
             <div className="relative mb-2 rounded-[18px] bg-white px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.12)]">
-              <span className="block text-center text-[15px] font-semibold text-stone-800 whitespace-nowrap">Hi, how can I help?</span>
+              <span className="block text-center text-[15px] font-semibold text-stone-800 whitespace-nowrap">Hi there! How can we help?</span>
               {/* Speech bubble tail */}
               <div className="absolute -bottom-2 right-6">
                 <div className="h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
@@ -304,15 +332,45 @@ function EmbedChatInner() {
         </div>
       )}
 
-      {open && (
+      {view === "menu" && (
+        <PanelShell
+          onClose={() => setView("closed")}
+          header={
+            <div>
+              <p className="text-[15px] font-bold leading-snug">Hi there!</p>
+              <p className="mt-0.5 text-[13px] font-normal text-white/90">How can we help you today?</p>
+            </div>
+          }
+        >
+          <LauncherMenu
+            brand="faztino"
+            channels={channels}
+            onChat={openChat}
+            onWhatsApp={openWhatsApp}
+            onCall={openCall}
+          />
+        </PanelShell>
+      )}
+
+      {view === "chat" && (
         <div className="flex h-full min-h-0 flex-col">
           <div className="mx-2 mb-2 flex min-h-0 max-h-[min(520px,calc(100dvh-72px))] flex-1 flex-col overflow-hidden rounded-[18px] border border-stone-200 bg-white shadow-[0_24px_60px_rgba(0,0,0,0.15)]">
             {/* Header */}
             <div
               className="flex items-center justify-between gap-2 rounded-t-[18px] px-4 py-3.5 text-white"
-              style={{ background: BRAND_GRADIENT }}
+              style={{ background: WIDGET_GREEN }}
             >
               <div className="flex min-w-0 items-center gap-2.5">
+                <button
+                  type="button"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white"
+                  aria-label="Back to options"
+                  onClick={() => setView("menu")}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -330,7 +388,7 @@ function EmbedChatInner() {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <div className="truncate text-[15px] font-bold">{brand}</div>
+                  <div className="truncate text-[15px] font-bold">Live chat</div>
                   <div className="flex items-center gap-1 text-[11px] text-white/90">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-300"></span>
                     Online · Typically replies instantly
@@ -352,7 +410,7 @@ function EmbedChatInner() {
                         ? "max-w-[88%] whitespace-pre-wrap break-words rounded-[14px] rounded-br-sm px-[13px] py-2.5 text-sm leading-snug text-white"
                         : "max-w-[88%] whitespace-pre-wrap break-words rounded-[14px] rounded-bl-sm border border-stone-200 bg-white px-[13px] py-2.5 text-sm leading-snug text-stone-800"
                     }
-                    style={m.role === "user" ? { background: BRAND_GRADIENT } : undefined}
+                    style={m.role === "user" ? { background: WIDGET_GREEN } : undefined}
                   >
                     {m.text}
                   </div>
@@ -410,7 +468,7 @@ function EmbedChatInner() {
                       type="button"
                       disabled={formSubmitting}
                       className="cursor-pointer rounded-[10px] border-0 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-50"
-                      style={{ background: BRAND_GRADIENT }}
+                      style={{ background: WIDGET_GREEN }}
                       onClick={submitBookingForm}
                     >
                       {formSubmitting ? "Sending…" : "Submit details"}
@@ -427,7 +485,7 @@ function EmbedChatInner() {
                 <input
                   className="min-w-0 flex-1 rounded-xl border border-stone-300 px-3.5 py-2.5 text-base text-stone-900 outline-none placeholder:text-stone-400 focus:border-black focus:shadow-[0_0_0_3px_rgba(0,0,0,0.12)]"
                   type="text"
-                  placeholder="Ask anything..."
+                  placeholder="Type a message..."
                   autoComplete="off"
                   enterKeyHint="send"
                   value={input}
@@ -442,7 +500,7 @@ function EmbedChatInner() {
                 <button
                   type="button"
                   className="flex h-10 w-10 shrink-0 items-center justify-center cursor-pointer rounded-xl border-0 text-white shadow-sm hover:opacity-95 transition-opacity"
-                  style={{ background: BRAND_GRADIENT }}
+                  style={{ background: WIDGET_GREEN }}
                   aria-label="Send message"
                   onClick={() => sendMessage()}
                 >
@@ -461,9 +519,9 @@ function EmbedChatInner() {
             <button
               type="button"
               className="flex h-[52px] w-[52px] items-center justify-center cursor-pointer rounded-full border-0 text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:opacity-95 transition-opacity"
-              style={{ background: BRAND_GRADIENT }}
+              style={{ background: WIDGET_GREEN }}
               aria-label="Close chat"
-              onClick={() => setOpen(false)}
+              onClick={() => setView("closed")}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>

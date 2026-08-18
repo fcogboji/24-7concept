@@ -100,7 +100,7 @@
      * documents lift sandbox restrictions. Here the iframe src is only our `/embed/chat`
      * URL (trusted), and same-origin is required for the embedded app to call our APIs.
      */
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms");
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox");
     iframe.setAttribute("allowtransparency", "true");
     iframe.allow = "clipboard-read; clipboard-write";
     iframe.dataset.botId = botId;

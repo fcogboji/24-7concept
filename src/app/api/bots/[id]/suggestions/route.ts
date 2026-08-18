@@ -52,7 +52,20 @@ export async function GET(req: NextRequest, context: RouteContext) {
 
   const bot = await prisma.bot.findUnique({
     where: { id },
-    select: { businessInfo: true, avatarUrl: true, bookingConfig: { select: { enabled: true } } },
+    select: {
+      businessInfo: true,
+      avatarUrl: true,
+      whatsappNumber: true,
+      bookingConfig: { select: { enabled: true } },
+      phoneConfig: {
+        select: {
+          enabled: true,
+          e164Number: true,
+          vapiAssistantId: true,
+          vapiPhoneNumberId: true,
+        },
+      },
+    },
   });
 
   const suggestions = buildSuggestions(bot?.businessInfo);
@@ -67,8 +80,24 @@ export async function GET(req: NextRequest, context: RouteContext) {
     }
   }
 
+  const whatsappDigits = bot?.whatsappNumber?.replace(/\D/g, "") ?? "";
+  const phoneLive = Boolean(
+    bot?.phoneConfig?.enabled &&
+      bot.phoneConfig.e164Number &&
+      bot.phoneConfig.vapiAssistantId &&
+      bot.phoneConfig.vapiPhoneNumberId,
+  );
+  const phoneDigits = bot?.phoneConfig?.e164Number?.replace(/\D/g, "") ?? "";
+
   return NextResponse.json(
-    { suggestions, avatarUrl: bot?.avatarUrl ?? null },
-    { headers: cors }
+    {
+      suggestions,
+      avatarUrl: bot?.avatarUrl ?? null,
+      channels: {
+        whatsapp: whatsappDigits.length >= 7 ? whatsappDigits : null,
+        phone: phoneLive && phoneDigits.length >= 8 ? phoneDigits : null,
+      },
+    },
+    { headers: cors },
   );
 }

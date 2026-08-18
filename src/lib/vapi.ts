@@ -298,6 +298,35 @@ export async function deleteVapiPhoneNumber(phoneNumberId: string): Promise<void
   }
 }
 
+/** Place an outbound call from the bot's Vapi/Twilio number to a visitor. */
+export async function createOutboundCall(opts: {
+  assistantId: string;
+  phoneNumberId: string;
+  customerNumber: string;
+  botId: string;
+}): Promise<{ id: string }> {
+  const created = await vapiFetch<{ id: string }>("/call", {
+    method: "POST",
+    json: {
+      assistantId: opts.assistantId,
+      phoneNumberId: opts.phoneNumberId,
+      customer: { number: opts.customerNumber },
+      metadata: { botId: opts.botId, direction: "outbound" },
+    },
+  });
+  if (!created?.id) throw new Error("Vapi did not return a call id");
+  return created;
+}
+
+/** Hang up a live call (used when a workspace is over minutes or concurrency). */
+export async function endVapiCall(callId: string): Promise<void> {
+  try {
+    await vapiFetch(`/call/${callId}/end`, { method: "POST" });
+  } catch (e) {
+    log.error("end call failed", e, { callId });
+  }
+}
+
 /** Verify Vapi webhook HMAC when VAPI_WEBHOOK_SECRET is set. */
 export function verifyVapiSignature(rawBody: string, signatureHeader: string | null): boolean {
   const secret = process.env.VAPI_WEBHOOK_SECRET?.trim();

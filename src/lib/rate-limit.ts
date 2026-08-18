@@ -297,6 +297,30 @@ export async function rateLimitBotCreate(userId: string) {
   return limitOrMemory(getBotCreateRatelimit(), `u:${userId}`, 25, 60 * 60 * 1000);
 }
 
+/** Widget "call me" — 3/hour per IP (billable telephony). */
+export async function rateLimitCallbackIp(ip: string) {
+  return rateLimitAuth(`callback:${ip}`, 3, 60 * 60 * 1000);
+}
+
+let callbackBotRatelimit: Ratelimit | null = null;
+function getCallbackBotRatelimit(): Ratelimit | null {
+  const redis = getRedis();
+  if (!redis) return null;
+  if (!callbackBotRatelimit) {
+    callbackBotRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(30, "60 m"),
+      prefix: "faztino:rl:callbackbot",
+    });
+  }
+  return callbackBotRatelimit;
+}
+
+/** Widget "call me" — 30/hour per bot (bounds Twilio spend). */
+export async function rateLimitCallbackBot(botId: string) {
+  return limitOrMemory(getCallbackBotRatelimit(), `b:${botId}`, 30, 60 * 60 * 1000);
+}
+
 /** Global per-bot chat cap (across all IPs) — burst protection for OpenAI cost. */
 export async function rateLimitChatBotGlobal(botId: string) {
   return limitOrMemory(getChatBotGlobalRatelimit(), `b:${botId}`, 600, 60_000);

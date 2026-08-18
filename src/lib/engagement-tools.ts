@@ -6,6 +6,7 @@ import { fireWebhooks } from "@/lib/webhooks";
 import { logAudit } from "@/lib/audit";
 import { getLogger } from "@/lib/logger";
 import { sendNewLeadNotification } from "@/lib/push-notifications";
+import { safeHttpUrlForDisplay } from "@/lib/url-safety";
 
 const log = getLogger("engagement-tools");
 
@@ -97,6 +98,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
   if (!bot) return JSON.stringify({ error: "Assistant not found." });
 
   const leadSource = ctx.source?.trim() || "chatbot";
+  const pageUrl = safeHttpUrlForDisplay(ctx.pageUrl);
 
   const existing = await prisma.lead.findFirst({ where: { botId: ctx.botId, email } });
   const lead =
@@ -108,7 +110,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
         name: args.name?.trim() || null,
         phone: args.phone?.trim() || null,
         sessionId: ctx.sessionId || null,
-        pageUrl: ctx.pageUrl || null,
+        pageUrl,
         source: leadSource,
       },
     }));
@@ -130,7 +132,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
       leadEmail: lead.email,
       leadName: lead.name,
       leadPhone: lead.phone,
-      pageUrl: ctx.pageUrl ?? null,
+      pageUrl,
     });
 
     // Send push notification for new lead
@@ -148,7 +150,7 @@ async function handleCaptureLead(ctx: EngagementToolContext, args: CaptureLeadAr
       email: lead.email,
       name: lead.name,
       phone: lead.phone,
-      pageUrl: ctx.pageUrl ?? null,
+      pageUrl,
       sessionId: ctx.sessionId ?? null,
       source: leadSource,
       reason: args.reason,
@@ -202,6 +204,7 @@ async function handleEscalate(ctx: EngagementToolContext, args: EscalateArgs): P
     .reverse()
     .map((m) => `${m.role === "user" ? "Visitor" : "Assistant"}: ${esc(m.content)}`)
     .join("<br/>");
+  const safePage = safeHttpUrlForDisplay(ctx.pageUrl);
 
   try {
     await sendTransactionalEmail({
@@ -213,7 +216,7 @@ async function handleEscalate(ctx: EngagementToolContext, args: EscalateArgs): P
           <p style="margin:0 0 12px;color:#444">${esc(summary)}</p>
           ${args.name ? `<p style="margin:0;color:#444"><strong>Name:</strong> ${esc(args.name)}</p>` : ""}
           ${args.email ? `<p style="margin:0;color:#444"><strong>Email:</strong> <a href="mailto:${esc(args.email)}">${esc(args.email)}</a></p>` : ""}
-          ${ctx.pageUrl ? `<p style="margin:0;color:#444"><strong>Page:</strong> <a href="${esc(ctx.pageUrl)}">${esc(ctx.pageUrl)}</a></p>` : ""}
+          ${safePage ? `<p style="margin:0;color:#444"><strong>Page:</strong> <a href="${esc(safePage)}">${esc(safePage)}</a></p>` : ""}
           ${transcript ? `<hr style="margin:16px 0;border:none;border-top:1px solid #eee"/><p style="margin:0 0 8px;color:#888;font-size:13px">Recent transcript</p><div style="font-size:13px;color:#444">${transcript}</div>` : ""}
         </div>`,
     });

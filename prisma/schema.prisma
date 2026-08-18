@@ -102,6 +102,8 @@ model Bot {
   name              String
   websiteUrl        String?
   avatarUrl         String?
+  /// Business WhatsApp number (E.164). Powers the widget "WhatsApp us" button.
+  whatsappNumber    String?
   businessInfo      String?          @db.Text
   isDemo            Boolean          @default(false)
   trainingStartedAt DateTime?
@@ -230,11 +232,13 @@ model PhoneConfig {
   @@index([vapiPhoneNumberId])
 }
 
-/// One inbound (or future outbound) phone call handled by the AI receptionist.
+/// One inbound or outbound phone call handled by the AI receptionist.
 model CallSession {
   id            String    @id @default(cuid())
   botId         String
   vapiCallId    String    @unique
+  /// inbound = visitor dialed the AI number; outbound = widget "call me" request.
+  direction     String    @default("inbound")
   fromNumber    String?
   toNumber      String?
   status        String    @default("ringing")

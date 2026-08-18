@@ -6,6 +6,7 @@ import { rateLimitChat } from "@/lib/rate-limit";
 import { getWidgetCorsHeaders } from "@/lib/widget-cors";
 import { sendLeadNotificationToOwner } from "@/lib/booking-emails";
 import { fireWebhooks } from "@/lib/webhooks";
+import { safeHttpUrlForDisplay } from "@/lib/url-safety";
 
 const bodySchema = z.object({
   botId: z.string().min(1),
@@ -43,7 +44,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or assistant" }, { status: 400, headers: cors });
     }
 
-    const { botId, email, name, phone, sessionId, pageUrl } = parsed.data;
+    const { botId, email, name, phone, sessionId, pageUrl: pageUrlRaw } = parsed.data;
+    const pageUrl = safeHttpUrlForDisplay(pageUrlRaw);
     const ip = clientIp(req);
     const limit = await rateLimitChat(`lead:${ip}:${botId}`);
     if (!limit.ok) {

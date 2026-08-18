@@ -160,6 +160,9 @@ export function PhoneConfigPanel({
             placeholder="+15551234567"
             onChange={(e) => setForwardingNumber(e.target.value)}
           />
+          <span className="mt-1 block text-xs text-gray-500">
+            Used to transfer inbound calls, and shown as “Call the team now” in the widget.
+          </span>
         </label>
 
         <label className="flex items-center justify-between gap-3">

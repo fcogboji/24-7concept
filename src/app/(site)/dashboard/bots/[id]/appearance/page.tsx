@@ -41,7 +41,7 @@ export default async function BotAppearancePage({ params }: { params: Promise<{ 
       />
       <BotWidgetSetupGrid
         botName={bot.name}
-        bot={{ id: bot.id, name: bot.name, isDemo: bot.isDemo }}
+        bot={{ id: bot.id, name: bot.name, isDemo: bot.isDemo, whatsappNumber: bot.whatsappNumber }}
         embedSnippet={embedSnippet}
       />
     </div>

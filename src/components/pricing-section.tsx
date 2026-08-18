@@ -40,6 +40,11 @@ export function PricingSection({ currency }: { currency: Currency }) {
           <p className="mt-6 text-sm font-semibold" style={{ color: LAND.green }}>
             Simple monthly billing · cancel anytime
           </p>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-gray-500">
+            Every plan includes the website widget, live chat, booking, WhatsApp, and contact us. Phone minutes
+            are metered (chat is generous because it costs far less). Need 10,000 minutes? That&apos;s a custom quote —
+            not a cheap unlimited plan.
+          </p>
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 md:gap-6 lg:grid-cols-4 lg:gap-5">

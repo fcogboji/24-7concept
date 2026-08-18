@@ -4,12 +4,14 @@ import { getOrCreateAppUser } from "@/lib/clerk-app-user";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { assertUrlSafeForServerFetch, isLocalTrainingUrlAllowed } from "@/lib/url-safety";
+import { normalizeE164 } from "@/lib/phone-number";
 
 const patchSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   websiteUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
   avatarUrl: z.union([z.string().url().max(2048), z.literal(""), z.null()]).optional(),
   businessInfo: z.union([z.string().max(12000), z.literal(""), z.null()]).optional(),
+  whatsappNumber: z.union([z.string().max(32), z.literal(""), z.null()]).optional(),
 });
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -34,7 +36,13 @@ export async function PATCH(req: Request, context: RouteContext) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const data: { name?: string; websiteUrl?: string | null; avatarUrl?: string | null; businessInfo?: string | null } = {};
+  const data: {
+    name?: string;
+    websiteUrl?: string | null;
+    avatarUrl?: string | null;
+    businessInfo?: string | null;
+    whatsappNumber?: string | null;
+  } = {};
   if (parsed.data.name !== undefined) data.name = parsed.data.name;
   if (parsed.data.avatarUrl !== undefined) {
     const v = parsed.data.avatarUrl;
@@ -59,6 +67,21 @@ export async function PATCH(req: Request, context: RouteContext) {
   if (parsed.data.businessInfo !== undefined) {
     const text = parsed.data.businessInfo;
     data.businessInfo = text === "" || text === null ? null : text.trim();
+  }
+  if (parsed.data.whatsappNumber !== undefined) {
+    const raw = parsed.data.whatsappNumber;
+    if (!raw) {
+      data.whatsappNumber = null;
+    } else {
+      const normalized = normalizeE164(raw);
+      if (!normalized) {
+        return NextResponse.json(
+          { error: "WhatsApp number must be an international number (e.g. +15551234567)." },
+          { status: 400 },
+        );
+      }
+      data.whatsappNumber = normalized;
+    }
   }
 
   const updated = await prisma.bot.update({

@@ -60,3 +60,21 @@ export function assertUrlSafeForServerFetch(raw: string, options?: UrlSafetyOpti
     throw new Error("That hostname is not allowed");
   }
 }
+
+/**
+ * Safe href for visitor-supplied page URLs in emails and the dashboard.
+ * Allows only http(s) with no credentials. Returns null if the value must not be linked.
+ */
+export function safeHttpUrlForDisplay(raw: string | null | undefined): string | null {
+  if (!raw?.trim()) return null;
+  let url: URL;
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  if (url.username || url.password) return null;
+  if (url.href.length > 2000) return null;
+  return url.href;
+}
