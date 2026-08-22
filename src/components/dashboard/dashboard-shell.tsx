@@ -55,7 +55,7 @@ export function DashboardShell({
   const closeNav = () => setNavState((s) => ({ ...s, open: false }));
 
   return (
-    <div className="relative min-h-screen bg-gray-50 text-gray-900">
+    <div className="relative min-h-screen bg-gray-50 text-base text-gray-900" data-dashboard>
       {/* Mobile: fixed top bar */}
       <header
         className="fixed inset-x-0 top-0 z-[45] border-b border-gray-200 bg-white/95 px-4 pt-[env(safe-area-inset-top,0px)] backdrop-blur-sm supports-[backdrop-filter]:bg-white/90 lg:hidden"

@@ -37,10 +37,10 @@ export function PricingSection({ currency }: { currency: Currency }) {
               : " Prices shown in $ USD; cards in other currencies are converted by your bank."}
           </p>
 
-          <p className="mt-6 text-sm font-semibold" style={{ color: LAND.green }}>
+          <p className="mt-6 text-base font-semibold sm:text-sm" style={{ color: LAND.green }}>
             Simple monthly billing · cancel anytime
           </p>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-gray-500">
+          <p className="mx-auto mt-3 max-w-xl text-base text-gray-500 sm:text-sm">
             Every plan includes the website widget, live chat, booking, WhatsApp, and contact us. Phone minutes
             are metered (chat is generous because it costs far less). Need 10,000 minutes? That&apos;s a custom quote —
             not a cheap unlimited plan.
@@ -68,7 +68,7 @@ export function PricingSection({ currency }: { currency: Currency }) {
               >
                 {plan.highlight && (
                   <span
-                    className="absolute right-6 top-6 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                    className="absolute right-6 top-6 rounded-full px-2.5 py-0.5 text-sm font-semibold sm:text-xs"
                     style={{ backgroundColor: LAND.greenSoft, color: LAND.green }}
                   >
                     Popular

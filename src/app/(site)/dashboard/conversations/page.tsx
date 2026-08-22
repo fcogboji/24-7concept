@@ -166,10 +166,10 @@ export default async function ConversationsPage() {
                       )}
                       {s.lead && (
                         <>
-                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${leadTemperatureClass(temp)}`}>
                             {leadTemperatureLabel(temp)}
                           </span>
-                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(s.lead.status)}`}>
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${statusBadge(s.lead.status)}`}>
                             {statusLabel(s.lead.status)}
                           </span>
                         </>

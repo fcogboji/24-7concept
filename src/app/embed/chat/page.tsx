@@ -287,7 +287,7 @@ function EmbedChatInner() {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-transparent font-sans text-stone-900">
+    <div className="flex h-full min-h-0 flex-col bg-transparent text-base font-sans text-stone-900" data-embed-widget>
       {!open && (
         <div className="fixed bottom-2 right-0 z-50 flex items-end justify-end">
           <button
@@ -298,7 +298,7 @@ function EmbedChatInner() {
           >
             {/* Speech bubble */}
             <div className="relative mb-2 rounded-[18px] bg-white px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.12)]">
-              <span className="block text-center text-[15px] font-semibold text-stone-800 whitespace-nowrap">Hi there! How can we help?</span>
+              <span className="block text-center text-base font-semibold text-stone-800 whitespace-nowrap">Hi there! How can we help?</span>
               {/* Speech bubble tail */}
               <div className="absolute -bottom-2 right-6">
                 <div className="h-0 w-0 border-x-[7px] border-t-[8px] border-x-transparent border-t-white" />
@@ -337,8 +337,8 @@ function EmbedChatInner() {
           onClose={() => setView("closed")}
           header={
             <div>
-              <p className="text-[15px] font-bold leading-snug">Hi there!</p>
-              <p className="mt-0.5 text-[13px] font-normal text-white/90">How can we help you today?</p>
+              <p className="text-base font-bold leading-snug">Hi there!</p>
+              <p className="mt-0.5 text-base font-normal text-white/90">How can we help you today?</p>
             </div>
           }
         >
@@ -388,8 +388,8 @@ function EmbedChatInner() {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <div className="truncate text-[15px] font-bold">Live chat</div>
-                  <div className="flex items-center gap-1 text-[11px] text-white/90">
+                  <div className="truncate text-base font-bold">Live chat</div>
+                  <div className="flex items-center gap-1 text-sm sm:text-xs text-white/90">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-300"></span>
                     Online · Typically replies instantly
                   </div>
@@ -415,7 +415,7 @@ function EmbedChatInner() {
                     {m.text}
                   </div>
                   {i === 0 && m.role === "bot" && (
-                    <div className="mt-1 text-[11px] text-stone-400">{formatTime(new Date())}</div>
+                    <div className="mt-1 text-sm sm:text-xs text-stone-400">{formatTime(new Date())}</div>
                   )}
                 </div>
               ))}
@@ -428,7 +428,7 @@ function EmbedChatInner() {
                     <button
                       key={label}
                       type="button"
-                      className="min-h-9 cursor-pointer rounded-full border border-stone-300 bg-white px-3 py-1.5 text-[13px] text-stone-600 hover:border-black hover:bg-stone-100 hover:text-black transition-colors"
+                      className="min-h-10 cursor-pointer rounded-full border border-stone-300 bg-white px-3.5 py-2 text-base text-stone-600 hover:border-black hover:bg-stone-100 hover:text-black transition-colors"
                       onClick={() => sendMessage(label)}
                     >
                       {label}
@@ -447,7 +447,7 @@ function EmbedChatInner() {
                       const meta = BOOKING_FORM_FIELD_META[fieldId];
                       return (
                         <label key={fieldId} className="flex flex-col gap-1">
-                          <span className="text-[11px] font-medium text-stone-500">
+                          <span className="text-sm sm:text-xs font-medium text-stone-500">
                             {meta.label}
                             {meta.required ? "" : " (optional)"}
                           </span>
@@ -507,7 +507,7 @@ function EmbedChatInner() {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                 </button>
               </div>
-              <div className="mt-2 text-center text-[11px] text-stone-400">
+              <div className="mt-2 text-center text-sm sm:text-xs text-stone-400">
                 Powered by <span className="font-medium text-stone-500">faztino</span>{" "}
                 <span style={{ color: BRAND_DARK }}>&#10022;</span>
               </div>

@@ -110,14 +110,14 @@ export default async function LeadsPage() {
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
                   {l.source === "phone" && (
-                    <span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-800">
+                    <span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-sm sm:text-xs font-semibold text-orange-800">
                       Phone
                     </span>
                   )}
-                  <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${leadTemperatureClass(temp)}`}>
                     {leadTemperatureLabel(temp)}
                   </span>
-                  <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(l.status)}`}>
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${statusBadge(l.status)}`}>
                     {statusLabel(l.status)}
                   </span>
                 </div>
@@ -180,14 +180,14 @@ export default async function LeadsPage() {
                   <td className="px-4 py-3 text-gray-600">{l.bot.name}</td>
                   <td className="px-4 py-3">
                     {l.source === "phone" && (
-                      <span className="mr-1 inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-800">
+                      <span className="mr-1 inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-sm sm:text-xs font-semibold text-orange-800">
                         Phone
                       </span>
                     )}
-                    <span className={`mr-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                    <span className={`mr-1 inline-flex rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${leadTemperatureClass(temp)}`}>
                       {leadTemperatureLabel(temp)}
                     </span>
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(l.status)}`}>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${statusBadge(l.status)}`}>
                       {statusLabel(l.status)}
                     </span>
                   </td>

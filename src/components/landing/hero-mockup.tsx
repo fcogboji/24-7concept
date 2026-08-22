@@ -32,7 +32,7 @@ function Sparks() {
 
 function AssistantBubble({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-[78%] rounded-2xl rounded-tl-md bg-gray-100 px-3.5 py-2.5 text-[13px] leading-snug text-gray-700">
+    <div className="max-w-[78%] rounded-2xl rounded-tl-md bg-gray-100 px-3.5 py-2.5 text-sm leading-snug text-gray-700">
       {children}
     </div>
   );
@@ -41,7 +41,7 @@ function AssistantBubble({ children }: { children: React.ReactNode }) {
 function VisitorBubble({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="ml-auto max-w-[80%] rounded-2xl rounded-tr-md px-3.5 py-2.5 text-[13px] leading-snug text-white"
+      className="ml-auto max-w-[80%] rounded-2xl rounded-tr-md px-3.5 py-2.5 text-sm leading-snug text-white"
       style={{ backgroundColor: LAND.green }}
     >
       {children}
@@ -53,7 +53,7 @@ function BookingCard() {
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
       <div className="flex items-center justify-between">
-        <p className="text-[13px] font-semibold" style={{ color: LAND.ink }}>
+        <p className="text-sm font-semibold" style={{ color: LAND.ink }}>
           Book a Call
         </p>
         <span className="text-xs" style={{ color: LAND.green }} aria-hidden>
@@ -61,9 +61,9 @@ function BookingCard() {
         </span>
       </div>
 
-      <p className="mt-2 text-[10px] font-medium uppercase tracking-wide text-gray-400">May 2024</p>
+      <p className="mt-2 text-xs sm:text-[10px] font-medium uppercase tracking-wide text-gray-400">May 2024</p>
 
-      <div className="mt-1.5 grid grid-cols-5 gap-1 text-center text-[10px] font-semibold text-gray-400">
+      <div className="mt-1.5 grid grid-cols-5 gap-1 text-center text-xs sm:text-[10px] font-semibold text-gray-400">
         {["Mon", "Tue", "Wed", "Thu", "Fri"].map((d) => (
           <span key={d}>{d}</span>
         ))}
@@ -71,7 +71,7 @@ function BookingCard() {
 
       <div className="mt-1 space-y-1">
         {CALENDAR_WEEKS.map((week, i) => (
-          <div key={i} className="grid grid-cols-5 gap-1 text-center text-[11px]">
+          <div key={i} className="grid grid-cols-5 gap-1 text-center text-xs sm:text-[11px]">
             {week.map((day) => {
               const selected = day === SELECTED_DAY;
               return (
@@ -90,7 +90,7 @@ function BookingCard() {
         ))}
       </div>
 
-      <div className="mt-3 flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-[11px] font-medium text-gray-600">
+      <div className="mt-3 flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 text-xs sm:text-[11px] font-medium text-gray-600">
         10:00 AM
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
@@ -98,7 +98,7 @@ function BookingCard() {
       </div>
 
       <div
-        className="mt-2 rounded-lg py-2 text-center text-[11px] font-semibold text-white"
+        className="mt-2 rounded-lg py-2 text-center text-xs sm:text-[11px] font-semibold text-white"
         style={{ backgroundColor: LAND.green }}
       >
         Confirm Booking
@@ -119,11 +119,11 @@ function LeadsStatCard() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 8h5v5" />
         </svg>
       </span>
-      <p className="mt-3 text-[11px] font-medium text-gray-500">Leads Captured</p>
+      <p className="mt-3 text-xs sm:text-[11px] font-medium text-gray-500">Leads Captured</p>
       <p className="text-2xl font-bold tracking-tight" style={{ color: LAND.ink }}>
         1,248
       </p>
-      <p className="text-[11px] font-semibold" style={{ color: LAND.green }}>
+      <p className="text-xs sm:text-[11px] font-semibold" style={{ color: LAND.green }}>
         +32% this month
       </p>
     </div>
@@ -158,7 +158,7 @@ export function HeroMockup() {
             <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
           </span>
-          <div className="mx-auto flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[10px] text-gray-400 shadow-sm">
+          <div className="mx-auto flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs sm:text-[10px] text-gray-400 shadow-sm">
             <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
               <rect x="5" y="11" width="14" height="9" rx="2" strokeLinejoin="round" />
               <path strokeLinecap="round" d="M8 11V8a4 4 0 018 0v3" />
@@ -177,10 +177,10 @@ export function HeroMockup() {
               F
             </span>
             <div>
-              <p className="text-[13px] font-semibold" style={{ color: LAND.ink }}>
+              <p className="text-sm font-semibold" style={{ color: LAND.ink }}>
                 Faztino AI Assistant
               </p>
-              <p className="flex items-center gap-1 text-[11px] text-gray-400">
+              <p className="flex items-center gap-1 text-xs sm:text-[11px] text-gray-400">
                 <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: LAND.green }} />
                 Online
               </p>
@@ -199,7 +199,7 @@ export function HeroMockup() {
             <BookingCard />
           </div>
 
-          <p className="mt-3 text-center text-[10px] font-medium text-gray-400">✦ Powered by Faztino</p>
+          <p className="mt-3 text-center text-xs sm:text-[10px] font-medium text-gray-400">✦ Powered by Faztino</p>
         </div>
       </div>
 

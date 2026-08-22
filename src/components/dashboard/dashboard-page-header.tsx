@@ -13,7 +13,7 @@ export function DashboardPageHeader({
         <h1 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl">
           {title}
         </h1>
-        {subtitle ? <p className="mt-1 text-sm text-gray-600 sm:text-base">{subtitle}</p> : null}
+        {subtitle ? <p className="mt-1 text-base text-gray-600 sm:text-base">{subtitle}</p> : null}
       </div>
       {actions ? (
         <div className="flex w-full min-w-0 flex-shrink-0 flex-row flex-wrap items-center gap-2 sm:w-auto sm:justify-end">

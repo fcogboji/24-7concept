@@ -26,7 +26,7 @@ export function DemoVideoSection({ video, label }: { video: DemoVideo; label: st
             {AVATARS.map((avatar) => (
               <span
                 key={avatar.initials}
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-white"
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white sm:text-[10px]"
                 style={{ backgroundColor: avatar.color }}
               >
                 {avatar.initials}
@@ -73,12 +73,12 @@ export function DemoVideoSection({ video, label }: { video: DemoVideo; label: st
             )}
           </div>
 
-          <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold shadow-sm" style={{ color: LAND.ink }}>
+          <span className="pointer-events-none absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1 text-sm font-semibold shadow-sm sm:text-xs" style={{ color: LAND.ink }}>
             {label || "Faztino product demo"}
           </span>
         </div>
 
-        <p className="mt-10 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+        <p className="mt-10 text-center text-sm font-semibold uppercase tracking-[0.2em] text-gray-400 sm:text-xs">
           Works on
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">

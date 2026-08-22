@@ -146,7 +146,7 @@ export function CapabilitiesSection() {
                 >
                   <CapabilityIcon name={feature.icon} />
                 </span>
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-sm font-bold uppercase tracking-wide text-emerald-700 sm:text-xs">
                   Available now
                 </span>
               </div>
@@ -165,7 +165,7 @@ export function CapabilitiesSection() {
           className="mt-14 overflow-hidden rounded-3xl border border-emerald-100 px-5 py-10 text-center sm:px-10 sm:py-12"
           style={{ backgroundColor: LAND.greenFaint }}
         >
-          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-amber-800">
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-bold uppercase tracking-[0.16em] text-amber-800 sm:text-xs">
             Early access
           </span>
           <h3

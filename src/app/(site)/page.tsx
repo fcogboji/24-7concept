@@ -324,7 +324,7 @@ export default async function HomePage() {
                 </div>
 
                 <div
-                  className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[13px] font-medium lg:justify-start"
+                  className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base font-medium sm:text-sm lg:justify-start"
                   style={{ color: LAND.body }}
                 >
                   {HERO_META.map((m) => (
@@ -392,7 +392,7 @@ export default async function HomePage() {
                   <h3 className="mt-4 text-[15px] font-bold leading-snug" style={{ color: LAND.ink }}>
                     {f.title}
                   </h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: LAND.body }}>
+                  <p className="mt-1.5 text-base leading-relaxed sm:text-sm" style={{ color: LAND.body }}>
                     {f.body}
                   </p>
                 </div>
@@ -434,7 +434,7 @@ export default async function HomePage() {
                     <h3 className="mt-4 text-[15px] font-bold" style={{ color: LAND.ink }}>
                       {s.title}
                     </h3>
-                    <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: LAND.body }}>
+                    <p className="mt-1.5 text-base leading-relaxed sm:text-sm" style={{ color: LAND.body }}>
                       {s.body}
                     </p>
                   </div>

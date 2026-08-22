@@ -79,7 +79,7 @@ export default function SiteLayout({
       signUpForceRedirectUrl={afterAuth}
     >
       <Providers>
-        <div className={`${dmSans.variable} ${fraunces.variable} min-h-full font-sans`}>{children}</div>
+        <div className={`${dmSans.variable} ${fraunces.variable} min-h-full text-base leading-relaxed font-sans`}>{children}</div>
       </Providers>
     </ClerkProvider>
   );

@@ -156,8 +156,8 @@ export function LauncherMenu({
           >
             <MenuIcon bg={item.bg}>{item.icon}</MenuIcon>
             <span className="min-w-0">
-              <span className="block text-[15px] font-semibold text-stone-900">{item.title}</span>
-              <span className="block text-[12px] text-stone-500">{item.subtitle}</span>
+              <span className="block text-base font-semibold text-stone-900">{item.title}</span>
+              <span className="block text-sm text-stone-500">{item.subtitle}</span>
             </span>
             <svg className="ml-auto h-4 w-4 shrink-0 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="M9 18l6-6-6-6" />
@@ -166,7 +166,7 @@ export function LauncherMenu({
         ))}
       </div>
       {hint && <p className="mt-3 px-1 text-center text-xs text-stone-500">{hint}</p>}
-      <p className="shrink-0 pt-4 pb-1 text-center text-[11px] text-stone-400">
+      <p className="shrink-0 pt-4 pb-1 text-center text-sm sm:text-xs text-stone-400">
         Powered by <span className="font-medium text-stone-500">{brand || "faztino"}</span>
       </p>
     </div>

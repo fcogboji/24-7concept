@@ -202,7 +202,7 @@ export function DashboardSidebar({
 
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5">
         <div>
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-wider text-teal-200/80">
+          <p className="px-3 pb-2 text-sm font-semibold uppercase tracking-wider text-teal-200/80 sm:text-xs">
             Main
           </p>
           <ul className="space-y-0.5">
@@ -218,7 +218,7 @@ export function DashboardSidebar({
         </div>
 
         <div>
-          <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-wider text-teal-200/80">
+          <p className="px-3 pb-2 text-sm font-semibold uppercase tracking-wider text-teal-200/80 sm:text-xs">
             Configuration
           </p>
           {configNav.length === 0 ? (
@@ -241,7 +241,7 @@ export function DashboardSidebar({
 
         {showAdminNav ? (
           <div>
-            <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-wider text-teal-200/80">
+            <p className="px-3 pb-2 text-sm font-semibold uppercase tracking-wider text-teal-200/80 sm:text-xs">
               Platform
             </p>
             <ul className="space-y-0.5">

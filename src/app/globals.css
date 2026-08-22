@@ -53,9 +53,34 @@ body {
   color: var(--foreground);
   /* Site routes set --font-dm-sans on the (site) wrapper; /embed/* omits it — fall back cleanly. */
   font-family: var(--font-dm-sans, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
   overflow-x: hidden;
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Mobile readability — 16px body, bump dense UI labels (real-world floor ~14px on phones). */
+@media (max-width: 639px) {
+  [data-dashboard] .text-xs {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  [data-dashboard] .text-sm {
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
+  }
+
+  [data-embed-widget] {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  [data-embed-widget] .text-xs {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 }
 
 ::selection {

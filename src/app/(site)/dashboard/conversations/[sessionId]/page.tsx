@@ -78,14 +78,14 @@ export default async function ConversationDetailPage({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-sm font-semibold text-gray-900">Lead brief</h3>
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                <span className={`rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${leadTemperatureClass(temp)}`}>
                   {leadTemperatureLabel(temp)}
                 </span>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-gray-700">{summary}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {signals.map((s) => (
-                  <span key={s.label} className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${signalClass(s.tone)}`}>
+                  <span key={s.label} className={`rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${signalClass(s.tone)}`}>
                     {s.label}
                   </span>
                 ))}

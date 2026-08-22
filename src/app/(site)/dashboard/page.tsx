@@ -295,7 +295,7 @@ export default async function DashboardPage({
                       <p className="font-semibold text-gray-900">{lead.name || lead.email}</p>
                       <p className="mt-1 text-sm text-gray-600">{summarizeConversation(thread)}</p>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${leadTemperatureClass(temp)}`}>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-sm sm:text-xs font-semibold ${leadTemperatureClass(temp)}`}>
                       {leadTemperatureLabel(temp)}
                     </span>
                   </div>

@@ -122,7 +122,7 @@ export function BotIntegrationPanel({
           (same host as in the snippet). Without that, the browser may block the script or API calls. The widget only runs where you install it — it cannot override another company&apos;s security, ad blockers, or private apps.
         </p>
         <div className="relative mt-4">
-          <pre className="max-h-[min(40vh,320px)] overflow-auto rounded-xl bg-gray-900 p-4 text-[11px] leading-relaxed text-gray-100 sm:text-xs">
+          <pre className="max-h-[min(40vh,320px)] overflow-auto rounded-xl bg-gray-900 p-4 text-sm leading-relaxed text-gray-100 sm:text-xs">
             {embedSnippet}
           </pre>
           <button

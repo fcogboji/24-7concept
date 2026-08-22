@@ -155,7 +155,7 @@ export function ConversationVolumeChart() {
                   stroke="#e5e7eb"
                   strokeWidth="1"
                 />
-                <text x={PAD.left - 8} y={y + 4} textAnchor="end" className="fill-gray-400 text-[10px]">
+                <text x={PAD.left - 8} y={y + 4} textAnchor="end" className="fill-gray-400 text-xs sm:text-[10px]">
                   {tick}
                 </text>
               </g>
@@ -196,13 +196,13 @@ export function ConversationVolumeChart() {
             </>
           )}
 
-          <text x={PAD.left} y={H - 6} className="fill-gray-400 text-[10px]">
+          <text x={PAD.left} y={H - 6} className="fill-gray-400 text-xs sm:text-[10px]">
             Mon
           </text>
-          <text x={PAD.left + innerW * 0.5 - 12} y={H - 6} className="fill-gray-400 text-[10px]">
+          <text x={PAD.left + innerW * 0.5 - 12} y={H - 6} className="fill-gray-400 text-xs sm:text-[10px]">
             Thu
           </text>
-          <text x={W - PAD.right - 24} y={H - 6} className="fill-gray-400 text-[10px]">
+          <text x={W - PAD.right - 24} y={H - 6} className="fill-gray-400 text-xs sm:text-[10px]">
             Sun
           </text>
         </svg>
@@ -212,8 +212,8 @@ export function ConversationVolumeChart() {
             className="pointer-events-none absolute z-10 min-w-[4.5rem] rounded border border-neutral-900 bg-white px-2.5 py-2 shadow-sm"
             style={{ left: tooltipPos.left, top: tooltipPos.top }}
           >
-            <p className="text-[11px] font-medium text-neutral-900">{active.day}</p>
-            <p className="mt-1 flex items-center gap-1.5 text-[11px] text-neutral-800">
+            <p className="text-sm font-medium text-neutral-900 sm:text-xs">{active.day}</p>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-neutral-800 sm:text-xs">
               <span className="h-0.5 w-3 rounded-full bg-[#0d9488]" aria-hidden />
               <span className="tabular-nums">{Math.round(active.v)}</span>
             </p>
